@@ -1,8 +1,8 @@
 # version: '3.8'
 
 services:
-  nextjs-app:
-    container_name: nextjs-app
+  barouz:
+    container_name: barouz
     build:
       context: .           # ✅ Usamos la raíz donde está el Dockerfile
       dockerfile: Dockerfile
