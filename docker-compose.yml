@@ -1,17 +1,16 @@
-# version: '3.8'
 
 services:
-  barouz:
-    container_name: barouz
+  frontend:
+    container_name: frontend
     build:
-      context: .           # ✅ Usamos la raíz donde está el Dockerfile
+      context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"         # 🌐 Puerto de Next.js
+      - "3000:3000"
     volumes:
-      - ./frontend:/app              # 🗂️ Montamos todo el proyecto
+      - ./:/app
+      - /app/node_modules
     environment:
       - NODE_ENV=development
     restart: unless-stopped
-    stdin_open: true        # ✅ Para terminal interactiva
-    tty: true               # ✅ Para terminal interactiva
+    command: npm run dev

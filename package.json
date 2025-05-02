@@ -14,6 +14,7 @@
     "@supabase/supabase-js": "latest",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "lightningcss": "^1.29.3",
     "lucide-react": "^0.468.0",
     "next": "latest",
     "next-themes": "^0.4.3",
@@ -31,5 +32,8 @@
     "tailwindcss": "^4.1.5",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "5.7.2"
+  },
+  "optionalDependencies": {
+    "lightningcss-linux-x64-gnu": "latest"
   }
 }
