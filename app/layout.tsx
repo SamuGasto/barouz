@@ -3,6 +3,7 @@ import { ThemeProvider } from "next-themes";
 import "@/globals.css";
 import Navbar from "@/components/general/navbar/navbar";
 import Footer from "@/components/general/footer/footer";
+import Banner from "@/components/pagina-principal/banner";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -33,10 +34,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <main className="min-h-screen flex flex-col items-center">
-            <div className="flex-1 w-full flex flex-col gap-20 items-center">
+          <main className="flex min-h-screen flex-col items-center">
+            <div className="flex w-full flex-1 flex-col items-center">
               <Navbar />
-              <div className="flex flex-col gap-20 max-w-5xl p-5">
+              <div className="flex w-full flex-col items-center justify-center gap-6">
                 {children}
               </div>
 

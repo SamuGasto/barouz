@@ -37,6 +37,26 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
+  --color-brand-primary: hsl(var(--brand-primary));
+  --color-brand-primary-foreground: hsl(var(--brand-primary-foreground));
+  --color-brand-primary-background: hsl(var(--brand-primary-background));
+  --color-brand-state-1: hsl(var(--brand-state-1));
+  --color-brand-state-1-foreground: hsl(var(--brand-state-1-foreground));
+  --color-brand-state-2: hsl(var(--brand-state-2));
+  --color-brand-state-2-foreground: hsl(var(--brand-state-2-foreground));
+  --color-brand-state-3: hsl(var(--brand-state-3));
+  --color-brand-state-3-foreground: hsl(var(--brand-state-3-foreground));
+  --color-brand-state-4: hsl(var(--brand-state-4));
+  --color-brand-state-4-foreground: hsl(var(--brand-state-4-foreground));
+
+  --color-brand-background-1: hsl(var(--brand-background-1));
+  --color-brand-background-2: hsl(var(--brand-background-2));
+  --color-brand-background-3: hsl(var(--brand-background-3));
+  --color-brand-background-4: hsl(var(--brand-background-4));
+  --color-brand-background-5: hsl(var(--brand-background-5));
+  --color-brand-background-6: hsl(var(--brand-background-6));
+  --color-brand-background-7: hsl(var(--brand-background-7));
+
   @keyframes accordion-down {
     from {
       height: 0;
@@ -51,6 +71,24 @@
     }
     to {
       height: 0;
+    }
+  }
+
+  @keyframes bounce {
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+      transform: translateX(0);
+    }
+    40% {
+      transform: translateX(-5px);
+      transform: scale(1.03);
+    }
+    60% {
+      transform: translateX(-2px);
+      transform: scale(1.01);
     }
   }
 }
@@ -111,6 +149,24 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --brand-primary: 182 94% 39%;
+    --brand-primary-foreground: 0 0% 98%;
+    --brand-primary-background: 185 70% 89%;
+    --brand-state-1: 69 73% 70%;
+    --brand-state-1-foreground: 69 73% 25%;
+    --brand-state-2: 30 73% 70%;
+    --brand-state-2-foreground: 30 73% 25%;
+    --brand-state-3: 182 73% 70%;
+    --brand-state-3-foreground: 182 73% 25%;
+    --brand-state-4: 152 73% 70%;
+    --brand-state-4-foreground: 152 73% 25%;
+    --brand-background-1: 154 100% 97%;
+    --brand-background-2: 44 73% 94%;
+    --brand-background-3: 106 73% 95%;
+    --brand-background-4: 246 73% 94%;
+    --brand-background-5: 0 72% 89%;
+    --brand-background-6: 60 72% 89%;
+    --brand-background-7: 214 72% 89%;
   }
 
   .dark {
@@ -138,6 +194,24 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --brand-primary: 182 94% 39%;
+    --brand-primary-foreground: 0 0% 98%;
+    --brand-primary-background: 185 13% 9%;
+    --brand-state-1: 69 73% 70%;
+    --brand-state-1-foreground: 69 73% 25%;
+    --brand-state-2: 30 73% 70%;
+    --brand-state-2-foreground: 30 73% 25%;
+    --brand-state-3: 182 73% 70%;
+    --brand-state-3-foreground: 182 73% 25%;
+    --brand-state-4: 152 73% 70%;
+    --brand-state-4-foreground: 152 73% 25%;
+    --brand-background-1: 154 13% 9%;
+    --brand-background-2: 44 13% 9%;
+    --brand-background-3: 106 13% 9%;
+    --brand-background-4: 246 13% 9%;
+    --brand-background-5: 0 13% 9%;
+    --brand-background-6: 60 13% 9%;
+    --brand-background-7: 214 13% 9%;
   }
 }
 

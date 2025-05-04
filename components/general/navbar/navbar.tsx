@@ -7,7 +7,7 @@ import CarritoCompra from "./carrito-compra";
 
 const Navbar = () => {
   return (
-    <nav className="flex w-full justify-between items-center p-3 px-5 text-sm border-b-1">
+    <nav className="border-b-brand-primary flex w-full items-center justify-between border-b-1 p-3 px-5 text-sm">
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-2">
           <a href="/">
@@ -27,8 +27,8 @@ const Navbar = () => {
           <Link href="/menu" className="hover:underline">
             Menu
           </Link>
-          <Link href="/ofertas" className="hover:underline">
-            Ofertas
+          <Link href="/promociones" className="hover:underline">
+            Promociones
           </Link>
           <Link href="/mis-pedidos" className="hover:underline">
             Mis Pedidos
@@ -40,7 +40,7 @@ const Navbar = () => {
       </div>
       <div className="flex items-center gap-2">
         <CarritoCompra />
-        <div className="flex border-1 rounded-md items-center">
+        <div className="flex items-center rounded-md border-1">
           <ThemeSwitcher />
         </div>
       </div>
