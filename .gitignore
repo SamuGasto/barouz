@@ -177,5 +177,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Images examples
-/images/products-example/*
+# Prettier
+.prettierrc*
