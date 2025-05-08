@@ -3,16 +3,34 @@ import { ThemeProvider } from "next-themes";
 import "@/globals.css";
 import Navbar from "@/components/general/navbar/navbar";
 import Footer from "@/components/general/footer/footer";
-import Banner from "@/components/pagina-principal/banner";
+import { Metadata } from "next";
+import og_image from "@/images/barouz-logo.png";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "http://localhost:3000";
 
-export const metadata = {
+export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: "Barouz",
   description: "Tienda de Helados, Waffles, Churros y más",
+  keywords: ["Helados", "Waffles", "Churros", "Postres", "Bebidas", "Barouz"],
+  openGraph: {
+    title: "Barouz",
+    description: "Tienda de Helados, Waffles, Churros y más",
+    type: "website",
+    locale: "es-CL",
+    siteName: "Barouz",
+    url: "https://barouz.cl",
+    images: [
+      {
+        url: og_image.src,
+        width: og_image.width,
+        height: og_image.height,
+        alt: "Barouz",
+      },
+    ],
+  },
 };
 
 const geistSans = Geist({

@@ -4,63 +4,63 @@ import heladoArtesanal from "@/images/products-example/helado-artesanal.jpg";
 import churros from "@/images/products-example/churros.jpg";
 import { StaticImageData } from "next/image";
 
-type Producto = {
-    id: number;
-    nombre: string;
-    precio: number;
-    en_promocion: boolean;
-    precio_promocion: number;
-    imagen: StaticImageData;
-    categoria: string;
-    descripcion: string;
-    disponible: boolean;
+export type Producto = {
+  id: number;
+  nombre: string;
+  precio: number;
+  en_promocion: boolean;
+  precio_promocion: number;
+  imagen: StaticImageData;
+  categoria: string;
+  descripcion: string;
+  disponible: boolean;
 };
 
 const productos: Producto[] = [
-    {
-        id: 1,
-        nombre: "Waffle",
-        precio: 1500,
-        en_promocion: false,
-        precio_promocion: 1500,
-        imagen: waffle,
-        categoria: "Waffles",
-        descripcion: "Un waffle clásico 100% natural.",
-        disponible: true,
-    },
-    {
-        id: 2,
-        nombre: "Waffle con Nutella",
-        precio: 1650,
-        en_promocion: false,
-        precio_promocion: 1650,
-        imagen: waffleNutella,
-        categoria: "Waffles",
-        descripcion: "Un waffle exquisito con nutella.",
-        disponible: true,
-    },
-    {
-        id: 3,
-        nombre: "Helado Artesanal",
-        precio: 2800,
-        en_promocion: false,
-        precio_promocion: 2800,
-        imagen: heladoArtesanal,
-        categoria: "Helados",
-        descripcion: "Un helado artesanal 100% natural.",
-        disponible: true,
-    },
-    {
-        id: 4,
-        nombre: "Churros",
-        precio: 2500,
-        en_promocion: false,
-        precio_promocion: 2500,
-        imagen: churros,
-        categoria: "Churros",
-        descripcion: "Un churro exquisito con chocolate.",
-        disponible: true,
-    },
+  {
+    id: 1,
+    nombre: "Waffle",
+    precio: 1500,
+    en_promocion: false,
+    precio_promocion: 1500,
+    imagen: waffle,
+    categoria: "Waffles",
+    descripcion: "Un waffle clásico 100% natural.",
+    disponible: true,
+  },
+  {
+    id: 2,
+    nombre: "Waffle con Nutella",
+    precio: 1650,
+    en_promocion: false,
+    precio_promocion: 1650,
+    imagen: waffleNutella,
+    categoria: "Waffles",
+    descripcion: "Un waffle exquisito con nutella.",
+    disponible: true,
+  },
+  {
+    id: 3,
+    nombre: "Helado Artesanal",
+    precio: 2800,
+    en_promocion: false,
+    precio_promocion: 2800,
+    imagen: heladoArtesanal,
+    categoria: "Helados",
+    descripcion: "Un helado artesanal 100% natural.",
+    disponible: true,
+  },
+  {
+    id: 4,
+    nombre: "Churros",
+    precio: 2500,
+    en_promocion: false,
+    precio_promocion: 2500,
+    imagen: churros,
+    categoria: "Churros",
+    descripcion: "Un churro exquisito con chocolate.",
+    disponible: true,
+  },
 ];
 
 export default productos;
