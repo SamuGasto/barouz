@@ -13,6 +13,7 @@ services:
       - ./images:/app/images
       - ./lib:/app/lib
       - ./utils:/app/utils
+      - ./stores:/app/stores
       - /app/node_modules
     environment:
       - NODE_ENV=development

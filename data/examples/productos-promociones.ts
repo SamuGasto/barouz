@@ -2,6 +2,8 @@ import waffle from "@/images/products-example/waffle.jpg";
 import waffleNutella from "@/images/products-example/waffle-nutella.jpg";
 import heladoArtesanal from "@/images/products-example/helado-artesanal.jpg";
 import churros from "@/images/products-example/churros.jpg";
+import waffleCookie from "@/images/products-example/waffle-cookie.jpg";
+import bebidas from "@/images/products-example/bebidas.jpg";
 import { StaticImageData } from "next/image";
 
 export type Producto = {
@@ -30,7 +32,7 @@ const productos: Producto[] = [
   },
   {
     id: 2,
-    nombre: "Waffle con Nutella",
+    nombre: "Waffle con Nutella Clásico",
     precio: 1650,
     en_promocion: false,
     precio_promocion: 1650,
@@ -59,6 +61,28 @@ const productos: Producto[] = [
     imagen: churros,
     categoria: "Churros",
     descripcion: "Un churro exquisito con chocolate.",
+    disponible: true,
+  },
+  {
+    id: 5,
+    nombre: "Waffle Cookie",
+    precio: 2000,
+    en_promocion: false,
+    precio_promocion: 2000,
+    imagen: waffleCookie,
+    categoria: "Waffles Cookies",
+    descripcion: "Un waffle exquisito con cookies.",
+    disponible: true,
+  },
+  {
+    id: 6,
+    nombre: "Limonada",
+    precio: 2000,
+    en_promocion: false,
+    precio_promocion: 2000,
+    imagen: bebidas,
+    categoria: "Bebidas",
+    descripcion: "Un jugo de limonada exquisito. Verdaderamente",
     disponible: true,
   },
 ];

@@ -1,7 +1,13 @@
+import Populares from "@/components/pagina-menu/populares/populares";
+import Menu from "@/components/pagina-menu/todo-menu/menu";
+import Banner from "@/components/pagina-menu/banner";
+
 export default async function Home() {
   return (
     <main className="flex w-full flex-col items-center gap-6">
-      <h1>Menu</h1>
+      <Banner />
+      <Populares />
+      <Menu />
     </main>
   );
 }
