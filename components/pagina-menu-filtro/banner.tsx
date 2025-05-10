@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import { Euphoria_Script } from "next/font/google";
 import BuscadorMenu from "./buscador/buscador-menu";

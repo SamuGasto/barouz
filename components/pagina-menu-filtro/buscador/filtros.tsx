@@ -14,8 +14,8 @@ const nombresFiltros = [
 ];
 
 function Filtros() {
-  const filtros_categoria = useFiltrosStore((state) => state.filtro_categoria);
-  const setFiltros_categoria = useFiltrosStore(
+  const filtrosCategoria = useFiltrosStore((state) => state.filtro_categoria);
+  const setFiltrosCategoria = useFiltrosStore(
     (state) => state.setFiltroCategoria,
   );
 
@@ -26,11 +26,11 @@ function Filtros() {
           <Badge
             key={index}
             className="cursor-pointer"
-            variant={filtros_categoria[index] == 0 ? "secondary" : "default"}
+            variant={filtrosCategoria[index] == 0 ? "secondary" : "default"}
             onClick={() => {
-              const nuevoEstado = [...filtros_categoria];
+              const nuevoEstado = [...filtrosCategoria];
               nuevoEstado[index] = nuevoEstado[index] == 0 ? 1 : 0;
-              setFiltros_categoria(nuevoEstado);
+              setFiltrosCategoria(nuevoEstado);
             }}
           >
             {nombre}

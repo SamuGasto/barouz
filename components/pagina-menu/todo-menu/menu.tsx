@@ -1,6 +1,7 @@
 import menu from "@/data/examples/menu";
 import React from "react";
 import CarruselDeProductos from "../carrusel-de-productos";
+import obtenerTodosLosProductos from "@/utils/querys/servidor/todos-productos";
 
 const colores: { [key: number]: string } = {
   1: "bg-brand-background-1",
@@ -11,7 +12,9 @@ const colores: { [key: number]: string } = {
   6: "bg-brand-background-6",
 };
 
-function Menu() {
+async function Menu() {
+  const productos = await obtenerTodosLosProductos();
+
   return (
     <div className="flex w-full flex-col items-center gap-6">
       {menu.map((item, index) => (
@@ -26,7 +29,11 @@ function Menu() {
             <h2 className="text-4xl font-thin">{item.nombre}</h2>
           </div>
           <div className="w-full rounded-xl p-4 md:ml-10 md:w-11/12 md:p-0 dark:shadow-none">
-            <CarruselDeProductos productos={item.productos} />
+            <CarruselDeProductos
+              productos={productos.filter(
+                (producto) => producto.categoria === item.nombre,
+              )}
+            />
           </div>
         </div>
       ))}
