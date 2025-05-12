@@ -1,7 +1,13 @@
+import Banner from "@/components/pagina-promociones/banner";
+import CarruselPromociones from "@/components/pagina-promociones/carrusel";
+import TodosProductos from "@/components/pagina-promociones/todos-productos";
+
 export default async function Home() {
   return (
     <main className="flex w-full flex-col items-center gap-6">
-      <h1>Promociones</h1>
+      <Banner />
+      <CarruselPromociones />
+      <TodosProductos />
     </main>
   );
 }

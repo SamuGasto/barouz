@@ -1,6 +1,6 @@
 import menu from "@/data/examples/menu";
 import React from "react";
-import CarruselDeProductos from "../carrusel-de-productos";
+import CarruselDeProductos from "../../general/carrusel-de-productos";
 import obtenerTodosLosProductos from "@/utils/querys/servidor/todos-productos";
 
 const colores: { [key: number]: string } = {

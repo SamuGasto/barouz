@@ -40,3 +40,23 @@ export type Producto_Ubicacion = {
   producto_id: number;
   ubicacion_id: string;
 };
+
+export type Promocion = {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  imagen: StaticImageData;
+  tipo_de_descuento: "Porcentaje" | "Precio"; // Si el descuento es porcentaje, el valor_descuento es el porcentaje. Si el descuento es precio, el valor_descuento es el precio final.
+  valor_descuento: number;
+  fecha_inicio: string;
+  fecha_fin: string;
+  hora_inicio: string;
+  hora_fin: string;
+  disponible: boolean;
+};
+
+export type Producto_Promocion = {
+  id: string;
+  producto_id: number;
+  promocion_id: string;
+};

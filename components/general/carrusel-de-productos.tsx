@@ -4,11 +4,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import productos from "@/data/examples/productos-promociones";
 import React from "react";
-import TarjetaProducto from "./producto";
+import TarjetaProducto from "../pagina-principal/promociones/producto";
+import { Producto } from "@/data/tipos";
 
-function CarruselDeProductos() {
+function CarruselDeProductos({ productos }: { productos: Producto[] }) {
   return (
     <Carousel>
       <CarouselContent className="ml-1 flex w-full flex-row gap-4">

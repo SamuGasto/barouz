@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CirclePlus } from "lucide-react";
 import Image from "next/image";
 import React from "react";
-import { Producto } from "@/data/examples/productos-promociones";
+import { Producto } from "@/data/tipos";
 
 function TarjetaProducto({ producto }: { producto: Producto }) {
   return (

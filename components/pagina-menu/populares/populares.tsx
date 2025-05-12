@@ -1,5 +1,5 @@
 import React from "react";
-import CarruselDeProductos from "../carrusel-de-productos";
+import CarruselDeProductos from "../../general/carrusel-de-productos";
 import productos from "@/data/examples/productos-promociones";
 
 function Populares() {

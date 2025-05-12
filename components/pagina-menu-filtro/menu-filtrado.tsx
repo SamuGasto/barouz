@@ -3,7 +3,7 @@ import React from "react";
 import TarjetaProducto from "../pagina-menu/producto";
 import { useFiltrosStore } from "@/components/providers/filtros-provider";
 import obtenerTodosLosProductos from "@/utils/querys/cliente/todos-productos";
-import { Producto } from "@/data/examples/productos-promociones";
+import { Producto } from "@/data/tipos";
 
 const nombresFiltros = [
   "Waffles",
