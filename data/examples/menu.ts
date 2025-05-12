@@ -5,7 +5,7 @@ import churros from "@/images/products-example/churros.jpg";
 import waffleCookies from "@/images/products-example/waffle-cookie.jpg";
 import postres from "@/images/products-example/postres.jpg";
 import bebidas from "@/images/products-example/bebidas.jpg";
-import { Producto } from "./productos-promociones";
+import { Producto } from "../tipos";
 import todos_waffles from "./waffles";
 import todos_helados from "./helados";
 import todos_churros from "./churros";

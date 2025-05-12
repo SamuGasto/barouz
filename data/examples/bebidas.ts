@@ -1,8 +1,8 @@
-import { Producto } from "./productos-promociones";
 import limonadaMenta from "@/images/products-example/bebidas.jpg";
 import jugoFrambuesa from "@/images/products-example/smothie-frutilla.jpg";
 import smoothieMango from "@/images/products-example/smothie-chocolate.jpg";
 import jugoCitricos from "@/images/products-example/jugo-naranja.jpg";
+import { Producto } from "../tipos";
 
 const bebidas: Producto[] = [
   {

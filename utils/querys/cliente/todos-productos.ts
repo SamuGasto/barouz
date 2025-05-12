@@ -1,5 +1,5 @@
-import { Producto } from "@/data/examples/productos-promociones";
 import todosLosProductos from "@/data/examples/todos-productos";
+import { Producto } from "@/data/tipos";
 import { createClient } from "@/utils/supabase/client";
 
 async function obtenerTodosLosProductos() {

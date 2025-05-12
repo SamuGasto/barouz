@@ -6,18 +6,20 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../../ui/carousel";
-import products from "@/data/examples/ofertas-carousel";
+import { obtenerCarruselPrincipal } from "@/utils/querys/servidor/carruseles";
 import TarjetaCarrusel from "./tarjeta-carrusel";
+import { Oferta } from "@/data/tipos";
 
-function ProductCarousel() {
+async function ProductCarousel() {
+  const ofertas = await obtenerCarruselPrincipal();
   return (
     <div className="flex w-full items-center justify-center">
       <div className="flex w-full rounded-xl p-4 md:w-3/4 md:p-0">
         <Carousel>
           <CarouselContent>
-            {products.map((product) => (
-              <CarouselItem key={product.id}>
-                <TarjetaCarrusel product={product} />
+            {ofertas?.map((oferta: Oferta) => (
+              <CarouselItem key={oferta.id}>
+                <TarjetaCarrusel oferta={oferta} />
               </CarouselItem>
             ))}
           </CarouselContent>

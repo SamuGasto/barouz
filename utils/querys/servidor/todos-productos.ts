@@ -1,6 +1,6 @@
-import { Producto } from "@/data/examples/productos-promociones";
 import todosLosProductos from "@/data/examples/todos-productos";
 import { createClient } from "@/utils/supabase/server";
+import { Producto } from "@/data/tipos";
 
 async function obtenerTodosLosProductos(): Promise<Producto[]> {
   return Promise.resolve(todosLosProductos);

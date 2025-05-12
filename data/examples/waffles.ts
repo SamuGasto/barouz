@@ -1,10 +1,10 @@
-import { Producto } from "./productos-promociones";
 import waffleFrutilla from "@/images/products-example/waffle-frutilla.jpg";
 import waffleManjar from "@/images/products-example/waffle-nutella.jpg";
 import waffleChocoBlanco from "@/images/products-example/waffle-basico.jpg";
 import waffleHelado from "@/images/products-example/waffle-helado.jpg";
 import waffleMermelada from "@/images/products-example/waffle-crema.jpg";
 import miniWaffleTrio from "@/images/products-example/waffle-nutella.jpg";
+import { Producto } from "../tipos";
 
 const waffles: Producto[] = [
   {

@@ -4,19 +4,7 @@ import heladoArtesanal from "@/images/products-example/helado-artesanal.jpg";
 import churros from "@/images/products-example/churros.jpg";
 import waffleCookie from "@/images/products-example/waffle-cookie.jpg";
 import bebidas from "@/images/products-example/bebidas.jpg";
-import { StaticImageData } from "next/image";
-
-export type Producto = {
-  id: number;
-  nombre: string;
-  precio: number;
-  en_promocion: boolean;
-  precio_promocion: number;
-  imagen: StaticImageData;
-  categoria: string;
-  descripcion: string;
-  disponible: boolean;
-};
+import { Producto } from "../tipos";
 
 const productos: Producto[] = [
   {

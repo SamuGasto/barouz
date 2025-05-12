@@ -1,10 +1,10 @@
-import { Producto } from "./productos-promociones";
 import heladoVainilla from "@/images/products-example/helado-sol.jpg";
 import heladoChocolate from "@/images/products-example/postres.jpg";
 import heladoFrutilla from "@/images/products-example/helado-frutilla.jpg";
 import heladoDoble from "@/images/products-example/helado-artesanal.jpg";
 import heladoVegano from "@/images/products-example/helado-menta.jpg";
 import heladoTopping from "@/images/products-example/helado-completo.jpg";
+import { Producto } from "../tipos";
 
 const helados: Producto[] = [
   {
