@@ -138,7 +138,7 @@ function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       ref={carouselRef}
-      className="overflow-hidden"
+      className="overflow-hidden py-10"
       data-slot="carousel-content"
     >
       <div
@@ -192,6 +192,7 @@ function CarouselPrevious({
         className,
       )}
       disabled={!canScrollPrev}
+      hidden={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
     >
@@ -222,6 +223,7 @@ function CarouselNext({
         className,
       )}
       disabled={!canScrollNext}
+      hidden={!canScrollNext}
       onClick={scrollNext}
       {...props}
     >
