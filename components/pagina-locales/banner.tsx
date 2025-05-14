@@ -10,12 +10,12 @@ const euphoriaScript = Euphoria_Script({
 
 function Banner() {
   return (
-    <div className="bg-brand-background-2 flex w-full justify-center gap-2">
+    <div className="bg-brand-background-4 flex w-full justify-center gap-2">
       <div className="flex w-full max-w-xl flex-col items-center justify-center gap-4 py-6">
         <h1
           className={euphoriaScript.className + " text-brand-primary text-8xl"}
         >
-          Promociones
+          Nuestros Locales
         </h1>
       </div>
     </div>

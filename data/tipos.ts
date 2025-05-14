@@ -60,3 +60,20 @@ export type Producto_Promocion = {
   producto_id: number;
   promocion_id: string;
 };
+
+export type Horario = {
+  id: string;
+  dia: string;
+  hora_inicio: string;
+  hora_fin: string;
+};
+
+export type Local = {
+  id: string;
+  nombre: string;
+  direccion: string;
+  telefono: string;
+  horarios: Horario[];
+  latitud: number;
+  longitud: number;
+};
