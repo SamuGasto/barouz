@@ -11,16 +11,10 @@ const Navbar = () => {
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-2">
           <a href="/">
-            <Image
-              className="rounded-full"
-              src={logo}
-              alt="Logo"
-              width={32}
-              height={32}
-            />
+            <Image className="rounded-full" src={logo} alt="Logo" width={32} />
           </a>
           <a href="/">
-            <Image src={logo_texto} alt="Logo" width={128} height={32} />
+            <Image src={logo_texto} alt="Logo" width={128} />
           </a>
         </div>
         <div className="flex items-center gap-2">

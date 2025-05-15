@@ -1,19 +1,18 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CirclePlus } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { Producto } from "@/data/tipos";
+import DialogAnadirProducto from "@/components/general/dialog-anadir-producto";
 
 function TarjetaProducto({ producto }: { producto: Producto }) {
   return (
     <Card
       key={producto.id}
-      className="shadow-none transition-all hover:scale-102"
+      className="w-[240px] px-0 py-0 shadow-none transition-all hover:scale-102"
     >
-      <CardContent className="-m-3 flex max-w-72 flex-col items-center justify-center gap-2">
+      <CardContent className="flex max-w-72 flex-col items-center justify-center gap-2 p-2">
         <Image
-          className="h-[300px] max-w-60 rounded-md object-cover"
+          className="h-[300px] rounded-md object-cover"
           src={producto.imagen}
           alt={producto.nombre}
         />
@@ -29,10 +28,9 @@ function TarjetaProducto({ producto }: { producto: Producto }) {
           </div>
           <p className="text-md truncate font-thin">{producto.descripcion}</p>
         </div>
-        <Button className="bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary/90 mt-2 flex w-full items-center justify-center gap-2">
-          <CirclePlus />
-          Agregar al carrito
-        </Button>
+        <div className="flex w-full items-center justify-center">
+          <DialogAnadirProducto producto={producto} />
+        </div>
       </CardContent>
     </Card>
   );
