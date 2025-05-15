@@ -13,7 +13,10 @@ function Banner() {
     <div className="bg-brand-background-4 flex w-full justify-center gap-2">
       <div className="flex w-full max-w-xl flex-col items-center justify-center gap-4 py-6">
         <h1
-          className={euphoriaScript.className + " text-brand-primary text-8xl"}
+          className={
+            euphoriaScript.className +
+            " text-brand-primary text-center text-8xl"
+          }
         >
           Nuestros Locales
         </h1>

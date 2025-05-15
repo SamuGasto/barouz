@@ -7,7 +7,7 @@ async function PresentacionLocales() {
   const locales = await obtenerLocales();
 
   return (
-    <div className="flex w-full flex-col justify-center gap-6 py-10 md:flex-row">
+    <div className="flex w-full flex-col items-center justify-center gap-6 p-10 md:flex-row">
       <Locales locales={locales} />
       <MapaGoogle locales={locales} />
     </div>

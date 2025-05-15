@@ -1,6 +1,6 @@
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Card } from "@/components/ui/card";
 import Image, { StaticImageData } from "next/image";
+import Link from "next/link";
 import React from "react";
 
 const colores: { [key: number]: string } = {
@@ -22,10 +22,13 @@ function TarjetaMenu({
   color: number;
 }) {
   return (
-    <AspectRatio ratio={21 / 5}>
+    <Link
+      href={`/menu#${nombre}`}
+      className="flex max-w-[600px] items-center justify-center"
+    >
       <Card
         className={
-          "flex h-full w-full flex-row items-center justify-between gap-2 px-2 py-2 transition-all hover:scale-102 hover:cursor-pointer " +
+          "flex h-fit w-full flex-row items-center justify-between gap-2 px-2 py-2 transition-all hover:scale-102 hover:cursor-pointer " +
           colores[color]
         }
       >
@@ -33,10 +36,10 @@ function TarjetaMenu({
         <Image
           src={imagen}
           alt={nombre}
-          className="flex h-full w-full max-w-60 rounded-md object-cover"
+          className="flex h-[100px] w-full max-w-60 rounded-md object-cover"
         />
       </Card>
-    </AspectRatio>
+    </Link>
   );
 }
 

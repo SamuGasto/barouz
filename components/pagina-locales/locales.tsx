@@ -8,8 +8,10 @@ interface PropType {
 
 function Locales(props: PropType) {
   return (
-    <div className="items-left flex w-1/3 flex-col gap-6">
-      <h2 className="text-4xl font-thin">Locales Disponibles</h2>
+    <div className="items-left flex w-full flex-col gap-6 self-start md:w-1/3">
+      <h2 className="text-center text-4xl font-thin md:text-left">
+        Locales Disponibles
+      </h2>
       {props.locales.map((local) => (
         <TarjetaLocal key={local.id} local={local} />
       ))}

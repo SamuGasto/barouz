@@ -13,7 +13,7 @@ function MapaGoogle(props: PropType) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
   return (
-    <Card className="flex aspect-square w-[600px] px-2 py-2">
+    <Card className="flex aspect-square w-[300px] px-2 py-2 md:w-[600px]">
       <APIProvider apiKey={apiKey}>
         <Map
           style={{ width: "100%", height: "100%" }}

@@ -3,7 +3,7 @@ import PresentacionLocales from "@/components/pagina-locales/presentacion-locale
 
 export default async function Home() {
   return (
-    <main className="flex w-full flex-col items-center gap-6">
+    <main className="flex w-full flex-col items-center justify-center gap-6">
       <Banner />
       <PresentacionLocales />
     </main>
