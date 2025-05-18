@@ -8,7 +8,12 @@ import React from "react";
 import TarjetaProducto from "../pagina-principal/promociones/producto";
 import { Producto } from "@/data/tipos";
 
-function CarruselDeProductos({ productos }: { productos: Producto[] }) {
+interface PropType {
+  productos: Producto[];
+}
+
+function CarruselDeProductos(props: PropType) {
+  const { productos } = props;
   return (
     <Carousel>
       <CarouselContent className="ml-1 flex w-full flex-row gap-4">

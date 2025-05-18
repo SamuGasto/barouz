@@ -1,5 +1,14 @@
 import { StaticImageData } from "next/image";
 
+export type CategoriaProducto =
+  | "Waffles"
+  | "Helados"
+  | "Churros"
+  | "Waffles Cookies"
+  | "Postres"
+  | "Bebidas"
+  | "Otros";
+
 export type Producto = {
   id: number;
   nombre: string;
@@ -7,9 +16,23 @@ export type Producto = {
   en_promocion: boolean;
   precio_promocion: number;
   imagen: StaticImageData;
-  categoria: string; // Waffle, Helado Artesanal, Churros, Waffle Cookies, Postres, Bebidas, Otros
+  categoria: CategoriaProducto;
   descripcion: string;
   disponible: boolean;
+};
+
+export type Extra = {
+  nombre: string;
+  tipo: "incremental" | "checkbox";
+  detalle: { nombre: string; cantidad: number; precio: number }[];
+};
+
+export type Pedido = {
+  id: string;
+  producto_id: number;
+  cantidad: number;
+  extras: Extra[];
+  precio_final: number;
 };
 
 export type Carrusel = {

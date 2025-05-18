@@ -12,12 +12,12 @@ import imagenPostrePromo from "@/images/products-example/postres.jpg";
 import imagenGalletaPromo from "@/images/products-example/waffle-cookie.jpg";
 
 const promocionesDestacadas = [
-  waffles[0],
   helados[0],
   cookies[0],
+  waffles[0],
+  bebidas[0],
   churros[0],
   postres[0],
-  bebidas[0],
 ];
 
 export default promocionesDestacadas;
