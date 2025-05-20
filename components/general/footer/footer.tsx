@@ -11,7 +11,7 @@ function Footer() {
         <div className="flex flex-col items-center gap-4 md:flex-row md:items-start">
           <div className="flex flex-col items-center gap-2">
             <Image className="rounded-full" src={logo} alt="Logo" width={32} />
-            <Image src={logo_texto} alt="Logo" width={128} height={32} />
+            <Image src={logo_texto} alt="Logo" width={128} />
           </div>
           <div className="text-brand-primary grid grid-cols-2 items-start gap-6 text-left md:grid-cols-4">
             <div className="items-left flex w-fit flex-col gap-2">

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,12 +10,13 @@ import {
   DialogTrigger,
 } from "../../ui/dialog";
 import { Button } from "../../ui/button";
-import { Extra, Pedido, Producto } from "@/data/tipos";
+import { Pedido, Producto } from "@/data/tipos";
 import { CirclePlus } from "lucide-react";
 import TarjetaVentaProducto from "../tarjeta-venta-producto";
 import extras_waffle from "@/data/extras-waffle";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Extras from "./extras";
+import { Separator } from "@/components/ui/separator";
 
 interface PropType {
   producto: Producto;
@@ -39,20 +40,41 @@ function DialogAnadirProducto(props: PropType) {
     extras: DefinirExtra(),
     precio_final: 0,
   });
+  const [precioFinal, setPrecioFinal] = React.useState(0);
 
   function CalcularPrecioFinal() {
-    setPedido({
-      ...pedido,
-      precio_final:
-        pedido.cantidad * producto.precio +
-        pedido.extras.reduce(
-          (total, extra) =>
-            total +
-            extra.detalle.reduce((total, detalle) => total + detalle.precio, 0),
-          0,
-        ),
-    });
+    setPrecioFinal(
+      pedido.cantidad *
+        (producto.precio +
+          pedido.extras.reduce(
+            (total, extra) =>
+              total +
+              extra.detalle.reduce(
+                (total, detalle) =>
+                  detalle.cantidad > 0 ? total + detalle.precio : total,
+                0,
+              ),
+            0,
+          )),
+    );
   }
+
+  useEffect(() => {
+    if (!open) {
+      setPedido({
+        id: "",
+        producto_id: producto.id,
+        cantidad: 1,
+        extras: DefinirExtra(),
+        precio_final: 0,
+      });
+      setPrecioFinal(0);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    CalcularPrecioFinal();
+  }, [pedido]);
 
   return (
     <Dialog modal open={open} onOpenChange={setOpen}>
@@ -73,31 +95,46 @@ function DialogAnadirProducto(props: PropType) {
           producto={producto}
           cantidad={pedido.cantidad}
           modificarCantidad={(nuevaCantidad) => {
-            const cantidad = pedido.cantidad + nuevaCantidad;
-            console.log(cantidad);
+            const cantidadActual = pedido.cantidad + nuevaCantidad;
 
-            if (cantidad < 1) return;
-            setPedido({ ...pedido, cantidad });
-            CalcularPrecioFinal();
+            const newPedido = { ...pedido, cantidad: cantidadActual };
+
+            if (cantidadActual > 0) {
+              setPedido(newPedido);
+            }
+          }}
+          eliminar={() => {
+            setOpen(false);
           }}
         />
         <ScrollArea className="flex max-h-[280px] w-full flex-col items-center justify-center gap-4">
           <Extras
-            categoria={producto.categoria}
+            pedido={pedido}
             extra={pedido.extras}
             setExtra={(extras) => {
               setPedido({ ...pedido, extras });
-              CalcularPrecioFinal();
             }}
           />
         </ScrollArea>
-        <DialogFooter>
-          <Button
-            className="bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary/90"
-            type="submit"
-          >
-            Agregar al carrito
-          </Button>
+        <DialogFooter className="flex w-full items-center justify-center gap-2 sm:flex-col">
+          <Separator />
+          <div className="flex w-full flex-row items-center justify-between gap-4">
+            <div className="flex flex-row items-center gap-2">
+              <p className="text-center text-xl font-light">Total</p>
+              <p className="text-brand-primary text-center text-2xl font-semibold">
+                ${precioFinal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+              </p>
+            </div>
+            <Button
+              className="bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary/90"
+              type="submit"
+              onClick={() => {
+                setPedido({ ...pedido, precio_final: precioFinal });
+              }}
+            >
+              Agregar al carrito
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

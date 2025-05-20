@@ -21,10 +21,17 @@ export type Producto = {
   disponible: boolean;
 };
 
+export type DetalleExtra = {
+  nombre: string;
+  cantidad: number;
+  precio: number;
+};
+
 export type Extra = {
   nombre: string;
   tipo: "incremental" | "checkbox";
-  detalle: { nombre: string; cantidad: number; precio: number }[];
+  cantidad_actual: number;
+  detalle: DetalleExtra[];
 };
 
 export type Pedido = {

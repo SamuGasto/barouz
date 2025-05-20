@@ -1,6 +1,6 @@
 import React from "react";
 import { Euphoria_Script } from "next/font/google";
-import { CategoriaProducto, Extra } from "@/data/tipos";
+import { CategoriaProducto, Extra, Pedido } from "@/data/tipos";
 import TarjetaExtra from "./waffles/tarjeta-detalle";
 
 const euphoriaScript = Euphoria_Script({
@@ -11,13 +11,17 @@ const euphoriaScript = Euphoria_Script({
 });
 
 interface PropType {
-  categoria: CategoriaProducto;
+  pedido: Pedido;
   extra: Extra[];
   setExtra: (extra: Extra[]) => void;
 }
 
 function Extras(props: PropType) {
-  const { categoria, extra, setExtra } = props;
+  const { pedido, extra, setExtra } = props;
+
+  if (extra.length === 0) {
+    return <></>;
+  }
 
   return (
     <div className="flex w-full flex-col items-center gap-2">
@@ -26,9 +30,16 @@ function Extras(props: PropType) {
       >
         Extras
       </h2>
-      {extra.map((item) => (
-        <TarjetaExtra key={item.nombre} extra={item} />
-      ))}
+      <div className="flex w-full flex-col items-center gap-5">
+        {extra.map((item) => (
+          <TarjetaExtra
+            key={item.nombre}
+            pedido={pedido}
+            extra={item}
+            setExtra={setExtra}
+          />
+        ))}
+      </div>
     </div>
   );
 }

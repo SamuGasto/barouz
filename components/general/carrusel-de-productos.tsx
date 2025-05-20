@@ -5,7 +5,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import React from "react";
-import TarjetaProducto from "../pagina-principal/promociones/producto";
+import TarjetaProducto from "./producto";
 import { Producto } from "@/data/tipos";
 
 interface PropType {

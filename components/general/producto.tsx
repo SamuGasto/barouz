@@ -10,9 +10,9 @@ function TarjetaProducto({ producto }: { producto: Producto }) {
       key={producto.id}
       className="w-[240px] px-0 py-0 shadow-none transition-all hover:scale-102"
     >
-      <CardContent className="flex max-w-72 flex-col items-center justify-center gap-2 px-2">
+      <CardContent className="flex max-w-72 flex-col items-center justify-center gap-2 px-2 pt-2">
         <Image
-          className="h-[300px] rounded-md object-cover"
+          className="h-[260px] rounded-md object-cover"
           src={producto.imagen}
           alt={producto.nombre}
         />

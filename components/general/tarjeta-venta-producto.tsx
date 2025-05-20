@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardContent } from "../ui/card";
+import { Card } from "../ui/card";
 import Image from "next/image";
 import { Producto } from "@/data/tipos";
 import { Button } from "../ui/button";
@@ -9,10 +9,11 @@ interface PropType {
   producto: Producto;
   cantidad: number;
   modificarCantidad: (cantidad: number) => void;
+  eliminar: () => void;
 }
 
 function TarjetaVentaProducto(props: PropType) {
-  const { producto, cantidad, modificarCantidad } = props;
+  const { producto, cantidad, modificarCantidad, eliminar } = props;
   return (
     <Card className="flex w-fit flex-row items-center justify-center p-1">
       <div id="imagen" className="flex aspect-square max-w-[128px]">
@@ -29,11 +30,19 @@ function TarjetaVentaProducto(props: PropType) {
         </div>
         <div id="precio" className="flex flex-row items-center gap-2">
           <Card className="flex h-fit w-fit flex-row items-center gap-2 py-0">
-            <Button onClick={() => modificarCantidad(-1)} variant={"ghost"}>
+            <Button
+              className="h-8 w-8"
+              onClick={() => modificarCantidad(-1)}
+              variant={"ghost"}
+            >
               -
             </Button>
             <p>{cantidad}</p>
-            <Button onClick={() => modificarCantidad(1)} variant={"ghost"}>
+            <Button
+              className="h-8 w-8"
+              onClick={() => modificarCantidad(1)}
+              variant={"ghost"}
+            >
               +
             </Button>
           </Card>
@@ -58,6 +67,7 @@ function TarjetaVentaProducto(props: PropType) {
         <Button
           className="flex h-fit w-fit flex-row items-center gap-2 self-center"
           variant="destructive"
+          onClick={() => eliminar()}
         >
           <Trash size={16} />
           Eliminar
