@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "../ui/button";
 import { Euphoria_Script } from "next/font/google";
+import Link from "next/link";
 
 const euphoriaScript = Euphoria_Script({
   weight: "400",
@@ -28,12 +29,14 @@ function Banner() {
           <span className="italic">¡Dulce placer sin culpa!</span>
         </p>
       </div>
-      <Button
-        className="bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary/90 scale-100 p-7 text-2xl font-light shadow-lg transition-all hover:scale-105"
-        size={"default"}
-      >
-        Pedir Ahora
-      </Button>
+      <Link href="/menu">
+        <Button
+          className="bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary/90 scale-100 p-7 text-2xl font-light shadow-lg transition-all hover:scale-105"
+          size={"default"}
+        >
+          Pedir Ahora
+        </Button>
+      </Link>
     </div>
   );
 }

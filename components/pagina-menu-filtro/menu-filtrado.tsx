@@ -1,9 +1,10 @@
 "use client";
 import React from "react";
-import TarjetaProducto from "../pagina-menu/producto";
+
 import { useFiltrosStore } from "@/components/providers/filtros-provider";
 import obtenerTodosLosProductos from "@/utils/querys/cliente/todos-productos";
 import { Producto } from "@/data/tipos";
+import TarjetaProducto from "../general/producto";
 
 const nombresFiltros = [
   "Waffles",
