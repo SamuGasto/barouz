@@ -5,11 +5,11 @@ import churros from "./churros";
 import postres from "./postres";
 import bebidas from "./bebidas";
 import { Promocion } from "../tipos";
-import imagenWafflePromo from "@/images/products-example/waffle-basico.jpg";
-import imagenHeladoPromo from "@/images/products-example/helado-artesanal.jpg";
-import imagenComboPromo from "@/images/products-example/churros.jpg";
-import imagenPostrePromo from "@/images/products-example/postres.jpg";
-import imagenGalletaPromo from "@/images/products-example/waffle-cookie.jpg";
+import imagenWafflePromo from "@/images/products-example/waffle-basico.webp";
+import imagenHeladoPromo from "@/images/products-example/helado-artesanal.webp";
+import imagenComboPromo from "@/images/products-example/churros.webp";
+import imagenPostrePromo from "@/images/products-example/postres.webp";
+import imagenGalletaPromo from "@/images/products-example/waffle-cookie.webp";
 
 const promocionesDestacadas = [
   helados[0],

@@ -1,5 +1,5 @@
-import brownieClasico from "@/images/products-example/brownie.jpg";
-import postreAvena from "@/images/products-example/postre-avena.jpg";
+import brownieClasico from "@/images/products-example/brownie.webp";
+import postreAvena from "@/images/products-example/postre-avena.webp";
 import { Producto } from "../tipos";
 
 const postres: Producto[] = [

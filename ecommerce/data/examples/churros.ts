@@ -1,8 +1,8 @@
-import churroClasico from "@/images/products-example/churros-artesanales.jpg";
-import churroManjar from "@/images/products-example/churros.jpg";
-import churroChocolate from "@/images/products-example/churros-chocolate.jpg";
-import churrosTrio from "@/images/products-example/muchos-churros.jpg";
-import churrosMini from "@/images/products-example/churros-docena.jpg";
+import churroClasico from "@/images/products-example/churros-artesanales.webp";
+import churroManjar from "@/images/products-example/churros.webp";
+import churroChocolate from "@/images/products-example/churros-chocolate.webp";
+import churrosTrio from "@/images/products-example/muchos-churros.webp";
+import churrosMini from "@/images/products-example/churros-docena.webp";
 import { Producto } from "../tipos";
 
 const churros: Producto[] = [

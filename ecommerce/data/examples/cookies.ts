@@ -1,6 +1,6 @@
-import waffleCookieClasico from "@/images/products-example/waffle-cookie.jpg";
-import waffleCookieNutella from "@/images/products-example/waffle-cokies.jpg";
-import waffleCookieHelado from "@/images/products-example/waffle-helado.jpg";
+import waffleCookieClasico from "@/images/products-example/waffle-cookie.webp";
+import waffleCookieNutella from "@/images/products-example/waffle-cokies.webp";
+import waffleCookieHelado from "@/images/products-example/waffle-helado.webp";
 import { Producto } from "../tipos";
 
 const waffles_cookies: Producto[] = [

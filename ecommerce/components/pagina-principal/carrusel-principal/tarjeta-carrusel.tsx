@@ -8,10 +8,10 @@ import { Oferta } from "@/data/tipos";
 
 function TarjetaCarrusel({ oferta }: { oferta: Oferta }) {
   return (
-    <Card className="relative px-2 py-2">
+    <Card className="relative h-fit w-full px-2 py-2">
       <Image
-        className="h-[460px] rounded-lg object-cover"
-        quality={50}
+        className="h-[460px] w-full rounded-lg object-cover"
+        quality={100}
         src={oferta.image}
         alt={oferta.oferta_texto}
         placeholder="blur"

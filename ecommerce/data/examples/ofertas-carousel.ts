@@ -1,6 +1,6 @@
-import product_image_1 from "@/images/products-example/1.jpg";
-import product_image_2 from "@/images/products-example/2.jpg";
-import product_image_3 from "@/images/products-example/3.jpg";
+import product_image_1 from "@/images/products-example/1.webp";
+import product_image_2 from "@/images/products-example/2.webp";
+import product_image_3 from "@/images/products-example/3.webp";
 import { Oferta } from "../tipos";
 
 export const ofertas_carrusel_principal: Oferta[] = [
