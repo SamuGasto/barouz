@@ -1,19 +1,37 @@
 services:
-  frontend:
-    container_name: frontend
+  admin:
+    container_name: admin
     build:
-      context: .
+      context: ./admin
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
-      - ./app:/app/app
-      - ./components:/app/components
-      - ./data:/app/data
-      - ./images:/app/images
-      - ./lib:/app/lib
-      - ./utils:/app/utils
-      - ./stores:/app/stores
+      - ./admin/app:/app/app
+      - ./admin/components:/app/components
+      - ./admin/lib:/app/lib
+      - ./admin/utils:/app/utils
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+    command: npm run dev
+
+  ecommerce:
+    container_name: ecommerce
+    build:
+      context: ./ecommerce
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3000"
+    volumes:
+      - ./ecommerce/app:/app/app
+      - ./ecommerce/components:/app/components
+      - ./ecommerce/data:/app/data
+      - ./ecommerce/images:/app/images
+      - ./ecommerce/lib:/app/lib
+      - ./ecommerce/utils:/app/utils
+      - ./ecommerce/stores:/app/stores
       - /app/node_modules
     environment:
       - NODE_ENV=development
