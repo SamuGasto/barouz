@@ -7,21 +7,18 @@ import { Badge } from "../../ui/badge";
 function CarritoCompra() {
   const [itemsEnCarrito, setItemsEnCarrito] = React.useState(1);
   return (
-    <Button
+    <a
       className="relative rounded-md border-1"
-      size="icon"
-      variant="ghost"
+      href="/carrito"
       aria-label="Ir al carrito"
     >
-      <a href="/carrito">
-        <ShoppingCart size={20} />
-      </a>
+      <ShoppingCart size={20} />
       {itemsEnCarrito > 0 && (
-        <Badge className="absolute -top-2 -right-3" variant="destructive">
+        <Badge className="absolute -top-3 -right-4" variant="destructive">
           {itemsEnCarrito}
         </Badge>
       )}
-    </Button>
+    </a>
   );
 }
 
