@@ -1,7 +1,6 @@
 "use client";
 import { ShoppingCart } from "lucide-react";
 import React from "react";
-import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
 
 function CarritoCompra() {
