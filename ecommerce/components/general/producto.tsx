@@ -20,9 +20,7 @@ function TarjetaProducto({ producto }: { producto: Producto }) {
         />
         <div className="flex w-full flex-col text-left">
           <div className="flex w-full flex-row justify-between">
-            <h3 className="truncate text-lg font-semibold">
-              {producto.nombre}
-            </h3>
+            <p className="truncate text-lg font-semibold">{producto.nombre}</p>
             <p className="text-brand-primary font-semibold">
               $
               {producto.precio.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}

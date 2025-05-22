@@ -8,9 +8,10 @@ function CarritoCompra() {
   const [itemsEnCarrito, setItemsEnCarrito] = React.useState(1);
   return (
     <Button
-      className="border-1 rounded-md relative"
+      className="relative rounded-md border-1"
       size="icon"
       variant="ghost"
+      aria-label="Ir al carrito"
     >
       <a href="/carrito">
         <ShoppingCart size={20} />
