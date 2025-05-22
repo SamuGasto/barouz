@@ -13,8 +13,10 @@ function TarjetaProducto({ producto }: { producto: Producto }) {
       <CardContent className="flex max-w-72 flex-col items-center justify-center gap-2 px-2 pt-2">
         <Image
           className="h-[260px] rounded-md object-cover"
+          quality={100}
           src={producto.imagen}
           alt={producto.nombre}
+          placeholder="blur"
         />
         <div className="flex w-full flex-col text-left">
           <div className="flex w-full flex-row justify-between">
