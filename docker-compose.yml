@@ -11,6 +11,8 @@ services:
       - ./admin/components:/app/components
       - ./admin/lib:/app/lib
       - ./admin/utils:/app/utils
+      - ./admin/public:/app/images
+      - ./admin/images:/app/public
       - /app/node_modules
     environment:
       - NODE_ENV=development
@@ -29,6 +31,7 @@ services:
       - ./ecommerce/components:/app/components
       - ./ecommerce/data:/app/data
       - ./ecommerce/images:/app/images
+      - ./ecommerce/public:/app/public
       - ./ecommerce/lib:/app/lib
       - ./ecommerce/utils:/app/utils
       - ./ecommerce/stores:/app/stores
