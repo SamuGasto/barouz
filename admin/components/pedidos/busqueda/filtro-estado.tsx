@@ -1,18 +1,37 @@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import React from 'react'
 
-function FiltroEstado() {
+interface Props {
+    activeSubTab: string
+    onSubTabChange: (value: string) => void
+}
+
+function FiltroEstado({ activeSubTab, onSubTabChange }: Props) {
     return (
-        <div>
-            <Tabs defaultValue='todos'>
-                <TabsList>
-                    <TabsTrigger value="todos">Todos</TabsTrigger>
-                    <TabsTrigger value="recibidos">Recibidos</TabsTrigger>
-                    <TabsTrigger value="en-preparacion">En Preparación</TabsTrigger>
-                    <TabsTrigger value="en-camino">En Camino</TabsTrigger>
-                </TabsList>
-            </Tabs>
-        </div>
+        <Tabs defaultValue="all" value={activeSubTab} onValueChange={onSubTabChange}>
+            <TabsList>
+                <TabsTrigger
+                    value="all"
+                >
+                    Todos
+                </TabsTrigger>
+                <TabsTrigger
+                    value="recibido"
+                >
+                    Recibidos
+                </TabsTrigger>
+                <TabsTrigger
+                    value="en preparación"
+                >
+                    En preparación
+                </TabsTrigger>
+                <TabsTrigger
+                    value="en camino"
+                >
+                    En camino
+                </TabsTrigger>
+            </TabsList>
+        </Tabs>
     )
 }
 

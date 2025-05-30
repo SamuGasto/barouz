@@ -115,47 +115,13 @@ export type Database = {
           },
         ]
       }
-      detalle_extra: {
-        Row: {
-          cantidad: number
-          created_at: string
-          extra_id: string
-          id: string
-          nombre: string
-          precio: number
-        }
-        Insert: {
-          cantidad?: number
-          created_at?: string
-          extra_id: string
-          id?: string
-          nombre?: string
-          precio: number
-        }
-        Update: {
-          cantidad?: number
-          created_at?: string
-          extra_id?: string
-          id?: string
-          nombre?: string
-          precio?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "detalle_extra_extra_id_fkey"
-            columns: ["extra_id"]
-            isOneToOne: false
-            referencedRelation: "extra"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       extra: {
         Row: {
           cantidad: number
           created_at: string
           id: string
           nombre: string
+          precio: number
           tipo: Database["public"]["Enums"]["TipoExtra"]
         }
         Insert: {
@@ -163,6 +129,7 @@ export type Database = {
           created_at?: string
           id?: string
           nombre?: string
+          precio?: number
           tipo: Database["public"]["Enums"]["TipoExtra"]
         }
         Update: {
@@ -170,6 +137,7 @@ export type Database = {
           created_at?: string
           id?: string
           nombre?: string
+          precio?: number
           tipo?: Database["public"]["Enums"]["TipoExtra"]
         }
         Relationships: []
@@ -326,6 +294,8 @@ export type Database = {
           estado: Database["public"]["Enums"]["EstadoPedidos"]
           fecha_hora: string
           id: string
+          razon_cancelacion: string
+          tipo_envio: Database["public"]["Enums"]["TipoEnvio"]
           total_final: number
           user_id: string
         }
@@ -334,6 +304,8 @@ export type Database = {
           estado?: Database["public"]["Enums"]["EstadoPedidos"]
           fecha_hora: string
           id?: string
+          razon_cancelacion?: string
+          tipo_envio?: Database["public"]["Enums"]["TipoEnvio"]
           total_final: number
           user_id: string
         }
@@ -342,6 +314,8 @@ export type Database = {
           estado?: Database["public"]["Enums"]["EstadoPedidos"]
           fecha_hora?: string
           id?: string
+          razon_cancelacion?: string
+          tipo_envio?: Database["public"]["Enums"]["TipoEnvio"]
           total_final?: number
           user_id?: string
         }
@@ -423,6 +397,7 @@ export type Database = {
           direccion: string | null
           gmail: string
           id: string
+          nombre: string
           rol: Database["public"]["Enums"]["Roles"]
           telefono: string | null
         }
@@ -431,6 +406,7 @@ export type Database = {
           direccion?: string | null
           gmail: string
           id?: string
+          nombre?: string
           rol?: Database["public"]["Enums"]["Roles"]
           telefono?: string | null
         }
@@ -439,6 +415,7 @@ export type Database = {
           direccion?: string | null
           gmail?: string
           id?: string
+          nombre?: string
           rol?: Database["public"]["Enums"]["Roles"]
           telefono?: string | null
         }
@@ -468,9 +445,15 @@ export type Database = {
         | "Viernes"
         | "Sábado"
         | "Domingo"
-      EstadoPedidos: "Recibido" | "En preparación" | "En camino" | "Entregado"
+      EstadoPedidos:
+        | "Recibido"
+        | "En preparación"
+        | "En camino"
+        | "Entregado"
+        | "Cancelado"
       Roles: "cliente" | "admin" | "caja" | "cocina"
       TipoDescuento: "porcentaje" | "valor"
+      TipoEnvio: "Delivery" | "Retiro en tienda"
       TipoExtra: "incremental" | "checkbox"
       Ubicaciones: "destacados_principal" | "destacados_menu"
     }
@@ -609,9 +592,16 @@ export const Constants = {
         "Sábado",
         "Domingo",
       ],
-      EstadoPedidos: ["Recibido", "En preparación", "En camino", "Entregado"],
+      EstadoPedidos: [
+        "Recibido",
+        "En preparación",
+        "En camino",
+        "Entregado",
+        "Cancelado",
+      ],
       Roles: ["cliente", "admin", "caja", "cocina"],
       TipoDescuento: ["porcentaje", "valor"],
+      TipoEnvio: ["Delivery", "Retiro en tienda"],
       TipoExtra: ["incremental", "checkbox"],
       Ubicaciones: ["destacados_principal", "destacados_menu"],
     },
