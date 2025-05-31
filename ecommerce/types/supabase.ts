@@ -118,6 +118,8 @@ export type Database = {
       extra: {
         Row: {
           cantidad: number
+          categoria: string
+          "categoria-producto": Database["public"]["Enums"]["CategoriaProducto"]
           created_at: string
           id: string
           nombre: string
@@ -126,6 +128,8 @@ export type Database = {
         }
         Insert: {
           cantidad?: number
+          categoria?: string
+          "categoria-producto"?: Database["public"]["Enums"]["CategoriaProducto"]
           created_at?: string
           id?: string
           nombre?: string
@@ -134,6 +138,8 @@ export type Database = {
         }
         Update: {
           cantidad?: number
+          categoria?: string
+          "categoria-producto"?: Database["public"]["Enums"]["CategoriaProducto"]
           created_at?: string
           id?: string
           nombre?: string
@@ -291,6 +297,7 @@ export type Database = {
       pedido_final: {
         Row: {
           created_at: string
+          direccion: string
           estado: Database["public"]["Enums"]["EstadoPedidos"]
           fecha_hora: string
           id: string
@@ -301,8 +308,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          direccion?: string
           estado?: Database["public"]["Enums"]["EstadoPedidos"]
-          fecha_hora: string
+          fecha_hora?: string
           id?: string
           razon_cancelacion?: string
           tipo_envio?: Database["public"]["Enums"]["TipoEnvio"]
@@ -311,6 +319,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          direccion?: string
           estado?: Database["public"]["Enums"]["EstadoPedidos"]
           fecha_hora?: string
           id?: string

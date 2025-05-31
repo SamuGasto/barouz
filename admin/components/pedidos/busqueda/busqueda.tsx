@@ -3,9 +3,12 @@ import React from 'react'
 import InputBusqueda from './input-busqueda'
 import FiltroCompletado from './filtro-completado'
 import FiltroEstado from './filtro-estado'
-import DialogNuevoPedido from '../dialog-nuevo-pedido'
+import DialogAnadirPedido from './dialog-anadir-pedido'
+import { Database } from '@/types/supabase'
 
 interface Props {
+    todosUsuarios: Database['public']['Tables']['usuario']['Row'][]
+    todosLosProductos: Database['public']['Tables']['producto']['Row'][]
     searchTerm: string
     onSearchChange: (value: string) => void
     activeTab: string
@@ -14,7 +17,7 @@ interface Props {
     onSubTabChange: (value: string) => void
 }
 
-function Busqueda({ searchTerm, onSearchChange, activeTab, onTabChange, activeSubTab, onSubTabChange }: Props) {
+function Busqueda({ todosUsuarios, todosLosProductos, searchTerm, onSearchChange, activeTab, onTabChange, activeSubTab, onSubTabChange }: Props) {
     return (
         <div className="flex w-full max-w-7xl flex-row justify-between gap-4 px-10">
             <div className="flex flex-col gap-2 w-fit">
@@ -24,7 +27,7 @@ function Busqueda({ searchTerm, onSearchChange, activeTab, onTabChange, activeSu
                 <FiltroEstado activeSubTab={activeSubTab} onSubTabChange={onSubTabChange} />
             </div>
             <div>
-                <DialogNuevoPedido />
+                <DialogAnadirPedido todosUsuarios={todosUsuarios} todosLosProductos={todosLosProductos} />
             </div>
         </div>
     )

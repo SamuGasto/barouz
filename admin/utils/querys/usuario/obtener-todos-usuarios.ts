@@ -8,7 +8,6 @@ async function obtenerTodosUsuarios(): Promise<
 
   const { data, error } = await supabase.from("usuario").select("*");
 
-  console.log(data);
   if (error) {
     console.error("Error al obtener todos los usuarios:", error);
     return null;

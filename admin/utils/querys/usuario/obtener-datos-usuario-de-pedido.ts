@@ -1,7 +1,7 @@
 import { Database } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/client";
 
-async function obtenerDatosUsuarioDePedido(
+async function obtenerDatosUsuario(
   id_pedido_final: string,
 ): Promise<Database["public"]["Tables"]["usuario"]["Row"] | null> {
   const supabase = createClient();
@@ -19,4 +19,4 @@ async function obtenerDatosUsuarioDePedido(
   return data[0];
 }
 
-export default obtenerDatosUsuarioDePedido;
+export default obtenerDatosUsuario;

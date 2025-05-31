@@ -10,6 +10,7 @@ import { DialogEditarPedido } from "./dialog-editar-pedido"
 import obtenerPedidosSegunPedidoFinal, { DetallesSobrePedido } from "@/utils/querys/pedidos/obtener-pedidos-segun-pedido-final"
 import { Badge } from "@/components/ui/badge"
 import { Menu } from "@/utils/querys/menu/obtener-menu"
+import { Card } from "@/components/ui/card"
 
 interface TarjetaPedidoProps {
     pedido: Database['public']['Tables']['pedido_final']['Row']
@@ -95,7 +96,7 @@ export function TarjetaPedido({
     }
 
     return (
-        <div className="rounded-lg border shadow-sm hover:shadow-md transition-shadow">
+        <Card className="py-0 gap-1" draggable>
             <div className="flex items-center justify-between p-4 rounded-t-lg">
                 <div className="grid gap-1">
                     <div className="font-semibold">
@@ -175,6 +176,6 @@ export function TarjetaPedido({
                     {getActionButtonText()}
                 </Button>
             </div>
-        </div>
+        </Card >
     )
 }

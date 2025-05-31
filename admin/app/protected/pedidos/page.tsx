@@ -42,6 +42,8 @@ function Pedidos() {
         onSearchChange={setSearchTerm}
         onTabChange={setActiveTab}
         onSubTabChange={setActiveSubTab}
+        todosUsuarios={usuarios}
+        todosLosProductos={menu.productos}
       />
       <ListaTarjetas searchTerm={searchTerm}
         activeSubTab={activeSubTab}

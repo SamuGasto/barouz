@@ -13,6 +13,8 @@ services:
       - ./admin/utils:/app/utils
       - ./admin/public:/app/images
       - ./admin/images:/app/public
+      - ./admin/stores:/app/stores
+      - ./admin/types:/app/types
       - /app/node_modules
     environment:
       - NODE_ENV=development
@@ -35,6 +37,7 @@ services:
       - ./ecommerce/lib:/app/lib
       - ./ecommerce/utils:/app/utils
       - ./ecommerce/stores:/app/stores
+      - ./ecommerce/types:/app/types
       - /app/node_modules
     environment:
       - NODE_ENV=development

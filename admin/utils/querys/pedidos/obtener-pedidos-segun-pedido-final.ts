@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/client";
 import { Database } from "@/types/supabase";
 
 export type DetallesSobrePedido = {
+  id: string;
   producto: Database["public"]["Tables"]["producto"]["Row"];
   extras: Database["public"]["Tables"]["extra"]["Row"][];
   cantidad: number;
@@ -34,6 +35,7 @@ async function obtenerPedidosSegunPedidoFinal(
 
   // Adaptamos la respuesta a la interface esperada
   const respuesta: DetallesSobrePedido[] = data.map((pedido: any) => ({
+    id: pedido.id,
     producto: pedido.producto,
     extras: (pedido.pedido_extra || []).map((pe: any) => pe.extra),
     cantidad: pedido.cantidad,

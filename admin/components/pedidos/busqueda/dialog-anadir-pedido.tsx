@@ -1,72 +1,52 @@
 "use client"
 
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { Plus, Minus, Trash2, Save, X } from "lucide-react"
-import type { Database } from "@/types/supabase"
-import { useEffect, useState } from "react"
-import obtenerDetalleProductos from "@/utils/querys/productos/obtener-detalle-productos"
-import { DetallesSobrePedido } from "@/utils/querys/pedidos/obtener-pedidos-segun-pedido-final"
-import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useState } from 'react'
+import type { Database } from '@/types/supabase'
+import { DetallesSobrePedido } from '@/utils/querys/pedidos/obtener-pedidos-segun-pedido-final'
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Minus, Plus, ReceiptText, Save, ShoppingBag, Trash2, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 
-interface DialogEditarPedidoProps {
-    pedido: Database['public']['Tables']['pedido_final']['Row'] | null,
-    detalles: DetallesSobrePedido[]
-    usuario: Database['public']['Tables']['usuario']['Row'] | null
+interface DialogAnadirPedidoProps {
     todosUsuarios: Database['public']['Tables']['usuario']['Row'][]
     todosLosProductos: Database['public']['Tables']['producto']['Row'][]
-    onSave: () => void
-    onCancel: () => void
 }
 
-export function DialogEditarPedido({
-    pedido,
-    detalles,
-    usuario,
-    todosLosProductos,
+
+function DialogAnadirPedido({
     todosUsuarios,
-    onSave,
-    onCancel,
-}: DialogEditarPedidoProps) {
-    if (!pedido) return null
-
-    const [loading, setLoading] = useState(false)
-    const [data, setData] = useState<Database['public']['Tables']['pedido']['Row'][]>([])
-
-    const [nuevoUsuario, setNuevoUsuario] = useState<Database['public']['Tables']['usuario']['Row'] | null>(usuario)
-    const [nuevoPedido, setNuevoPedido] = useState<Database['public']['Tables']['pedido_final']['Row']>(pedido)
-    const [nuevosProductos, setNuevosProductos] = useState<DetallesSobrePedido[]>(detalles)
+    todosLosProductos,
+}: DialogAnadirPedidoProps) {
+    const [nuevoUsuario, setNuevoUsuario] = useState<Database['public']['Tables']['usuario']['Row'] | null>(null)
+    const [nuevoPedido, setNuevoPedido] = useState<Database['public']['Tables']['pedido_final']['Row']>({
+        id: '',
+        created_at: '',
+        user_id: '',
+        tipo_envio: 'Delivery',
+        estado: 'Recibido',
+        razon_cancelacion: '',
+        fecha_hora: '',
+        total_final: 0,
+    })
+    const [nuevosProductos, setNuevosProductos] = useState<DetallesSobrePedido[]>([])
     const [productoPorAnadir, setProductoPorAnadir] = useState<string>("")
 
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button
-                    variant="outline"
-                    size="sm"
-                >
-                    Editar
-                </Button>
+                <Button><ShoppingBag className="mr-2 h-5 w-5" /> Agregar Pedido</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
-                    <DialogTitle>Editar Pedido de {usuario?.nombre}</DialogTitle>
+                    <DialogTitle>Nuevo Pedido</DialogTitle>
                     <DialogDescription>
-                        Modifica los detalles del pedido y haz clic en guardar cuando termines.
+                        Agrega un nuevo pedido y haz clic en guardar cuando termines.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -158,7 +138,7 @@ export function DialogEditarPedido({
                         </Select>
                     </div>
 
-                    {pedido.estado === "Cancelado" && (
+                    {nuevoPedido.estado === "Cancelado" && (
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="cancellationReason" className="text-right">
                                 Motivo
@@ -220,7 +200,7 @@ export function DialogEditarPedido({
                                 <div className="text-center py-4">No hay productos en este pedido</div>
                             ) : (
                                 <ScrollArea className="flex flex-col max-h-[210px]">
-                                    {nuevosProductos.map((item, index) => (
+                                    {nuevosProductos.length > 0 ? nuevosProductos.map((item, index) => (
                                         <div key={index} className="flex items-center justify-between p-3">
                                             <div className="flex-1">
                                                 <div className="flex flex-wrap items-center gap-2">
@@ -257,7 +237,9 @@ export function DialogEditarPedido({
                                                 </Button>
                                             </div>
                                         </div>
-                                    ))}
+                                    )) : (
+                                        <div className="flex flex-row items-center justify-center gap-2 text-center py-4"><ReceiptText className="h-4 w-4" /> No hay productos en este pedido</div>
+                                    )}
                                 </ScrollArea>
                             )}
                         </div>
@@ -265,14 +247,11 @@ export function DialogEditarPedido({
                 </div>
 
                 <DialogFooter>
-                    <Button
-                        variant="outline"
-                        onClick={onCancel}
-                    >
-                        <X className="mr-2 h-4 w-4" />
-                        Cancelar
-                    </Button>
-                    <Button onClick={onSave}>
+                    <Button onClick={() => {
+                        console.log(nuevoPedido)
+                        console.log(nuevoUsuario)
+                        console.log(nuevosProductos)
+                    }}>
                         <Save className="mr-2 h-4 w-4" />
                         Guardar Cambios
                     </Button>
@@ -281,3 +260,5 @@ export function DialogEditarPedido({
         </Dialog>
     )
 }
+
+export default DialogAnadirPedido
