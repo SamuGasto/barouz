@@ -40,9 +40,10 @@ export function MenuTabs({ categories, searchTerm, onAddToOrder }: MenuTabsProps
 
     return (
         <Tabs defaultValue="waffles" >
-            <TabsList className="flex flex-wrap">
+            <TabsList className="flex flex-nowrap overflow-x-auto scrollbar-thin scrollbar-thumb-muted rounded-md gap-1">
+
                 {categories.map((category) => (
-                    <TabsTrigger key={category.id} value={category.id} className="font-semibold flex items-center gap-1.5">
+                    <TabsTrigger key={category.id} value={category.id} className="font-semibold flex items-center gap-1.5 px-2 py-1 text-xs min-w-[90px] sm:text-sm sm:px-4 sm:py-2 whitespace-nowrap">
                         {getCategoryIcon(category.id)}
                         {category.name}
                     </TabsTrigger>

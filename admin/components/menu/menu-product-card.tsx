@@ -8,6 +8,7 @@ import Image from "next/image"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
 import type { Product } from "@/types/product";
+import { Card, CardContent } from "@/components/ui/card"
 
 interface MenuProductCardProps {
     item: Product;
@@ -31,14 +32,14 @@ export function MenuProductCard({ item, onEdit, onDelete }: MenuProductCardProps
     }
 
     return (
-        <div className="rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col">
+        <Card className="p-2">
             <div className="relative h-32 sm:h-48 w-full">
                 {!imageError && item.imagen ? (
                     <Image
                         src={item.imagen || "/placeholder.svg"}
                         alt={item.nombre}
                         fill
-                        className="object-cover"
+                        className="object-cover rounded-lg"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         onError={handleImageError}
                     />
@@ -109,6 +110,6 @@ export function MenuProductCard({ item, onEdit, onDelete }: MenuProductCardProps
                     )}
                 </div>
             </div>
-        </div>
+        </Card>
     )
 }

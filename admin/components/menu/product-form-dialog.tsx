@@ -134,7 +134,7 @@ export function ProductFormDialog({ open, product, isNew, onClose, onSave }: Pro
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogContent className="max-w-xs sm:max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <DialogContent className="w-full max-w-xs sm:max-w-md p-2 sm:p-6 max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
                         {isNew ? "Nuevo Producto" : "Editar Producto"}
