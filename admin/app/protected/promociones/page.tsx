@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,9 +12,11 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Edit, Trash2 } from "lucide-react";
 
-// TODO: Ajusta estos imports a tu estructura real
-// import { obtenerCupones, crearCupon, editarCupon, eliminarCupon } from "@/utils/querys/promociones";
-// import ImageUpload from "@/components/ui/image-upload";
+import { obtenerCupones } from "@/utils/querys/promociones/obtener-cupones";
+import { crearCupon } from "@/utils/querys/promociones/crear-cupones";
+import { editarCupon } from "@/utils/querys/promociones/editar-cupon";
+import { eliminarCupon } from "@/utils/querys/promociones/eliminar-cupon";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 // Tipos base (ajusta según tus tipos reales)
 type Cupon = {
@@ -21,7 +24,7 @@ type Cupon = {
   nombre: string;
   descripcion: string;
   imagen_url: string;
-  tipo_descuento: "porcentaje" | "monto";
+  tipo_descuento: "porcentaje" | "valor";
   valor_descuento: number;
   fecha_inicio: string;
   fecha_fin: string;
@@ -36,17 +39,12 @@ export default function PromocionesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editCupon, setEditCupon] = useState<Cupon | null>(null);
 
-  // Fetch cupones (simulado, reemplaza por fetch real)
   useEffect(() => {
     setLoading(true);
-    // obtenerCupones().then((data) => {
-    //   setCupones(data);
-    //   setLoading(false);
-    // });
-    setTimeout(() => {
-      setCupones([]); // Muestra vacío por ahora
+    obtenerCupones().then((data) => {
+      setCupones(data);
       setLoading(false);
-    }, 500);
+    });
   }, []);
 
   function handleAdd() {
@@ -59,21 +57,23 @@ export default function PromocionesPage() {
     setDialogOpen(true);
   }
 
-  function handleDelete(cupon: Cupon) {
+  async function handleDelete(cupon: Cupon) {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
+      eliminarCupon(cupon.id),
       {
         loading: "Eliminando...",
-        success: "Cupón eliminado",
+        success: () => {
+          setCupones((prev) => prev.filter((c) => c.id !== cupon.id));
+          return "Cupón eliminado";
+        },
         error: "Error al eliminar",
       }
     );
-    // eliminarCupon(cupon.id).then(() => ... )
   }
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-2">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col gap-3 justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Gestión de Promociones y Cupones</h1>
         <Button onClick={handleAdd} className="gap-2">
           <Plus size={18} /> Nuevo cupón
@@ -114,9 +114,29 @@ export default function PromocionesPage() {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         cupon={editCupon}
-        onSave={(cupon) => {
+        onSave={async (cupon) => {
           setDialogOpen(false);
-          // Actualiza lista de cupones (optimista)
+          setLoading(true);
+          if (cupon.id) {
+            // Editar
+            const actualizado = await editarCupon(cupon.id, cupon);
+            if (actualizado) {
+              setCupones((prev) => prev.map((c) => c.id === cupon.id ? actualizado : c));
+              toast.success("Cupón actualizado");
+            } else {
+              toast.error("Error al actualizar cupón");
+            }
+          } else {
+            // Crear
+            const creado = await crearCupon({ ...cupon });
+            if (creado) {
+              setCupones((prev) => [creado, ...prev]);
+              toast.success("Cupón creado");
+            } else {
+              toast.error("Error al crear cupón");
+            }
+          }
+          setLoading(false);
         }}
       />
     </div>
@@ -172,12 +192,8 @@ function CuponDialog({ open, onClose, cupon, onSave }: CuponDialogProps) {
 
   async function handleSubmit() {
     setSubmitting(true);
-    // Aquí iría la lógica real de crear/editar
-    setTimeout(() => {
-      onSave(form);
-      setSubmitting(false);
-      toast.success("Cupón guardado exitosamente");
-    }, 1000);
+    await onSave(form);
+    setSubmitting(false);
   }
 
   return (
@@ -185,8 +201,10 @@ function CuponDialog({ open, onClose, cupon, onSave }: CuponDialogProps) {
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{cupon ? "Editar cupón" : "Nuevo cupón"}</DialogTitle>
+          <DialogDescription>Completa los datos para crear o editar un cupón.</DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2">
+        <ScrollArea className="max-h-[70vh] w-full pr-2">
+          <div className="grid gap-4 py-2">
           <div className="grid gap-1">
             <Label>Nombre</Label>
             <Input
@@ -205,7 +223,33 @@ function CuponDialog({ open, onClose, cupon, onSave }: CuponDialogProps) {
               required
             />
           </div>
-          {/* Aquí puedes agregar ImageUpload para imagen_url */}
+          <div className="grid gap-1">
+  <Label>Imagen</Label>
+  <ImageUpload
+    value={form.imagen_url}
+    onChange={async (fileOrUrl: string | File) => {
+      if (typeof fileOrUrl === "string") {
+        handleChange("imagen_url", fileOrUrl);
+      } else if (fileOrUrl instanceof File) {
+        // Subir imagen a Supabase Storage
+        const { uploadCuponImage } = await import("@/utils/querys/promociones/upload-cupon-image");
+        const url = await uploadCuponImage(fileOrUrl, form.nombre || "cupon");
+        if (url) {
+          handleChange("imagen_url", url);
+          toast.success("Imagen subida");
+        } else {
+          toast.error("Error al subir imagen");
+        }
+      }
+    }}
+    disabled={submitting}
+    onRemove={async () => {
+      // Opcional: eliminar de Supabase Storage si quieres
+      handleChange("imagen_url", "");
+      toast("Imagen eliminada");
+    }}
+  />
+</div>
           <div className="grid gap-1">
             <Label>Tipo de descuento</Label>
             <select
@@ -215,7 +259,7 @@ function CuponDialog({ open, onClose, cupon, onSave }: CuponDialogProps) {
               disabled={submitting}
             >
               <option value="porcentaje">Porcentaje (%)</option>
-              <option value="monto">Monto ($)</option>
+              <option value="valor">Monto ($)</option>
             </select>
           </div>
           <div className="grid gap-1">
@@ -282,6 +326,7 @@ function CuponDialog({ open, onClose, cupon, onSave }: CuponDialogProps) {
             <span className="text-sm">Disponible</span>
           </div>
         </div>
+        </ScrollArea>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={submitting}>
             Cancelar
