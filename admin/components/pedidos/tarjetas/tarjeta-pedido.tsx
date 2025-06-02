@@ -9,7 +9,6 @@ import obtenerDatosUsuarioDePedido from "@/utils/querys/usuario/obtener-datos-us
 import { DialogEditarPedido } from "./dialog-editar-pedido"
 import obtenerPedidosSegunPedidoFinal, { DetallesSobrePedido } from "@/utils/querys/pedidos/obtener-pedidos-segun-pedido-final"
 import { Badge } from "@/components/ui/badge"
-import { Menu } from "@/utils/querys/menu/obtener-menu"
 import { Card } from "@/components/ui/card"
 
 interface TarjetaPedidoProps {
@@ -20,7 +19,7 @@ interface TarjetaPedidoProps {
     onReactivate?: (orderId: string) => void
     showCancelButton?: boolean
     showReactivateButton?: boolean
-    menu: Menu
+    menu: Database['public']['Tables']['producto']['Row'][]
     todosUsuarios: Database['public']['Tables']['usuario']['Row'][]
 }
 
@@ -152,7 +151,7 @@ export function TarjetaPedido({
                 <DialogEditarPedido
                     pedido={pedido}
                     usuario={usuario}
-                    todosLosProductos={menu ? menu.productos : []}
+                    todosLosProductos={menu}
                     detalles={todosSubPedidos}
                     onSave={() => { }}
                     onCancel={() => { }}

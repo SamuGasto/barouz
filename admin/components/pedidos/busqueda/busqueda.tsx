@@ -3,8 +3,10 @@ import React from 'react'
 import InputBusqueda from './input-busqueda'
 import FiltroCompletado from './filtro-completado'
 import FiltroEstado from './filtro-estado'
-import DialogAnadirPedido from './dialog-anadir-pedido'
 import { Database } from '@/types/supabase'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { ShoppingBag } from 'lucide-react'
 
 interface Props {
     todosUsuarios: Database['public']['Tables']['usuario']['Row'][]
@@ -27,7 +29,12 @@ function Busqueda({ todosUsuarios, todosLosProductos, searchTerm, onSearchChange
                 <FiltroEstado activeSubTab={activeSubTab} onSubTabChange={onSubTabChange} />
             </div>
             <div>
-                <DialogAnadirPedido todosUsuarios={todosUsuarios} todosLosProductos={todosLosProductos} />
+                <Link href="/protected/nuevo-pedido">
+                    <Button className='flex flex-row items-center gap-2'>
+                        <ShoppingBag className="h-5 w-5" />
+                        Nuevo Pedido
+                    </Button>
+                </Link>
             </div>
         </div>
     )

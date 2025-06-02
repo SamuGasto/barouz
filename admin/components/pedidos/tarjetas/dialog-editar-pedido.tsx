@@ -198,13 +198,14 @@ export function DialogEditarPedido({
                                     onClick={() => {
                                         const producto: Database['public']['Tables']['producto']['Row'] | undefined = todosLosProductos.find((item) => item.nombre === productoPorAnadir);
                                         if (producto) {
-                                            const elementtoPorAnadir: DetallesSobrePedido = {
+                                            const elementoPorAnadir: DetallesSobrePedido = {
+                                                id: '',
                                                 producto: producto,
                                                 extras: [],
                                                 cantidad: 1,
                                                 precio_final: producto.precio,
                                             }
-                                            setNuevosProductos([...nuevosProductos, elementtoPorAnadir]);
+                                            setNuevosProductos([...nuevosProductos, elementoPorAnadir]);
                                             setProductoPorAnadir('');
                                         }
                                     }}

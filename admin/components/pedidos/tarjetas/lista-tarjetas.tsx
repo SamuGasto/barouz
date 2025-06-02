@@ -1,7 +1,6 @@
 import { TarjetaPedido } from "./tarjeta-pedido"
 import type { Database } from "@/types/supabase"
 import { EstadoVacio } from "./estado-vacio"
-import { Menu } from "@/utils/querys/menu/obtener-menu"
 
 interface Props {
     pedidos: Database['public']['Tables']['pedido_final']['Row'][]
@@ -12,7 +11,7 @@ interface Props {
     onCancel?: (orderId: string) => void
     onUpdateStatus: (orderId: string) => void
     onReactivate?: (orderId: string) => void
-    menu: Menu
+    menu: Database['public']['Tables']['producto']['Row'][]
     todosUsuarios: Database['public']['Tables']['usuario']['Row'][]
 }
 

@@ -5,7 +5,6 @@ import { ListaTarjetas } from '@/components/pedidos/tarjetas/lista-tarjetas';
 import obtenerPedidos from '@/utils/querys/pedidos/obtener-pedidos-finales';
 import type { Database } from '@/types/supabase';
 import obtenerMenu from '@/utils/querys/menu/obtener-menu';
-import { Menu } from '@/utils/querys/menu/obtener-menu';
 import obtenerTodosUsuarios from '@/utils/querys/usuario/obtener-todos-usuarios';
 
 function Pedidos() {
@@ -14,9 +13,7 @@ function Pedidos() {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [activeTab, setActiveTab] = React.useState("activos");
   const [activeSubTab, setActiveSubTab] = React.useState("all");
-  const [menu, setMenu] = React.useState<Menu>({
-    productos: []
-  });
+  const [menu, setMenu] = React.useState<Database['public']['Tables']['producto']['Row'][]>([]);
   const [usuarios, setUsuarios] = React.useState<Database['public']['Tables']['usuario']['Row'][]>([]);
 
 
@@ -26,9 +23,7 @@ function Pedidos() {
       const menu = await obtenerMenu();
       const usuarios = await obtenerTodosUsuarios();
       setPedidos(pedidos != null ? pedidos : []);
-      setMenu(menu != null ? menu : {
-        productos: []
-      });
+      setMenu(menu != null ? menu : []);
       setUsuarios(usuarios != null ? usuarios : []);
     }
     getData();
@@ -43,7 +38,7 @@ function Pedidos() {
         onTabChange={setActiveTab}
         onSubTabChange={setActiveSubTab}
         todosUsuarios={usuarios}
-        todosLosProductos={menu.productos}
+        todosLosProductos={menu}
       />
       <ListaTarjetas searchTerm={searchTerm}
         activeSubTab={activeSubTab}

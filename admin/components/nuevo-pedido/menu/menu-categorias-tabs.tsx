@@ -2,14 +2,14 @@
 
 import React from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Menu } from "@/utils/querys/menu/obtener-menu"
 import { CakeSlice, Candy, Coffee, Cookie, IceCream, Snowflake } from 'lucide-react'
 import TarjetaMenu from './tarjeta-menu'
 import { categoriasMenu } from '@/types/categorias-menu'
 import { DetallesSobrePedido } from '@/utils/querys/pedidos/obtener-pedidos-segun-pedido-final'
+import type { Database } from '@/types/supabase'
 
 interface Props {
-    menu: Menu
+    menu: Database['public']['Tables']['producto']['Row'][]
     detallesPedido: DetallesSobrePedido[]
     setDetallesPedido: (detallesPedido: DetallesSobrePedido[]) => void
 }
@@ -50,7 +50,7 @@ function MenuCategoriasTabs({ menu, detallesPedido, setDetallesPedido }: Props) 
             {categoriasMenu.map((category) => (
                 <TabsContent key={category.id} value={category.id} className="space-y-4">
                     <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                        {menu.productos
+                        {menu
                             .filter((item) => item.categoria.toLowerCase().includes(category.id))
                             .map((item) => (
                                 <TarjetaMenu key={item.id} item={item} detallesPedido={detallesPedido} setDetallesPedido={setDetallesPedido} />

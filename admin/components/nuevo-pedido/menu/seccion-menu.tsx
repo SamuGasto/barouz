@@ -5,11 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card'
 import { Input } from '../../ui/input'
 import { Search } from 'lucide-react'
 import MenuCategoriasTabs from './menu-categorias-tabs'
-import { Menu } from '@/utils/querys/menu/obtener-menu'
 import { DetallesSobrePedido } from '@/utils/querys/pedidos/obtener-pedidos-segun-pedido-final'
+import type { Database } from '@/types/supabase'
 
 interface Props {
-    menu: Menu
+    menu: Database['public']['Tables']['producto']['Row'][]
     searchTerm: string
     onSearchChange: (searchTerm: string) => void
     detallesPedido: DetallesSobrePedido[]

@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../
 import { UserPlus } from 'lucide-react'
 import { RadioGroup, RadioGroupItem } from '../../ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../ui/dialog'
 import { useState, useEffect } from 'react'
 import type { Database } from '@/types/supabase'
 import obtenerTodosUsuarios from '@/utils/querys/usuario/obtener-todos-usuarios'
@@ -16,6 +17,7 @@ import obtenerPedidosSegunPedidoFinal, { DetallesSobrePedido } from '@/utils/que
 import { Badge } from '../../ui/badge'
 import ResumenPedido from '@/components/nuevo-pedido/resumen/resumen-pedido'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import NuevoClienteDialog from './nuevo-cliente-dialog'
 
 interface Props {
     detallesPedido: DetallesSobrePedido[]
@@ -46,6 +48,18 @@ function DetallesPedido({ detallesPedido, setDetallesPedido }: Props) {
         fetchUsers()
     }, [])
 
+    // Estados para el Dialog de nuevo cliente
+    const [isOpen, setIsOpen] = useState(false);
+    const [nombre, setNombre] = useState("");
+    const [correo, setCorreo] = useState("");
+    const [contraseña, setContraseña] = useState("");
+    const [telefono, setTelefono] = useState("");
+    const [direccion, setDireccion] = useState("");
+    const [mostrarResumen, setMostrarResumen] = useState(false);
+    const handleConfirmar = () => {
+        setMostrarResumen(true);
+    };
+
     return (
         <Card className="h-full flex flex-col">
             <CardHeader>
@@ -57,24 +71,29 @@ function DetallesPedido({ detallesPedido, setDetallesPedido }: Props) {
                         <Label htmlFor="clientName" className="text-right">
                             Cliente
                         </Label>
-                        <Select
-                            value={usuario?.id || ""}
-                            onValueChange={(value) => setUsuario({ ...usuario, id: value } as Database['public']['Tables']['usuario']['Row'])}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Selecciona un cliente" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {todosUsuarios?.map((usuario) => (
-                                    <SelectItem
-                                        key={usuario.id}
-                                        value={usuario.id}
-                                    >
-                                        {usuario.nombre}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <div className="flex flex-row items-center gap-2">
+                            <Select
+                                value={usuario?.id || ""}
+                                onValueChange={(value) => setUsuario({ ...usuario, id: value } as Database['public']['Tables']['usuario']['Row'])}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona un cliente" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {todosUsuarios?.map((usuario) => (
+                                        <SelectItem
+                                            key={usuario.id}
+                                            value={usuario.id}
+                                        >
+                                            {usuario.nombre}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {/* Botón para abrir el dialog de nuevo cliente */}
+                            {/* Componente modular para alta de cliente */}
+                            <NuevoClienteDialog />
+                        </div>
                     </div>
 
                     <div>

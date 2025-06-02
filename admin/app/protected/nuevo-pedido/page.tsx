@@ -6,13 +6,13 @@ import { HelpCircle } from "lucide-react"
 import React, { useEffect, useState } from 'react'
 import SeccionMenu from "@/components/nuevo-pedido/menu/seccion-menu"
 import DetallesPedido from "@/components/nuevo-pedido/resumen/detalles-pedido"
-import { Menu } from "@/utils/querys/menu/obtener-menu"
 import obtenerMenu from "@/utils/querys/menu/obtener-menu"
 import { DetallesSobrePedido } from "@/utils/querys/pedidos/obtener-pedidos-segun-pedido-final"
+import { Database } from '@/types/supabase';
 
 function NuevoPedido() {
     const [detallesPedido, setDetallesPedido] = useState<DetallesSobrePedido[]>([]) // Es para armar el pedido final
-    const [menu, setMenu] = useState<Menu | null>(null)
+    const [menu, setMenu] = useState<Database['public']['Tables']['producto']['Row'][] | null>(null)
     const [searchTerm, setSearchTerm] = useState<string>("")
 
     useEffect(() => {
@@ -24,7 +24,7 @@ function NuevoPedido() {
     }, [])
 
     return (
-        <div>
+        <div >
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-3xl font-bold tracking-tight">Nuevo Pedido</h2>
                 <TooltipProvider>
