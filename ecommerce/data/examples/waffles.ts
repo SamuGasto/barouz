@@ -1,9 +1,9 @@
-import waffleFrutilla from "@/images/products-example/waffle-frutilla.jpg";
-import waffleManjar from "@/images/products-example/waffle-nutella.jpg";
-import waffleChocoBlanco from "@/images/products-example/waffle-basico.jpg";
-import waffleHelado from "@/images/products-example/waffle-helado.jpg";
-import waffleMermelada from "@/images/products-example/waffle-crema.jpg";
-import miniWaffleTrio from "@/images/products-example/waffle-nutella.jpg";
+import waffleFrutilla from "@/images/products-example/waffle-frutilla.webp";
+import waffleManjar from "@/images/products-example/waffle-nutella.webp";
+import waffleChocoBlanco from "@/images/products-example/waffle-basico.webp";
+import waffleHelado from "@/images/products-example/waffle-helado.webp";
+import waffleMermelada from "@/images/products-example/waffle-crema.webp";
+import miniWaffleTrio from "@/images/products-example/waffle-nutella.webp";
 import { Producto } from "../tipos";
 
 const waffles: Producto[] = [

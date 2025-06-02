@@ -1,9 +1,9 @@
-import heladoVainilla from "@/images/products-example/helado-sol.jpg";
-import heladoChocolate from "@/images/products-example/postres.jpg";
-import heladoFrutilla from "@/images/products-example/helado-frutilla.jpg";
-import heladoDoble from "@/images/products-example/helado-artesanal.jpg";
-import heladoVegano from "@/images/products-example/helado-menta.jpg";
-import heladoTopping from "@/images/products-example/helado-completo.jpg";
+import heladoVainilla from "@/images/products-example/helado-sol.webp";
+import heladoChocolate from "@/images/products-example/postres.webp";
+import heladoFrutilla from "@/images/products-example/helado-frutilla.webp";
+import heladoDoble from "@/images/products-example/helado-artesanal.webp";
+import heladoVegano from "@/images/products-example/helado-menta.webp";
+import heladoTopping from "@/images/products-example/helado-completo.webp";
 import { Producto } from "../tipos";
 
 const helados: Producto[] = [
