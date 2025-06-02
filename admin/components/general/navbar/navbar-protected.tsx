@@ -12,22 +12,23 @@ import { signOutAction } from '@/app/actions'
 const links = [
     { href: "/protected/pedidos", label: "Pedidos" },
     { href: "/protected/menu", label: "Menu" },
+    { href: "/protected/promociones", label: "Promociones" },
     { href: "/protected/locales", label: "Locales" },
 ]
 
 function NavbarProtected() {
-  return (
-    <nav className="flex w-full h-16 border flex-row items-center justify-between p-3 px-5">
+    return (
+        <nav className="flex w-full h-16 border flex-row items-center justify-between p-3 px-5">
             <div id="navigation" className='flex flex-row items-center gap-2'>
-            <Link href="/protected/pedidos" className="flex flex-row items-center gap-2">
-                        <Image className="rounded-full" src={logo} alt="Logo"/>
-                        <Image src={logo_texto} alt="Logo"/>
-                    </Link>
-            {links.map((link) => (
-                <Link key={link.href} href={link.href} className="hover:underline">
-                    {link.label}
+                <Link href="/protected/pedidos" className="flex flex-row items-center gap-2">
+                    <Image className="rounded-full" src={logo} alt="Logo" />
+                    <Image src={logo_texto} alt="Logo" />
                 </Link>
-            ))}
+                {links.map((link) => (
+                    <Link key={link.href} href={link.href} className="hover:underline">
+                        {link.label}
+                    </Link>
+                ))}
             </div>
             <div id="actions" className='flex flex-row items-center gap-2'>
                 <Button variant="ghost" onClick={() => signOutAction()}>
@@ -37,7 +38,7 @@ function NavbarProtected() {
                 <ThemeSwitcher />
             </div>
         </nav>
-  )
+    )
 }
 
 export default NavbarProtected
