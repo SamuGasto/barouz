@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/client";
 import { Local } from "@/data/tipos";
 import locales from "@/data/examples/locales";
 

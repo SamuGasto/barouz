@@ -21,6 +21,7 @@ function Filtros() {
 
   return (
     <div className="flex h-fit w-full flex-wrap items-center justify-center gap-4">
+      <p className="text-2xl font-thin">Categorías: </p>
       {nombresFiltros.map((nombre, index) => {
         return (
           <Badge
