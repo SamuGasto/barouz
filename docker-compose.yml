@@ -9,6 +9,8 @@ services:
     volumes:
       - ./admin/app:/app/app
       - ./admin/components:/app/components
+      - ./admin/services:/app/services
+      - ./admin/hooks:/app/hooks
       - ./admin/lib:/app/lib
       - ./admin/utils:/app/utils
       - ./admin/public:/app/images
@@ -31,6 +33,8 @@ services:
     volumes:
       - ./ecommerce/app:/app/app
       - ./ecommerce/components:/app/components
+      - ./ecommerce/services:/app/services
+      - ./ecommerce/hooks:/app/hooks
       - ./ecommerce/data:/app/data
       - ./ecommerce/images:/app/images
       - ./ecommerce/public:/app/public

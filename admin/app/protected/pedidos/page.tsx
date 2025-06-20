@@ -4,11 +4,12 @@ import Busqueda from '@/components/pedidos/busqueda/busqueda'
 import { ListaTarjetas } from '@/components/pedidos/tarjetas/lista-tarjetas';
 import obtenerPedidos from '@/utils/querys/pedidos/obtener-pedidos-finales';
 import type { Database } from '@/types/supabase';
-import obtenerMenu from '@/utils/querys/menu/obtener-menu';
 import obtenerTodosUsuarios from '@/utils/querys/usuario/obtener-todos-usuarios';
+import ProductosService from '@/services/menu';
 
 function Pedidos() {
   const [pedidos, setPedidos] = React.useState<Database['public']['Tables']['pedido_final']['Row'][]>([]);
+  const [productsService, setProductsService] = React.useState<ProductosService>(new ProductosService());
 
   const [searchTerm, setSearchTerm] = React.useState("");
   const [activeTab, setActiveTab] = React.useState("activos");
@@ -20,8 +21,8 @@ function Pedidos() {
   React.useEffect(() => {
     const getData = async () => {
       const pedidos = await obtenerPedidos();
-      const menu = await obtenerMenu();
       const usuarios = await obtenerTodosUsuarios();
+      const menu = await productsService.obtenerMenuCompleto();
       setPedidos(pedidos != null ? pedidos : []);
       setMenu(menu != null ? menu : []);
       setUsuarios(usuarios != null ? usuarios : []);
