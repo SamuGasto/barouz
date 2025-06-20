@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 import React from "react";
+import { Euphoria_Script } from "next/font/google";
 
 const colores: { [key: number]: string } = {
   1: "bg-brand-background-1",
@@ -11,6 +12,13 @@ const colores: { [key: number]: string } = {
   5: "bg-brand-background-5",
   6: "bg-brand-background-6",
 };
+
+const euphoriaScript = Euphoria_Script({
+  weight: "400",
+  style: "normal",
+  display: "swap",
+  subsets: ["latin"],
+});
 
 // TarjetaMenu debe permanecer como Server Component para SEO y performance.
 function TarjetaMenu({
@@ -34,7 +42,7 @@ function TarjetaMenu({
           colores[color]
         }
       >
-        <h3 className="flex pl-4 font-semibold text-brand-primary drop-shadow-sm md:text-2xl text-lg" style={{ color: 'hsl(var(--brand-primary-foreground))' }}>
+        <h3 className={euphoriaScript.className + " flex pl-4 text-gray-700 dark:text-brand-primary-foreground md:text-3xl text-lg"}>
           {nombre}
         </h3>
         <Image

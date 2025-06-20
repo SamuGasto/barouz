@@ -20,24 +20,26 @@ function Filtros() {
   );
 
   return (
-    <div className="flex h-fit w-full flex-wrap items-center justify-center gap-4">
+    <div className="flex h-fit w-full flex-col items-center justify-center gap-4">
       <p className="text-2xl font-thin">Categorías: </p>
-      {nombresFiltros.map((nombre, index) => {
-        return (
-          <Badge
-            key={index}
-            className="cursor-pointer"
-            variant={filtrosCategoria[index] == 0 ? "secondary" : "default"}
-            onClick={() => {
-              const nuevoEstado = [...filtrosCategoria];
-              nuevoEstado[index] = nuevoEstado[index] == 0 ? 1 : 0;
-              setFiltrosCategoria(nuevoEstado);
-            }}
-          >
-            {nombre}
-          </Badge>
-        );
-      })}
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        {nombresFiltros.map((nombre, index) => {
+          return (
+            <Badge
+              key={index}
+              className="cursor-pointer"
+              variant={filtrosCategoria[index] == 0 ? "secondary" : "default"}
+              onClick={() => {
+                const nuevoEstado = [...filtrosCategoria];
+                nuevoEstado[index] = nuevoEstado[index] == 0 ? 1 : 0;
+                setFiltrosCategoria(nuevoEstado);
+              }}
+            >
+              {nombre}
+            </Badge>
+          );
+        })}
+      </div>
     </div>
   );
 }
