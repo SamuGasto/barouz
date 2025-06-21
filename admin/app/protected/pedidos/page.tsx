@@ -2,33 +2,18 @@
 import React from 'react'
 import Busqueda from '@/components/pedidos/busqueda/busqueda'
 import { ListaTarjetas } from '@/components/pedidos/tarjetas/lista-tarjetas';
-import obtenerPedidos from '@/utils/querys/pedidos/obtener-pedidos-finales';
-import type { Database } from '@/types/supabase';
-import obtenerTodosUsuarios from '@/utils/querys/usuario/obtener-todos-usuarios';
-import ProductosService from '@/services/menu';
+import usePedidos from '@/hooks/usePedidos';
+import useUsuarios from '@/hooks/useUsuarios';
+import { useProducts } from '@/hooks/useMenuManagement';
 
 function Pedidos() {
-  const [pedidos, setPedidos] = React.useState<Database['public']['Tables']['pedido_final']['Row'][]>([]);
-  const [productsService, setProductsService] = React.useState<ProductosService>(new ProductosService());
+  const { pedidoService, loading } = usePedidos();
+  const { usuarioService, loading: usuariosLoading } = useUsuarios();
+  const { data: products, isLoading: productsLoading } = useProducts();
 
   const [searchTerm, setSearchTerm] = React.useState("");
   const [activeTab, setActiveTab] = React.useState("activos");
   const [activeSubTab, setActiveSubTab] = React.useState("all");
-  const [menu, setMenu] = React.useState<Database['public']['Tables']['producto']['Row'][]>([]);
-  const [usuarios, setUsuarios] = React.useState<Database['public']['Tables']['usuario']['Row'][]>([]);
-
-
-  React.useEffect(() => {
-    const getData = async () => {
-      const pedidos = await obtenerPedidos();
-      const usuarios = await obtenerTodosUsuarios();
-      const menu = await productsService.obtenerMenuCompleto();
-      setPedidos(pedidos != null ? pedidos : []);
-      setMenu(menu != null ? menu : []);
-      setUsuarios(usuarios != null ? usuarios : []);
-    }
-    getData();
-  }, []);
 
   return (
     <div className="flex w-full justify-center items-center flex-col gap-10">
@@ -38,19 +23,19 @@ function Pedidos() {
         onSearchChange={setSearchTerm}
         onTabChange={setActiveTab}
         onSubTabChange={setActiveSubTab}
-        todosUsuarios={usuarios}
-        todosLosProductos={menu}
+        todosUsuarios={usuarioService.usuarios}
+        todosLosProductos={products || []}
       />
       <ListaTarjetas searchTerm={searchTerm}
         activeSubTab={activeSubTab}
-        pedidos={pedidos}
+        pedidos={pedidoService.pedidos}
         type="all"
         onEdit={() => { }}
         onUpdateStatus={() => { }}
         onCancel={() => { }}
         onReactivate={() => { }}
-        menu={menu}
-        todosUsuarios={usuarios}
+        menu={products || []}
+        todosUsuarios={usuarioService.usuarios}
       />
     </div>
   )

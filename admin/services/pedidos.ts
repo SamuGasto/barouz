@@ -1,27 +1,25 @@
-import Supabase from "@/lib/supabase";
 import { Database } from "@/types/supabase";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { supabase } from "@/utils/supabase/client";
 
 class PedidoService {
-  private client: SupabaseClient<any, "public", any>;
+  public pedidos: Database["public"]["Tables"]["pedido_final"]["Row"][];
 
   constructor() {
-    this.client = Supabase.getClient();
+    this.pedidos = [];
   }
 
-  public async obtenerTodosLosPedidos(): Promise<
+  public async cargarPedidos(): Promise<
     Database["public"]["Tables"]["pedido_final"]["Row"][]
   > {
     try {
-      const { data, error } = await this.client
-        .from("pedido_final")
-        .select("*");
+      const { data, error } = await supabase.from("pedido_final").select("*");
 
       if (error) {
         console.error("Error al obtener pedidos:", error);
         return [];
       }
 
+      this.pedidos = data;
       return data;
     } catch (error) {
       console.error("Error al obtener pedidos:", error);

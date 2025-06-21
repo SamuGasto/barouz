@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 
 interface ImageUploadProps {
     value?: string | File;
-    onChange: (value: string | File) => void;
+    onChange: (value: string | File | undefined) => void;
     onRemove: () => void;
     disabled?: boolean;
     className?: string;
@@ -19,7 +19,6 @@ interface ImageUploadProps {
 
 export function ImageUpload({ value, onChange, onRemove, disabled, className }: ImageUploadProps) {
     const [isDragOver, setIsDragOver] = useState(false)
-    const [isUploading, setIsUploading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -42,9 +41,9 @@ export function ImageUpload({ value, onChange, onRemove, disabled, className }: 
 
     const validateFile = (file: File): string | null => {
         // Validar tipo de archivo
-        const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"]
+        const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
         if (!allowedTypes.includes(file.type)) {
-            return "Solo se permiten archivos de imagen (JPEG, PNG, WebP, GIF)"
+            return "Solo se permiten archivos de imagen (JPEG, PNG, WebP)"
         }
 
         // Validar tamaño (máximo 5MB)
@@ -58,23 +57,15 @@ export function ImageUpload({ value, onChange, onRemove, disabled, className }: 
 
     const processFile = async (file: File) => {
         setError(null)
-        setIsUploading(true)
 
         const validationError = validateFile(file)
         if (validationError) {
             setError(validationError)
-            setIsUploading(false)
+            onChange(undefined)
             return
         }
 
-        try {
-            // Solo pasar el File al onChange, el formulario se encargará de subirlo
-            onChange(file)
-        } catch (err) {
-            setError("Error al procesar la imagen")
-        } finally {
-            setIsUploading(false)
-        }
+        onChange(file)
     }
 
     const handleDrop = useCallback(
@@ -98,6 +89,10 @@ export function ImageUpload({ value, onChange, onRemove, disabled, className }: 
         if (files && files.length > 0) {
             await processFile(files[0])
         }
+
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ""
+        }
     }
 
     const handleClick = () => {
@@ -115,15 +110,15 @@ export function ImageUpload({ value, onChange, onRemove, disabled, className }: 
         }
     }
 
+    const imageUrl = value instanceof File ? URL.createObjectURL(value) : value
+
     return (
         <div className={cn("space-y-2", className)}>
-            <Label className="font-medium">Imagen del producto</Label>
-
-            {value ? (
+            {imageUrl ? (
                 <div className="relative group">
                     <div className="relative h-48 w-full rounded-lg overflow-hidden border-2">
                         <Image
-                            src={typeof value === "string" ? value : URL.createObjectURL(value)}
+                            src={imageUrl}
                             alt="Preview"
                             fill
                             className="object-cover"
@@ -136,6 +131,7 @@ export function ImageUpload({ value, onChange, onRemove, disabled, className }: 
                                 size="sm"
                                 onClick={handleRemove}
                                 className="bg-red-600 hover:bg-red-700"
+                                disabled={disabled}
                             >
                                 <X className="h-4 w-4 mr-2" />
                                 Eliminar
@@ -148,7 +144,7 @@ export function ImageUpload({ value, onChange, onRemove, disabled, className }: 
                             variant="outline"
                             size="sm"
                             onClick={handleClick}
-                            disabled={disabled || isUploading}
+                            disabled={disabled}
                         >
                             <Upload className="h-4 w-4 mr-2" />
                             Cambiar imagen
@@ -160,7 +156,6 @@ export function ImageUpload({ value, onChange, onRemove, disabled, className }: 
                     className={cn(
                         "relative h-48 w-full rounded-lg border-2 border-dashed transition-all cursor-pointer",
                         disabled && "opacity-50 cursor-not-allowed",
-                        isUploading && "opacity-75",
                     )}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
@@ -168,20 +163,11 @@ export function ImageUpload({ value, onChange, onRemove, disabled, className }: 
                     onClick={handleClick}
                 >
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                        {isUploading ? (
-                            <>
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2"></div>
-                                <p className="text-sm">Procesando imagen...</p>
-                            </>
-                        ) : (
-                            <>
-                                <ImageIcon className="h-12 w-12 mb-3" />
-                                <p className="text-sm font-medium mb-1">
-                                    Arrastra una imagen aquí o haz clic para seleccionar
-                                </p>
-                                <p className="text-xs">PNG, JPG, WebP o GIF (máx. 5MB)</p>
-                            </>
-                        )}
+                        <ImageIcon className="h-12 w-12 mb-3" />
+                        <p className="text-sm font-medium mb-1">
+                            Arrastra una imagen aquí o haz clic para seleccionar
+                        </p>
+                        <p className="text-xs">PNG, JPG o WebP (máx. 5MB)</p>
                     </div>
                 </div>
             )}
