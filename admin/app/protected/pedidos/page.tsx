@@ -2,12 +2,13 @@
 import React from 'react'
 import Busqueda from '@/components/pedidos/busqueda/busqueda'
 import { ListaTarjetas } from '@/components/pedidos/tarjetas/lista-tarjetas';
-import usePedidos from '@/hooks/usePedidos';
+
 import useUsuarios from '@/hooks/useUsuarios';
 import { useProducts } from '@/hooks/useMenuManagement';
+import usePedidos from '@/hooks/usePedidos';
 
 function Pedidos() {
-  const { pedidoService, loading } = usePedidos();
+  const { data: pedidos, isLoading: pedidosLoading } = usePedidos();
   const { usuarioService, loading: usuariosLoading } = useUsuarios();
   const { data: products, isLoading: productsLoading } = useProducts();
 
@@ -28,7 +29,7 @@ function Pedidos() {
       />
       <ListaTarjetas searchTerm={searchTerm}
         activeSubTab={activeSubTab}
-        pedidos={pedidoService.pedidos}
+        pedidos={pedidos || []}
         type="all"
         onEdit={() => { }}
         onUpdateStatus={() => { }}
