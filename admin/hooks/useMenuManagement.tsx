@@ -2,6 +2,7 @@
 import { Database } from '@/types/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { menuService } from '@/services/menu';
+import { storageService } from '@/services/storage';
 
 
 type ProductRow = Database["public"]["Tables"]["producto"]["Row"];
@@ -63,19 +64,37 @@ export function useUpdateProduct() {
 export function useDeleteProduct() {
     const queryClient = useQueryClient();
 
-    return useMutation<boolean, Error, string>({
-        mutationFn: menuService.eliminarProducto,
-        onSuccess: (isSuccess, deletedId) => {
-            if (isSuccess) {
-                queryClient.setQueryData<ProductRow[]>(['products'], (old) => {
-                    return old ? old.filter(product => product.id !== deletedId) : []
-                })
+    return useMutation<void, Error, string>({
+        mutationFn: async (productId: string) => {
+            const productsInCache = queryClient.getQueryData<ProductRow[]>(['products'])
+            const productToDelete = productsInCache?.find(product => product.id === productId)
 
-                queryClient.invalidateQueries({ queryKey: ['products'] })
+            // Si el producto tiene una imagen, intenta eliminarla del storage primero
+            if (productToDelete && productToDelete.imagen && productToDelete.imagen !== "") {
+                try {
+                    await storageService.deleteProductImage(productToDelete.imagen);
+                } catch (storageError) {
+                    console.error("No se pudo eliminar la imagen del storage, pero se intentará eliminar el producto de la DB.", storageError);
+                    // Opcional: podrías decidir lanzar el error aquí si quieres que la eliminación
+                    // del producto falle si la imagen no se puede eliminar.
+                    // Por ahora, solo lo logueamos y continuamos.
+                }
             }
+
+            // 2. Eliminar el producto de la base de datos
+            await menuService.eliminarProducto(productId); // Asegúrate de que menuService tenga este método
+        },
+        onSuccess: (data, variables) => {
+            // Invalidar o actualizar la caché después de la eliminación exitosa
+            queryClient.setQueryData<ProductRow[]>(['products'], (old) => {
+                return old ? old.filter(p => p.id !== variables) : [];
+            });
+            queryClient.invalidateQueries({ queryKey: ['products'] });
         },
         onError: (error) => {
-            console.error("Error al eliminar producto: ", error)
+            console.error("Error al eliminar producto:", error);
+            throw error;
+            // ... toast
         }
     })
 }

@@ -16,7 +16,7 @@ interface MenuCategorySectionProps {
     items: Product[];
     searchTerm: string;
     onEdit: (item: Product) => void;
-    onDelete?: (itemId: string) => void;
+    onDelete?: (itemId: string) => Promise<void>;
 }
 
 export function MenuCategorySection({ category, items, searchTerm, onEdit, onDelete }: MenuCategorySectionProps) {

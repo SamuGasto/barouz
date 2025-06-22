@@ -9,11 +9,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 
 import type { Product } from "@/types/product";
 import { Card, CardContent } from "@/components/ui/card"
+import { toast } from "sonner"
 
 interface MenuProductCardProps {
     item: Product;
     onEdit: (item: Product) => void;
-    onDelete?: (itemId: string) => void;
+    onDelete?: (itemId: string) => Promise<void>;
 }
 
 export function MenuProductCard({ item, onEdit, onDelete }: MenuProductCardProps) {
@@ -27,7 +28,16 @@ export function MenuProductCard({ item, onEdit, onDelete }: MenuProductCardProps
     const handleDelete = () => {
         setShowDeleteDialog(false)
         if (onDelete) {
-            onDelete(item.id)
+            onDelete(item.id).then(() => {
+                toast.success("Producto eliminado exitosamente")
+            }).catch((error) => {
+                if (error.code == "23503") {
+                    toast.error("Error al eliminar producto ya que esta siendo utilizado en un pedido")
+                }
+                else {
+                    toast.error("Error al eliminar producto, intentalo de nuevo más tarde")
+                }
+            })
         }
     }
 
@@ -39,7 +49,7 @@ export function MenuProductCard({ item, onEdit, onDelete }: MenuProductCardProps
                         src={item.imagen || "/placeholder.svg"}
                         alt={item.nombre}
                         fill
-                        className="object-cover rounded-lg"
+                        className="object-cover rounded-lg dark:shadow-none shadow-lg"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         onError={handleImageError}
                     />
@@ -94,8 +104,9 @@ export function MenuProductCard({ item, onEdit, onDelete }: MenuProductCardProps
                                         <DialogTitle>¿Eliminar producto?</DialogTitle>
                                     </DialogHeader>
                                     <div className="py-2">
-                                        ¿Estás seguro de que deseas eliminar <b>{item.nombre}</b>? Esta acción no se puede deshacer.
+                                        <p>¿Estás seguro de que deseas eliminar <b>{item.nombre}</b>? Esta acción no se puede deshacer.</p>
                                     </div>
+
                                     <DialogFooter>
                                         <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
                                             Cancelar

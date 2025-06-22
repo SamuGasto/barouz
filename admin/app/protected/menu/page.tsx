@@ -6,10 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { IceCream, Search, CakeSlice, Cookie, Candy, Coffee, Snowflake, PackagePlus } from "lucide-react"
 import { MenuCategorySection } from "@/components/menu/menu-category-section"
-import { ProductFormDialog } from "@/components/menu/product-form-dialog"
-import { toast } from "sonner";
 import { Database } from "@/types/supabase"
-import CrearProductoDialog from "@/components/menu/dialogs/crear-producto"
+import CrearProductoDialog from "@/components/menu/dialog-producto"
 import { useDeleteProduct, useProducts } from "@/hooks/useMenuManagement"
 
 const CATEGORY_ID_TO_LITERAL: Record<string, Database["public"]["Tables"]["producto"]["Row"]["categoria"]> = {
@@ -35,11 +33,6 @@ export default function MenuPage() {
     setShowDialog(false)
     setActualProduct(undefined)
   }
-
-  useEffect(() => {
-    console.log(products)
-  }, [products])
-
 
   // Categorías de productos
   const categories = [

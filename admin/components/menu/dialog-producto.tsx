@@ -18,6 +18,7 @@ import { Database } from '@/types/supabase'
 import { useCreateProduct, useUpdateProduct } from '@/hooks/useMenuManagement'
 import { toast } from 'sonner'
 import { useUploadImage } from '@/hooks/useUploadImage'
+import { storageService } from '@/services/storage'
 
 type ProductRow = Database["public"]["Tables"]["producto"]["Row"];
 type ProductInsert = Database["public"]["Tables"]["producto"]["Insert"];
@@ -52,7 +53,7 @@ function CrearProductoDialog({ open, producto, onClose }: CrearProductoDialogPro
         resolver: zodResolver(ProductFormSchema),
         defaultValues: {
             nombre: producto?.nombre || "",
-            precio: producto?.precio.toString() || "",
+            precio: producto?.precio.toString() || "0",
             descripcion: producto?.descripcion || "",
             categoria: producto?.categoria || "Waffles",
             disponible: producto?.disponible || true,
@@ -71,47 +72,82 @@ function CrearProductoDialog({ open, producto, onClose }: CrearProductoDialogPro
                 disponible: producto.disponible,
                 imagen: producto.imagen || undefined,
             })
-            console.log(producto)
         } else {
             form.reset({
                 nombre: "",
-                precio: "",
+                precio: "0",
                 descripcion: "",
                 categoria: "Waffles",
                 disponible: true,
                 imagen: undefined,
             })
         }
-    }, [producto])
+    }, [producto, form])
 
     const onSubmit = async (data: z.infer<typeof ProductFormSchema>) => {
         try {
-            let imageUrlToSave: string = "";
+            let finalImageUrl: string = ""; // Esta será la URL final para guardar en la DB
+            const oldImageUrl: string = producto?.imagen || ""; // La URL de la imagen que el producto ya tenía (si existe)
 
-            // 1. Manejo de la imagen
+            // 1. Manejo de la imagen: Subida de nueva, o mantenimiento/eliminación de la existente
             if (data.imagen instanceof File) {
-                // Si el usuario seleccionó un nuevo archivo, lo subimos
-                imageUrlToSave = await uploadImage(data.imagen);
-            } else if (typeof data.imagen === 'string' && data.imagen !== "") {
-                // Si no se seleccionó un nuevo archivo y ya había una URL, la mantenemos
-                imageUrlToSave = data.imagen;
-            }
-            // Si data.imagen es undefined, imageUrlToSave se quedará como null
+                // Caso 1: El usuario seleccionó un NUEVO archivo. Lo subimos.
+                finalImageUrl = await uploadImage(data.imagen);
 
-            const productDataToSave: ProductInsert | ProductUpdate = {
+                // Si estamos editando y había una imagen antigua Y es diferente de la nueva, la eliminamos.
+                if (isEditing && oldImageUrl && oldImageUrl !== "" && oldImageUrl !== finalImageUrl) {
+                    try {
+                        await storageService.deleteProductImage(oldImageUrl);
+                        console.log(`Imagen antigua ${oldImageUrl} eliminada.`);
+                    } catch (deleteError) {
+                        console.warn("No se pudo eliminar la imagen antigua del storage:", deleteError);
+                        // No lanzamos el error aquí para no bloquear la actualización del producto en DB
+                    }
+                }
+            } else if (typeof data.imagen === 'string') {
+                // Caso 2: La imagen del formulario es un string (URL existente o string vacío)
+                finalImageUrl = data.imagen; // Usamos el string que viene del formulario (URL o "")
+
+                // Si estamos editando y la nueva URL es vacía (usuario la borró) Y había una imagen antigua, la eliminamos.
+                if (isEditing && finalImageUrl === "" && oldImageUrl && oldImageUrl !== "") {
+                    try {
+                        await storageService.deleteProductImage(oldImageUrl);
+                        console.log(`Imagen antigua ${oldImageUrl} eliminada al dejar el campo vacío.`);
+                    } catch (deleteError) {
+                        console.warn("No se pudo eliminar la imagen antigua al dejar el campo vacío:", deleteError);
+                    }
+                }
+                // Si finalImageUrl no es vacío y es igual a oldImageUrl, no hacemos nada (se mantiene la imagen)
+                // Si finalImageUrl no es vacío y es diferente de oldImageUrl (e.g., se pegó una URL),
+                // la imagen antigua también debería eliminarse. La lógica actual ya lo maneja si pasa por `File`
+                // o si se vacía el campo. Si se pega una URL, tendrías que añadir un chequeo más específico
+                // para `oldImageUrl !== finalImageUrl` también aquí, pero es un caso menos común para URL directa.
+            } else {
+                // Caso 3: `data.imagen` es `undefined` (el campo no se tocó o es opcional)
+                // Si el campo de imagen no se modificó en el formulario, queremos mantener la imagen existente.
+                finalImageUrl = oldImageUrl; // Mantenemos la imagen que ya tenía el producto.
+                // Si `oldImageUrl` era `""` y `data.imagen` es `undefined`, `finalImageUrl` seguirá siendo `""`.
+            }
+
+
+            // --- Preparación y Llamada a la Mutación ---
+            const productDataToSave: ProductInsert | ProductUpdate = { // Usa el tipo correcto aquí
                 nombre: data.nombre,
                 precio: Number(data.precio),
                 descripcion: data.descripcion,
                 categoria: data.categoria,
                 disponible: data.disponible,
-                imagen: imageUrlToSave, // Usa la URL de la imagen (nueva o existente)
+                imagen: finalImageUrl, // **Esta es la URL final que se guardará**
             };
 
             // 2. Guardar/Actualizar el producto en la base de datos
             if (isEditing) {
-                await updateProduct({ ...productDataToSave, id: producto!.id });
+                // Asegúrate de pasar el ID del producto al objeto ProductUpdateDB
+                await updateProduct({ ...productDataToSave as ProductUpdate, id: producto!.id });
                 toast.success("Producto actualizado exitosamente.");
             } else {
+                // Cuando creamos, `imagen` debería ser `string | null`, no un `File`.
+                // Tu `createProduct` de `useCreateProduct` debe esperar `ProductInsert`.
                 await createProduct(productDataToSave as ProductInsert);
                 toast.success("Producto creado exitosamente.");
             }
@@ -154,9 +190,10 @@ function CrearProductoDialog({ open, producto, onClose }: CrearProductoDialogPro
                                     <FormDescription>(Opcional)</FormDescription>
                                     <FormControl>
                                         <ImageUpload
+                                            nameProduct={form.getValues("nombre")}
                                             value={field.value}
                                             onChange={(value: string | File | undefined) => field.onChange(value)}
-                                            onRemove={() => field.onChange(undefined)}
+                                            onRemove={() => field.onChange("")}
                                             disabled={isLoading}
                                         />
                                     </FormControl>

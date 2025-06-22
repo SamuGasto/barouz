@@ -11,33 +11,39 @@ import { cn } from "@/lib/utils"
 
 interface ImageUploadProps {
     value?: string | File;
+    nameProduct: string;
     onChange: (value: string | File | undefined) => void;
     onRemove: () => void;
     disabled?: boolean;
     className?: string;
 }
 
-export function ImageUpload({ value, onChange, onRemove, disabled, className }: ImageUploadProps) {
+export function ImageUpload({ value, nameProduct, onChange, onRemove, disabled, className }: ImageUploadProps) {
     const [isDragOver, setIsDragOver] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [isProcessingImage, setIsProcessingImage] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
+
+    const isBusy = disabled || isProcessingImage
 
     const handleDragOver = useCallback(
         (e: React.DragEvent) => {
             e.preventDefault()
             e.stopPropagation()
-            if (!disabled) {
+            if (!isBusy) {
                 setIsDragOver(true)
             }
         },
-        [disabled],
+        [isBusy],
     )
 
     const handleDragLeave = useCallback((e: React.DragEvent) => {
         e.preventDefault()
         e.stopPropagation()
-        setIsDragOver(false)
-    }, [])
+        if (!isBusy) {
+            setIsDragOver(false)
+        }
+    }, [isBusy])
 
     const validateFile = (file: File): string | null => {
         // Validar tipo de archivo
@@ -55,17 +61,87 @@ export function ImageUpload({ value, onChange, onRemove, disabled, className }: 
         return null
     }
 
+    const convertImageToWebP = (file: File): Promise<File> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader()
+
+            reader.onload = (readerEvent) => {
+                const image = new window.Image()
+
+                image.onload = () => {
+                    const canvas = document.createElement("canvas")
+                    const ctx = canvas.getContext("2d")
+
+                    const MAX_WIDTH = 1200;
+                    const MAX_HEIGHT = 1200;
+                    let width = image.width;
+                    let height = image.height;
+
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    ctx?.drawImage(image, 0, 0, width, height);
+
+                    // Convertir a WebP
+                    const quality = 1;
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            // Creamos un nuevo File con el tipo webp y el nombre original + .webp
+                            const webpFile = new File([blob], `${Date.now()}-${nameProduct.replace(/[^a-zA-Z0-9]/g, "_")}.webp`, {
+                                type: 'image/webp',
+                                lastModified: Date.now(),
+                            });
+                            resolve(webpFile);
+                        } else {
+                            reject(new Error("No se pudo convertir la imagen a WebP"))
+                        }
+                    }, "image/webp", quality)
+                }
+                image.onerror = (error) => {
+                    reject(new Error("Error al cargar la imagen."))
+                }
+                image.src = readerEvent.target?.result as string
+            }
+            reader.onerror = (error) => {
+                reject(new Error("Error al leer el archivo."))
+            }
+            reader.readAsDataURL(file)
+        })
+    }
+
+
     const processFile = async (file: File) => {
         setError(null)
+        setIsProcessingImage(true)
 
         const validationError = validateFile(file)
         if (validationError) {
             setError(validationError)
             onChange(undefined)
+            setIsProcessingImage(false)
             return
         }
 
-        onChange(file)
+        try {
+            const webpFile = await convertImageToWebP(file)
+            onChange(webpFile)
+        } catch (error) {
+            setError("Error al procesar la imagen")
+            onChange(undefined)
+        }
+        finally {
+            setIsProcessingImage(false)
+        }
     }
 
     const handleDrop = useCallback(
@@ -74,14 +150,14 @@ export function ImageUpload({ value, onChange, onRemove, disabled, className }: 
             e.stopPropagation()
             setIsDragOver(false)
 
-            if (disabled) return
+            if (isBusy) return
 
             const files = Array.from(e.dataTransfer.files)
             if (files.length > 0) {
                 await processFile(files[0])
             }
         },
-        [disabled, onChange],
+        [isBusy, onChange],
     )
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,7 +172,7 @@ export function ImageUpload({ value, onChange, onRemove, disabled, className }: 
     }
 
     const handleClick = () => {
-        if (!disabled) {
+        if (!isBusy) {
             fileInputRef.current?.click()
         }
     }
@@ -116,7 +192,7 @@ export function ImageUpload({ value, onChange, onRemove, disabled, className }: 
         <div className={cn("space-y-2", className)}>
             {imageUrl ? (
                 <div className="relative group">
-                    <div className="relative h-48 w-full rounded-lg overflow-hidden border-2">
+                    <div className="relative h-48 w-full rounded-lg overflow-hidden border-2 ">
                         <Image
                             src={imageUrl}
                             alt="Preview"
@@ -131,7 +207,7 @@ export function ImageUpload({ value, onChange, onRemove, disabled, className }: 
                                 size="sm"
                                 onClick={handleRemove}
                                 className="bg-red-600 hover:bg-red-700"
-                                disabled={disabled}
+                                disabled={isBusy}
                             >
                                 <X className="h-4 w-4 mr-2" />
                                 Eliminar
@@ -144,7 +220,7 @@ export function ImageUpload({ value, onChange, onRemove, disabled, className }: 
                             variant="outline"
                             size="sm"
                             onClick={handleClick}
-                            disabled={disabled}
+                            disabled={isBusy}
                         >
                             <Upload className="h-4 w-4 mr-2" />
                             Cambiar imagen
@@ -185,7 +261,7 @@ export function ImageUpload({ value, onChange, onRemove, disabled, className }: 
                 accept="image/*"
                 onChange={handleFileSelect}
                 className="hidden"
-                disabled={disabled}
+                disabled={isBusy}
             />
         </div>
     )

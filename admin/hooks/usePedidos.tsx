@@ -1,18 +1,24 @@
-import React from 'react'
-import PedidoService from '@/services/pedidos';
+import { useQuery } from '@tanstack/react-query';
+import { pedidoService } from '@/services/pedidos';
 
 function usePedidos() {
-    const [pedidoService, setPedidoService] = React.useState(new PedidoService())
-    const [loading, setLoading] = React.useState(true)
-
-    React.useEffect(() => {
-        const getData = async () => {
-            await pedidoService.cargarPedidos().then(() => setLoading(false))
-        }
-        getData()
-    }, [])
-
-    return { pedidoService, loading }
+    return useQuery({
+        queryKey: ["pedidos"],
+        queryFn: () => pedidoService.getAllPedidos(),
+        staleTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: true,
+    })
 }
+
+export function useDetallePedidos(pedido_final_id: string | undefined) {
+    return useQuery({
+        queryKey: ["pedido", pedido_final_id],
+        queryFn: () => pedidoService.obtenerDetalleProductos(pedido_final_id!),
+        staleTime: 5 * 60 * 1000,
+        enabled: !!pedido_final_id,
+    })
+}
+
+
 
 export default usePedidos
