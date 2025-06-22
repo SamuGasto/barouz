@@ -32,7 +32,7 @@ function TarjetaPromocion({ promocion }: { promocion: Promocion }) {
         className="bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary/90 flex w-full items-center justify-center gap-2"
       >
         <CirclePlus className="hidden md:block" />
-        Aplicar Promoción
+        Aplicar Cupón
       </Button>
     </Card>
   );

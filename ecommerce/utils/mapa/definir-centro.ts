@@ -1,7 +1,8 @@
+import { map } from "./init-map";
+
 export function setCentroMapa(lat: number, lng: number) {
-  const map = new google.maps.Map(document.getElementById("map")!, {
+  map.moveCamera({
     center: { lat, lng },
     zoom: 15,
-    streetViewControl: false,
   });
 }

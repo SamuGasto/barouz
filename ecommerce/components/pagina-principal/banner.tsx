@@ -12,14 +12,15 @@ const euphoriaScript = Euphoria_Script({
 
 function Banner() {
   return (
-    <div className="bg-brand-primary-background flex w-full flex-col items-center justify-center gap-4 p-10">
+    <div className="bg-brand-primary-background flex w-full flex-col items-center justify-center gap-4 p-6 md:p-10">
       <div className="flex flex-col items-center justify-center gap-4 text-center">
-        <h1 className="text-6xl font-thin">
-          Endulzamos sonrisas <br />{" "}
+        <h1 className="text-3xl md:text-6xl font-thin">
+          Endulzamos sonrisas <br />
           <span
             className={
-              euphoriaScript.className + " text-brand-primary text-8xl"
+              euphoriaScript.className + " text-brand-primary text-4xl md:text-8xl"
             }
+            style={{color: 'hsl(var(--brand-primary))'}}
           >
             de forma natural.
           </span>

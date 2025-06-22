@@ -1,7 +1,7 @@
 import Banner from "@/components/pagina-locales/banner";
 import PresentacionLocales from "@/components/pagina-locales/presentacion-locales";
 
-export default async function Home() {
+export default function Home() {
   return (
     <main className="flex w-full flex-col items-center justify-center gap-6">
       <Banner />

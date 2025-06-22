@@ -3,8 +3,8 @@ import React from "react";
 import { Local } from "@/data/tipos";
 import { Card } from "../ui/card";
 import { MapPin } from "lucide-react";
-import { setCentroMapa } from "@/utils/mapa/definir-centro";
 import { Separator } from "../ui/separator";
+import { setCentroMapa } from "@/utils/mapa/definir-centro";
 
 interface PropType {
   local: Local;
@@ -16,7 +16,7 @@ function TarjetaLocal(props: PropType) {
   return (
     <Card
       className="items-left flex w-fit flex-col justify-center gap-2 px-4 py-4 transition-all hover:scale-102 hover:cursor-pointer"
-      onClick={() => setCentroMapa(local.latitud, local.longitud)}
+      onClick={() => { setCentroMapa(local.latitud, local.longitud) }}
     >
       <div className="items-left flex w-fit flex-col gap-2">
         <h3 className="text-2xl font-semibold">{local.nombre}</h3>

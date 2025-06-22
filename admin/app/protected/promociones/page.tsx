@@ -205,127 +205,104 @@ function CuponDialog({ open, onClose, cupon, onSave }: CuponDialogProps) {
         </DialogHeader>
         <ScrollArea className="max-h-[70vh] w-full pr-2">
           <div className="grid gap-4 py-2">
-          <div className="grid gap-1">
-            <Label>Nombre</Label>
-            <Input
-              value={form.nombre}
-              onChange={(e) => handleChange("nombre", e.target.value)}
-              disabled={submitting}
-              required
-            />
-          </div>
-          <div className="grid gap-1">
-            <Label>Descripción</Label>
-            <Textarea
-              value={form.descripcion}
-              onChange={(e) => handleChange("descripcion", e.target.value)}
-              disabled={submitting}
-              required
-            />
-          </div>
-          <div className="grid gap-1">
-  <Label>Imagen</Label>
-  <ImageUpload
-    value={form.imagen_url}
-    onChange={async (fileOrUrl: string | File) => {
-      if (typeof fileOrUrl === "string") {
-        handleChange("imagen_url", fileOrUrl);
-      } else if (fileOrUrl instanceof File) {
-        // Subir imagen a Supabase Storage
-        const { uploadCuponImage } = await import("@/utils/querys/promociones/upload-cupon-image");
-        const url = await uploadCuponImage(fileOrUrl, form.nombre || "cupon");
-        if (url) {
-          handleChange("imagen_url", url);
-          toast.success("Imagen subida");
-        } else {
-          toast.error("Error al subir imagen");
-        }
-      }
-    }}
-    disabled={submitting}
-    onRemove={async () => {
-      // Opcional: eliminar de Supabase Storage si quieres
-      handleChange("imagen_url", "");
-      toast("Imagen eliminada");
-    }}
-  />
-</div>
-          <div className="grid gap-1">
-            <Label>Tipo de descuento</Label>
-            <select
-              className="border rounded px-2 py-1"
-              value={form.tipo_descuento}
-              onChange={(e) => handleChange("tipo_descuento", e.target.value as Cupon["tipo_descuento"])}
-              disabled={submitting}
-            >
-              <option value="porcentaje">Porcentaje (%)</option>
-              <option value="valor">Monto ($)</option>
-            </select>
-          </div>
-          <div className="grid gap-1">
-            <Label>Valor</Label>
-            <Input
-              type="number"
-              value={form.valor_descuento}
-              onChange={(e) => handleChange("valor_descuento", Number(e.target.value))}
-              disabled={submitting}
-              required
-              min={0}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-2">
             <div className="grid gap-1">
-              <Label>Fecha inicio</Label>
+              <Label>Nombre</Label>
               <Input
-                type="date"
-                value={form.fecha_inicio}
-                onChange={(e) => handleChange("fecha_inicio", e.target.value)}
+                value={form.nombre}
+                onChange={(e) => handleChange("nombre", e.target.value)}
                 disabled={submitting}
                 required
               />
             </div>
             <div className="grid gap-1">
-              <Label>Fecha fin</Label>
-              <Input
-                type="date"
-                value={form.fecha_fin}
-                onChange={(e) => handleChange("fecha_fin", e.target.value)}
-                disabled={submitting}
-                required
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="grid gap-1">
-              <Label>Hora inicio</Label>
-              <Input
-                type="time"
-                value={form.hora_inicio}
-                onChange={(e) => handleChange("hora_inicio", e.target.value)}
+              <Label>Descripción</Label>
+              <Textarea
+                value={form.descripcion}
+                onChange={(e) => handleChange("descripcion", e.target.value)}
                 disabled={submitting}
                 required
               />
             </div>
             <div className="grid gap-1">
-              <Label>Hora fin</Label>
+              <Label>Imagen</Label>
+              {/* Ajustar ImageUploader*/}
+            </div>
+            <div className="grid gap-1">
+              <Label>Tipo de descuento</Label>
+              <select
+                className="border rounded px-2 py-1"
+                value={form.tipo_descuento}
+                onChange={(e) => handleChange("tipo_descuento", e.target.value as Cupon["tipo_descuento"])}
+                disabled={submitting}
+              >
+                <option value="porcentaje">Porcentaje (%)</option>
+                <option value="valor">Monto ($)</option>
+              </select>
+            </div>
+            <div className="grid gap-1">
+              <Label>Valor</Label>
               <Input
-                type="time"
-                value={form.hora_fin}
-                onChange={(e) => handleChange("hora_fin", e.target.value)}
+                type="number"
+                value={form.valor_descuento}
+                onChange={(e) => handleChange("valor_descuento", Number(e.target.value))}
                 disabled={submitting}
                 required
+                min={0}
               />
             </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="grid gap-1">
+                <Label>Fecha inicio</Label>
+                <Input
+                  type="date"
+                  value={form.fecha_inicio}
+                  onChange={(e) => handleChange("fecha_inicio", e.target.value)}
+                  disabled={submitting}
+                  required
+                />
+              </div>
+              <div className="grid gap-1">
+                <Label>Fecha fin</Label>
+                <Input
+                  type="date"
+                  value={form.fecha_fin}
+                  onChange={(e) => handleChange("fecha_fin", e.target.value)}
+                  disabled={submitting}
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="grid gap-1">
+                <Label>Hora inicio</Label>
+                <Input
+                  type="time"
+                  value={form.hora_inicio}
+                  onChange={(e) => handleChange("hora_inicio", e.target.value)}
+                  disabled={submitting}
+                  required
+                />
+              </div>
+              <div className="grid gap-1">
+                <Label>Hora fin</Label>
+                <Input
+                  type="time"
+                  value={form.hora_fin}
+                  onChange={(e) => handleChange("hora_fin", e.target.value)}
+                  disabled={submitting}
+                  required
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <Switch
+                checked={form.disponible}
+                onCheckedChange={(v) => handleChange("disponible", v)}
+                disabled={submitting}
+              />
+              <span className="text-sm">Disponible</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2 mt-2">
-            <Switch
-              checked={form.disponible}
-              onCheckedChange={(v) => handleChange("disponible", v)}
-              disabled={submitting}
-            />
-            <span className="text-sm">Disponible</span>
-          </div>
-        </div>
         </ScrollArea>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={submitting}>

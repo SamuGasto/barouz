@@ -182,3 +182,6 @@ next-env.d.ts
 
 # unlighthouse
 .unlighthouse
+
+# DATA-FAKE
+.DATA-FAKE
