@@ -72,7 +72,7 @@ export function useDeleteProduct() {
             // Si el producto tiene una imagen, intenta eliminarla del storage primero
             if (productToDelete && productToDelete.imagen && productToDelete.imagen !== "") {
                 try {
-                    await storageService.deleteProductImage(productToDelete.imagen);
+                    await storageService.deleteImage("productos", productToDelete.imagen);
                 } catch (storageError) {
                     console.error("No se pudo eliminar la imagen del storage, pero se intentará eliminar el producto de la DB.", storageError);
                     // Opcional: podrías decidir lanzar el error aquí si quieres que la eliminación

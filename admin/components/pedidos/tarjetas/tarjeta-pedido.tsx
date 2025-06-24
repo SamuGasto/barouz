@@ -95,7 +95,7 @@ export function TarjetaPedido({
     }
 
     return (
-        <Card className="py-0 gap-1" draggable>
+        <Card className="py-0 gap-1 max-w-fit">
             <div className="flex items-center justify-between p-4 rounded-t-lg">
                 <div className="grid gap-1">
                     <div className="font-semibold">
@@ -140,23 +140,26 @@ export function TarjetaPedido({
                 </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 p-3 rounded-b-lg">
-                <Button
-                    variant="outline"
-                    size="sm"
-                >
-                    <FileText className="mr-2 h-3 w-3" />
-                    Imprimir
-                </Button>
-                <DialogEditarPedido
-                    pedido={pedido}
-                    usuario={usuario}
-                    todosLosProductos={menu}
-                    detalles={todosSubPedidos}
-                    onSave={() => { }}
-                    onCancel={() => { }}
-                    todosUsuarios={todosUsuarios}
-                />
+            <div className="flex flex-col md:flex-row items-center justify-end gap-2 p-3 rounded-b-lg">
+                <div className="flex flex-row items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                    >
+                        <FileText className="mr-2 h-3 w-3" />
+                        Imprimir
+                    </Button>
+                    <DialogEditarPedido
+                        pedido={pedido}
+                        usuario={usuario}
+                        todosLosProductos={menu}
+                        detalles={todosSubPedidos}
+                        onSave={() => { }}
+                        onCancel={() => { }}
+                        todosUsuarios={todosUsuarios}
+                    />
+                </div>
+
                 {showCancelButton && onCancel && (
                     <Button
                         variant="outline"

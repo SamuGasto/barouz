@@ -19,6 +19,7 @@ import { useCreateProduct, useUpdateProduct } from '@/hooks/useMenuManagement'
 import { toast } from 'sonner'
 import { useUploadImage } from '@/hooks/useUploadImage'
 import { storageService } from '@/services/storage'
+import { useHandleImageUpload } from '@/hooks/useUploadImage'
 
 type ProductRow = Database["public"]["Tables"]["producto"]["Row"];
 type ProductInsert = Database["public"]["Tables"]["producto"]["Insert"];
@@ -43,11 +44,11 @@ interface CrearProductoDialogProps {
 function CrearProductoDialog({ open, producto, onClose }: CrearProductoDialogProps) {
     const { mutateAsync: createProduct, isPending: isCreatingProduct } = useCreateProduct()
     const { mutateAsync: updateProduct, isPending: isUpdatingProduct } = useUpdateProduct()
-    const { mutateAsync: uploadImage, isPending: isUploadingImage } = useUploadImage()
+    const { mutateAsync: handleImageUpload, isPending: isHandlingImage } = useHandleImageUpload()
 
     const isEditing = !!producto
     const dialogTitle = isEditing ? "Editar Producto" : "Crear Nuevo Producto"
-    const isLoading = isCreatingProduct || isUpdatingProduct || isUploadingImage
+    const isLoading = isCreatingProduct || isUpdatingProduct || isHandlingImage
 
     const form = useForm<z.infer<typeof ProductFormSchema>>({
         resolver: zodResolver(ProductFormSchema),
@@ -86,52 +87,18 @@ function CrearProductoDialog({ open, producto, onClose }: CrearProductoDialogPro
 
     const onSubmit = async (data: z.infer<typeof ProductFormSchema>) => {
         try {
-            let finalImageUrl: string = ""; // Esta será la URL final para guardar en la DB
-            const oldImageUrl: string = producto?.imagen || ""; // La URL de la imagen que el producto ya tenía (si existe)
+            const oldImageUrl: string = producto?.imagen || "";
 
-            // 1. Manejo de la imagen: Subida de nueva, o mantenimiento/eliminación de la existente
-            if (data.imagen instanceof File) {
-                // Caso 1: El usuario seleccionó un NUEVO archivo. Lo subimos.
-                finalImageUrl = await uploadImage(data.imagen);
-
-                // Si estamos editando y había una imagen antigua Y es diferente de la nueva, la eliminamos.
-                if (isEditing && oldImageUrl && oldImageUrl !== "" && oldImageUrl !== finalImageUrl) {
-                    try {
-                        await storageService.deleteProductImage(oldImageUrl);
-                        console.log(`Imagen antigua ${oldImageUrl} eliminada.`);
-                    } catch (deleteError) {
-                        console.warn("No se pudo eliminar la imagen antigua del storage:", deleteError);
-                        // No lanzamos el error aquí para no bloquear la actualización del producto en DB
-                    }
-                }
-            } else if (typeof data.imagen === 'string') {
-                // Caso 2: La imagen del formulario es un string (URL existente o string vacío)
-                finalImageUrl = data.imagen; // Usamos el string que viene del formulario (URL o "")
-
-                // Si estamos editando y la nueva URL es vacía (usuario la borró) Y había una imagen antigua, la eliminamos.
-                if (isEditing && finalImageUrl === "" && oldImageUrl && oldImageUrl !== "") {
-                    try {
-                        await storageService.deleteProductImage(oldImageUrl);
-                        console.log(`Imagen antigua ${oldImageUrl} eliminada al dejar el campo vacío.`);
-                    } catch (deleteError) {
-                        console.warn("No se pudo eliminar la imagen antigua al dejar el campo vacío:", deleteError);
-                    }
-                }
-                // Si finalImageUrl no es vacío y es igual a oldImageUrl, no hacemos nada (se mantiene la imagen)
-                // Si finalImageUrl no es vacío y es diferente de oldImageUrl (e.g., se pegó una URL),
-                // la imagen antigua también debería eliminarse. La lógica actual ya lo maneja si pasa por `File`
-                // o si se vacía el campo. Si se pega una URL, tendrías que añadir un chequeo más específico
-                // para `oldImageUrl !== finalImageUrl` también aquí, pero es un caso menos común para URL directa.
-            } else {
-                // Caso 3: `data.imagen` es `undefined` (el campo no se tocó o es opcional)
-                // Si el campo de imagen no se modificó en el formulario, queremos mantener la imagen existente.
-                finalImageUrl = oldImageUrl; // Mantenemos la imagen que ya tenía el producto.
-                // Si `oldImageUrl` era `""` y `data.imagen` es `undefined`, `finalImageUrl` seguirá siendo `""`.
-            }
-
+            // 1. Manejo de la imagen usando la función reutilizable
+            const finalImageUrl: string = await handleImageUpload({
+                newImageData: data.imagen,
+                oldImageUrl: oldImageUrl,
+                bucketName: "productos", // Aquí defines el bucket específico para productos
+                isEditing: isEditing,
+            });
 
             // --- Preparación y Llamada a la Mutación ---
-            const productDataToSave: ProductInsert | ProductUpdate = { // Usa el tipo correcto aquí
+            const productDataToSave: ProductInsert | ProductUpdate = {
                 nombre: data.nombre,
                 precio: Number(data.precio),
                 descripcion: data.descripcion,
@@ -142,15 +109,13 @@ function CrearProductoDialog({ open, producto, onClose }: CrearProductoDialogPro
 
             // 2. Guardar/Actualizar el producto en la base de datos
             if (isEditing) {
-                // Asegúrate de pasar el ID del producto al objeto ProductUpdateDB
                 await updateProduct({ ...productDataToSave as ProductUpdate, id: producto!.id });
                 toast.success("Producto actualizado exitosamente.");
             } else {
-                // Cuando creamos, `imagen` debería ser `string | null`, no un `File`.
-                // Tu `createProduct` de `useCreateProduct` debe esperar `ProductInsert`.
                 await createProduct(productDataToSave as ProductInsert);
                 toast.success("Producto creado exitosamente.");
             }
+
 
             onClose();
         } catch (error) {

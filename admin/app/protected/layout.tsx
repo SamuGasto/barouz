@@ -14,7 +14,7 @@ export default function ProtectedLayout({
                 <div className="flex w-full flex-col gap-20 px-5">
                     {children}
                 </div>
-                <Toaster />
+                <Toaster richColors />
             </MenuProvider>
         </>
     );

@@ -32,7 +32,7 @@ export function ListaTarjetas({
     }
 
     return (
-        <div className="space-y-4">
+        <div className="flex flex-col md:flex-wrap w-full max-w-7xl gap-2">
             {pedidos.map((pedido) => (
                 <TarjetaPedido
                     key={pedido.id}
