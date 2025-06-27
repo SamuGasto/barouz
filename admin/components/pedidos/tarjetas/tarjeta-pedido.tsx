@@ -4,44 +4,50 @@ import { Button } from "@/components/ui/button"
 import { Clock, FileText, ArrowRight, CheckCircle, XCircle, Loader2 } from "lucide-react"
 import { PedidoBadge } from "./pedido-badge"
 import type { Database } from "@/types/supabase"
-import { useEffect, useState } from "react"
-import obtenerDatosUsuarioDePedido from "@/utils/querys/usuario/obtener-datos-usuario-de-pedido"
-import { DialogEditarPedido } from "./dialog-editar-pedido"
-import obtenerPedidosSegunPedidoFinal, { DetallesSobrePedido } from "@/utils/querys/pedidos/obtener-pedidos-segun-pedido-final"
+import { useState } from "react"
+import { DialogPedido } from "./dialog-pedido"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
+import { useDetallePedidosFinal } from "@/hooks/usePedidos"
+
+type PedidoFinalRow = Database['public']['Tables']['pedido_final']['Row']
+type UsuarioRow = Database['public']['Tables']['usuario']['Row']
+type ProductoRow = Database['public']['Tables']['producto']['Row']
+type ExtraRow = Database['public']['Tables']['extra']['Row']
+
+
 
 interface TarjetaPedidoProps {
-    pedido: Database['public']['Tables']['pedido_final']['Row']
-    onEdit: (pedido: Database['public']['Tables']['pedido_final']['Row']) => void
+    pedido_final: PedidoFinalRow
+    usuarios: UsuarioRow[]
     onCancel?: (orderId: string) => void
     onUpdateStatus: (orderId: string) => void
     onReactivate?: (orderId: string) => void
     showCancelButton?: boolean
     showReactivateButton?: boolean
-    menu: Database['public']['Tables']['producto']['Row'][]
-    todosUsuarios: Database['public']['Tables']['usuario']['Row'][]
 }
 
 export function TarjetaPedido({
-    pedido,
-    onEdit,
+    pedido_final,
+    usuarios,
     onCancel,
     onUpdateStatus,
     onReactivate,
     showCancelButton = false,
     showReactivateButton = false,
-    menu,
-    todosUsuarios,
 }: TarjetaPedidoProps) {
+    const { data: detalles, isPending: detallesPending } = useDetallePedidosFinal(pedido_final.id)
+
+    const isBusy = detallesPending
+
     const getActionButtonText = () => {
         if (showReactivateButton) return "Reactivar Pedido"
 
-        switch (pedido.estado) {
+        switch (pedido_final.estado) {
             case "Recibido":
                 return "Iniciar Preparación"
             case "En preparación":
-                return pedido.tipo_envio === "Delivery" ? "Enviar Pedido" : "Listo para Entrega"
+                return pedido_final.tipo_envio === "Delivery" ? "Enviar Pedido" : "Listo para Entrega"
             case "En camino":
                 return "Marcar Entregado"
             default:
@@ -52,7 +58,7 @@ export function TarjetaPedido({
     const getActionButtonIcon = () => {
         if (showReactivateButton) return null
 
-        switch (pedido.estado) {
+        switch (pedido_final.estado) {
             case "Recibido":
             case "En preparación":
                 return <ArrowRight className="mr-2 h-3 w-3" />
@@ -71,22 +77,7 @@ export function TarjetaPedido({
         return `${fechaFormateada} ${hora}`;
     }
 
-    const [loading, setLoading] = useState(true);
-    const [usuario, setUsuario] = useState<Database['public']['Tables']['usuario']['Row'] | null>(null);
-    const [todosSubPedidos, setTodosSubPedidos] = useState<DetallesSobrePedido[]>([]);
-
-    useEffect(() => {
-        const getData = async () => {
-            const usuario = await obtenerDatosUsuarioDePedido(pedido.user_id);
-            setUsuario(usuario);
-            const todosLosSubPedidos = await obtenerPedidosSegunPedidoFinal(pedido.id);
-            setTodosSubPedidos(todosLosSubPedidos != null ? todosLosSubPedidos : []);
-            setLoading(false);
-        }
-        getData();
-    }, [pedido.id]);
-
-    if (loading) {
+    if (isBusy) {
         return (
             <div className="flex items-center justify-center h-full">
                 <Loader2 className="animate-spin" />
@@ -99,27 +90,27 @@ export function TarjetaPedido({
             <div className="flex items-center justify-between p-4 rounded-t-lg">
                 <div className="grid gap-1">
                     <div className="font-semibold">
-                        {usuario?.nombre}
+                        {usuarios.find((usuario) => usuario.id === pedido_final.user_id)?.nombre}
                     </div>
                     <div className="text-sm">
-                        <Clock className="inline-block mr-1 h-3 w-3" /> {formatearFechaHora(pedido.fecha_hora)}
+                        <Clock className="inline-block mr-1 h-3 w-3" /> {formatearFechaHora(pedido_final.fecha_hora)}
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <PedidoBadge status={pedido.estado} />
+                    <PedidoBadge status={pedido_final.estado} />
                 </div>
             </div>
 
             <div className="border-t px-4 py-3">
                 <div className="space-y-2">
-                    {todosSubPedidos.map((item, idx) => (
+                    {detalles?.map((item, idx) => (
                         <div key={idx} className="flex justify-between text-sm">
                             <div className="flex flex-row items-center gap-2">
-                                {item.cantidad}x {item.producto.nombre}
-                                {item.extras.length > 0 && (
+                                {item.cantidad}x {item.producto?.nombre}
+                                {item.pedido_extra.length > 0 && (
                                     <div className="flex flex-wrap items-center gap-1">
-                                        {item.extras.map((extra, idx) => (
-                                            <Badge key={idx} className="bg-brand-primary/70">{extra.nombre}</Badge>
+                                        {item.pedido_extra.map((extra, idx) => (
+                                            <Badge key={idx} className="bg-brand-primary/70">{extra.extra?.nombre}</Badge>
                                         ))}
                                     </div>
                                 )}
@@ -129,12 +120,12 @@ export function TarjetaPedido({
                     ))}
                     <div className="flex justify-between font-medium pt-2 border-t">
                         <div>Total</div>
-                        <div>{pedido.total_final}</div>
+                        <div>{pedido_final.total_final}</div>
                     </div>
-                    {pedido.razon_cancelacion && (
+                    {pedido_final.razon_cancelacion && (
                         <div className="mt-2 p-2 rounded border ">
                             <div className="text-sm font-medium ">Motivo de cancelación:</div>
-                            <div className="text-sm">{pedido.razon_cancelacion}</div>
+                            <div className="text-sm">{pedido_final.razon_cancelacion}</div>
                         </div>
                     )}
                 </div>
@@ -149,14 +140,10 @@ export function TarjetaPedido({
                         <FileText className="mr-2 h-3 w-3" />
                         Imprimir
                     </Button>
-                    <DialogEditarPedido
-                        pedido={pedido}
-                        usuario={usuario}
-                        todosLosProductos={menu}
-                        detalles={todosSubPedidos}
-                        onSave={() => { }}
-                        onCancel={() => { }}
-                        todosUsuarios={todosUsuarios}
+                    <DialogPedido
+                        pedido_final={pedido_final}
+                        detalles={detalles}
+                        usuarios={usuarios}
                     />
                 </div>
 
@@ -164,7 +151,7 @@ export function TarjetaPedido({
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => onCancel(pedido.id)}
+                        onClick={() => onCancel(pedido_final.id)}
                     >
                         <XCircle className="mr-2 h-3 w-3" />
                         Cancelar
@@ -172,7 +159,7 @@ export function TarjetaPedido({
                 )}
                 <Button
                     size="sm"
-                    onClick={() => (showReactivateButton && onReactivate ? onReactivate(pedido.id) : onUpdateStatus(pedido.id))}
+                    onClick={() => (showReactivateButton && onReactivate ? onReactivate(pedido_final.id) : onUpdateStatus(pedido_final.id))}
                 >
                     {getActionButtonIcon()}
                     {getActionButtonText()}

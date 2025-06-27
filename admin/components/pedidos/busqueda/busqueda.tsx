@@ -3,14 +3,11 @@ import React from 'react'
 import InputBusqueda from './input-busqueda'
 import FiltroCompletado from './filtro-completado'
 import FiltroEstado from './filtro-estado'
-import { Database } from '@/types/supabase'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { ShoppingBag } from 'lucide-react'
+import { DialogPedido } from '../tarjetas/dialog-pedido'
+import { Tables } from '@/types/supabase'
 
 interface Props {
-    todosUsuarios: Database['public']['Tables']['usuario']['Row'][]
-    todosLosProductos: Database['public']['Tables']['producto']['Row'][]
+    usuarios: Tables<'usuario'>[]
     searchTerm: string
     onSearchChange: (value: string) => void
     activeTab: string
@@ -19,7 +16,7 @@ interface Props {
     onSubTabChange: (value: string) => void
 }
 
-function Busqueda({ todosUsuarios, todosLosProductos, searchTerm, onSearchChange, activeTab, onTabChange, activeSubTab, onSubTabChange }: Props) {
+function Busqueda({ searchTerm, onSearchChange, activeTab, onTabChange, activeSubTab, onSubTabChange, usuarios }: Props) {
     return (
         <div className="flex w-full max-w-7xl flex-col md:flex-row items-center justify-center md:justify-between gap-4 px-10">
             <div className="flex flex-col gap-2 w-fit md:justify-start justify-center items-center md:items-start">
@@ -29,12 +26,11 @@ function Busqueda({ todosUsuarios, todosLosProductos, searchTerm, onSearchChange
                 <FiltroEstado activeSubTab={activeSubTab} onSubTabChange={onSubTabChange} />
             </div>
             <div className='order-first md:order-last'>
-                <Link href="/protected/nuevo-pedido">
-                    <Button className='flex flex-row items-center gap-2'>
-                        <ShoppingBag className="h-5 w-5" />
-                        Nuevo Pedido
-                    </Button>
-                </Link>
+                <DialogPedido
+                    pedido_final={undefined}
+                    detalles={undefined}
+                    usuarios={usuarios}
+                />
             </div>
         </div>
     )
