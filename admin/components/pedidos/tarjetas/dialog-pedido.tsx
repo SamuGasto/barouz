@@ -179,15 +179,18 @@ export function DialogPedido({ pedido_final_arg, usuarios }: DialogPedidoProps) 
   function onSubmit(values: z.infer<typeof DialogFormScheme>) {
     const { pedido_final } = values;
 
-    const finalPayload = {
+    const finalPayload: z.infer<typeof PedidoFinalScheme> = {
       ...pedido_final,
+      detalles: detalles,
       razon_cancelacion: pedido_final.razon_cancelacion || null,
+      tipo_envio: values.pedido_final.tipo_envio,
+      estado: values.pedido_final.estado,
     };
 
     gestionarPedidoMutation.mutate(
       {
         pedido_final_id: isEditing ? pedido_final_arg?.informacion.id : null,
-        pedido_final: finalPayload as any,
+        pedido_final: finalPayload,
         usuario_id: pedido_final.user_id,
       },
       {
