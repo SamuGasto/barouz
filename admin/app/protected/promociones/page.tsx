@@ -1,13 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
+
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Edit, Trash2 } from "lucide-react";
@@ -16,13 +11,12 @@ import { useCupones } from "@/hooks/useCupones";
 import { useCrearCupon } from "@/hooks/useCupones";
 import { useEditarCupon } from "@/hooks/useCupones";
 import { useEliminarCupon } from "@/hooks/useCupones";
-import { Database } from "@/types/supabase";
 import CuponDialog from "@/components/promociones/dialog-cupones";
 import Image from "next/image";
+import { AlertDialog, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogDescription, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { CuponRow } from "@/types/tipos_supabase_resumidos";
+import AlertDialogDeleteCupon from "@/components/promociones/alert-dialog";
 
-type CuponRow = Database['public']['Tables']['cupon']['Row'];
-type CuponInsert = Database['public']['Tables']['cupon']['Insert'];
-type CuponUpdate = Database['public']['Tables']['cupon']['Update'];
 
 export default function PromocionesPage() {
   const { data: cupones, isLoading: cuponesLoading } = useCupones();
@@ -48,6 +42,7 @@ export default function PromocionesPage() {
   }
 
   async function handleDelete(cupon: CuponRow) {
+    console.log(cupon);
     toast.promise(
       eliminarCuponMutation(cupon.id),
       {
@@ -60,35 +55,6 @@ export default function PromocionesPage() {
     );
   }
 
-  function DialogConfirmDelete() {
-    return (
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogTrigger>
-          <Button variant="destructive">
-            <Trash2 className="mr-2 h-4 w-4" />
-            Eliminar
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>¿Eliminar cupón?</DialogTitle>
-          </DialogHeader>
-          <div className="py-2">
-            <p>¿Estás seguro de que deseas eliminar <b>{actualCupon?.nombre}</b>? Esta acción no se puede deshacer.</p>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={() => handleDelete(actualCupon!)}>
-              Sí, eliminar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    )
-  }
 
 
   return (
@@ -140,7 +106,7 @@ export default function PromocionesPage() {
                   <Button size="icon" variant="outline" onClick={() => openCloseDialog(true, cupon)}>
                     <Edit size={16} />
                   </Button>
-                  <DialogConfirmDelete />
+                  <AlertDialogDeleteCupon cupon={cupon} handleRemove={handleDelete} />
                 </div>
               </div>
             </div>

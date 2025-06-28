@@ -25,7 +25,7 @@ export function ListaTarjetas({
 }: Props) {
 
     return (
-        <div className="flex flex-col md:flex-wrap w-full max-w-7xl gap-2">
+        <div className="flex flex-row flex-wrap w-full max-w-[95%] mx-auto gap-3 py-2">
             {pedidosFinales?.map((pedido_final) => (
                 <TarjetaPedido
                     key={pedido_final.pedido_final.informacion.id}

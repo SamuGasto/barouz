@@ -93,8 +93,6 @@ function CuponDialog({ open, onOpenChange, cupon_inicial }: CuponDialogProps) {
                 disponible: true,
             })
         }
-        console.log(form.getValues());
-        console.log(cupon_inicial);
     }, [cupon_inicial, form])
 
     function timeUnFormat(time: string) {
@@ -323,7 +321,6 @@ function CuponDialog({ open, onOpenChange, cupon_inicial }: CuponDialogProps) {
                                                 type="time"
                                                 value={field.value}
                                                 onChange={(e) => {
-                                                    console.log(`${e.target.value}:00-4`);
                                                     field.onChange(e.target.value)
                                                 }}
                                                 disabled={isBusy}

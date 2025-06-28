@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Pencil, Save, ShoppingBag, X } from "lucide-react";
+import { Pencil, Save, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -39,6 +40,7 @@ import { useGestionarPedidoFinal } from "@/hooks/usePedidosFinales";
 import { TodosLosPedidos } from "@/types/res_pedidos_final";
 import { UsuarioRow } from "@/types/tipos_supabase_resumidos";
 import GestorPedidos from "./gestor-pedidos";
+import { Input } from "@/components/ui/input";
 
 const CategoriaProductoEnum = z.enum([
   "Waffles",
@@ -72,9 +74,13 @@ const DetalleSchema = z.object({
 });
 
 // Esquema para el formulario principal del pedido final
+// Esquema base para la dirección que será condicional
+export const DireccionSchema = z.string().min(1, "La dirección es requerida para envíos a domicilio").default("");
+
 export const PedidoFinalScheme = z.object({
   user_id: z.string().min(1, "Debe seleccionar un usuario."),
   tipo_envio: z.enum(["Delivery", "Retiro en tienda"]),
+  direccion: z.string().default("").optional(),
   estado: z.enum([
     "Recibido",
     "En preparación",
@@ -95,17 +101,19 @@ export const DialogFormScheme = z.object({
   usuario: z.object({ id: z.string() }), // Mantenemos esto para el selector, pero el valor real se toma de pedido_final.user_id
 });
 
-interface DialogPedidoProps {
+interface DialogPedidoProps extends React.HTMLAttributes<HTMLDivElement> {
   pedido_final_arg?: TodosLosPedidos["pedido_final"];
   usuarios: UsuarioRow[];
+  children?: React.ReactNode;
 }
 
-const getInitialValues = (pedido_final_arg?: TodosLosPedidos["pedido_final"]) => ({
+const getInitialValues = (pedido_final_arg?: TodosLosPedidos["pedido_final"]): z.infer<typeof DialogFormScheme> => ({
   pedido_final: {
     user_id:
       pedido_final_arg?.informacion.user_id ||
       "15e5db76-857f-45fc-a561-62473a179df8", // Default a "Local Barouz"
     tipo_envio: pedido_final_arg?.informacion.tipo_envio || "Delivery",
+    direccion: pedido_final_arg?.informacion.direccion || "",
     estado: pedido_final_arg?.informacion.estado || "Recibido",
     razon_cancelacion: pedido_final_arg?.informacion.razon_cancelacion || "",
     total_final: pedido_final_arg?.informacion.total_final || 0,
@@ -130,11 +138,11 @@ const getInitialValues = (pedido_final_arg?: TodosLosPedidos["pedido_final"]) =>
               precio_final: extra.precio_final,
             }))
             .filter((extra) => extra.extra_id && extra.extra_nombre) as {
-            extra_id: string;
-            extra_nombre: string;
-            cantidad: number;
-            precio_final: number;
-          }[],
+              extra_id: string;
+              extra_nombre: string;
+              cantidad: number;
+              precio_final: number;
+            }[],
         })) || [],
   },
   usuario: {
@@ -144,19 +152,29 @@ const getInitialValues = (pedido_final_arg?: TodosLosPedidos["pedido_final"]) =>
   },
 });
 
-export function DialogPedido({ pedido_final_arg, usuarios }: DialogPedidoProps) {
+export function DialogPedido({ pedido_final_arg, usuarios, className, children, ...rest }: DialogPedidoProps) {
+  // Extraer solo las props que no son de botón para evitar conflictos de tipo
+  const { onClick, onKeyDown, ...dialogProps } = rest as any;
   const [open, setOpen] = useState(false);
   const isEditing = !!pedido_final_arg;
   const [isCancelado, setIsCancelado] = useState(
     pedido_final_arg?.informacion.estado === "Cancelado"
   );
+  const [isDelivery, setIsDelivery] = useState(
+    pedido_final_arg?.informacion.tipo_envio === "Delivery"
+  );
 
   const gestionarPedidoMutation = useGestionarPedidoFinal();
-
   const form = useForm<z.infer<typeof DialogFormScheme>>({
     resolver: zodResolver(DialogFormScheme),
     defaultValues: getInitialValues(pedido_final_arg),
   });
+
+  // Update isDelivery state when tipo_envio changes
+  const tipoEnvio = form.watch("pedido_final.tipo_envio");
+  useEffect(() => {
+    setIsDelivery(tipoEnvio === "Delivery");
+  }, [tipoEnvio]);
 
   useEffect(() => {
     form.reset(getInitialValues(pedido_final_arg));
@@ -179,12 +197,22 @@ export function DialogPedido({ pedido_final_arg, usuarios }: DialogPedidoProps) 
   function onSubmit(values: z.infer<typeof DialogFormScheme>) {
     const { pedido_final } = values;
 
+    // Validate delivery address if shipping type is Delivery
+    if (pedido_final.tipo_envio === "Delivery" && (!pedido_final.direccion || pedido_final.direccion.trim() === "")) {
+      form.setError("pedido_final.direccion", {
+        type: "required",
+        message: "La dirección es requerida para envíos a domicilio",
+      });
+      return;
+    }
+
     const finalPayload: z.infer<typeof PedidoFinalScheme> = {
       ...pedido_final,
       detalles: detalles,
       razon_cancelacion: pedido_final.razon_cancelacion || null,
-      tipo_envio: values.pedido_final.tipo_envio,
-      estado: values.pedido_final.estado,
+      tipo_envio: pedido_final.tipo_envio,
+      direccion: pedido_final.tipo_envio === "Delivery" ? pedido_final.direccion : "",
+      estado: pedido_final.estado,
     };
 
     gestionarPedidoMutation.mutate(
@@ -200,8 +228,7 @@ export function DialogPedido({ pedido_final_arg, usuarios }: DialogPedidoProps) 
         },
         onError: (error) => {
           toast.error(
-            `Error al ${isEditing ? "modificar" : "crear"} el pedido: ${
-              error.message
+            `Error al ${isEditing ? "modificar" : "crear"} el pedido: ${error.message
             }`
           );
         },
@@ -212,14 +239,32 @@ export function DialogPedido({ pedido_final_arg, usuarios }: DialogPedidoProps) 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={isEditing ? "outline" : "default"} size={isEditing ? "sm" : "default"}>
-          {isEditing ? (
-            <Pencil className="mr-2 h-3 w-3" />
-          ) : (
-            <ShoppingBag className="mr-2 h-3 w-3" />
-          )}
-          {isEditing ? "Editar" : "Nuevo Pedido"}
-        </Button>
+        <div {...dialogProps}>
+          <Button
+            variant={isEditing ? "ghost" : "default"}
+            size={isEditing ? "sm" : "default"}
+            className={cn(
+              isEditing
+                ? "h-8 px-2 text-xs"
+                : "h-10 px-4 py-2 text-sm font-medium transition-all duration-200",
+              className
+            )}
+          >
+            {isEditing ? (
+              <>
+                <Pencil className="h-3 w-3 mr-1" />
+                Editar
+              </>
+            ) : (
+              children || (
+                <>
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Nuevo Pedido
+                </>
+              )
+            )}
+          </Button>
+        </div>
       </DialogTrigger>
       <DialogContent className="flex flex-col w-11/12 md:w-3/4">
         <DialogHeader>
@@ -272,27 +317,58 @@ export function DialogPedido({ pedido_final_arg, usuarios }: DialogPedidoProps) 
                 control={form.control}
                 name="pedido_final.tipo_envio"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row w-full mt-4 items-center col-span-3">
-                    <FormLabel className="w-1/3">Tipo de envio</FormLabel>
+                  <FormItem className="space-y-3">
+                    <FormLabel>Tipo de envío</FormLabel>
                     <FormControl>
                       <RadioGroup
-                        defaultValue={field.value}
                         onValueChange={field.onChange}
-                        className="flex flex-row"
+                        defaultValue={field.value}
+                        className="flex flex-col space-y-1"
                       >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem id="r1" value="Delivery" />
-                          <Label htmlFor="r1">Delivery</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem id="r2" value="Retiro en tienda" />
-                          <Label htmlFor="r2">Retiro en tienda</Label>
-                        </div>
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="Retiro en tienda" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Retiro en tienda
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="Delivery" />
+                          </FormControl>
+                          <FormLabel className="font-normal">Delivery</FormLabel>
+                        </FormItem>
                       </RadioGroup>
                     </FormControl>
                   </FormItem>
                 )}
               />
+
+              {/* Dirección de entrega - Solo visible para envío a domicilio */}
+              {isDelivery && (
+                <FormField
+                  control={form.control}
+                  name="pedido_final.direccion"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col w-full mt-4">
+                      <FormLabel className="mb-2">Dirección de entrega</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ingrese la dirección de entrega completa"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      {form.formState.errors.pedido_final?.direccion && (
+                        <p className="text-sm font-medium text-destructive mt-1">
+                          {form.formState.errors.pedido_final.direccion.message}
+                        </p>
+                      )}
+                    </FormItem>
+                  )}
+                />
+              )}
               <FormField
                 control={form.control}
                 name="pedido_final.estado"

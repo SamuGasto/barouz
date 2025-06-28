@@ -78,50 +78,53 @@ class PedidoFinalService {
       return [];
     }
 
-    const response: TodosLosPedidos[] = pedidosFinalesData.map((pedidoFinal) => {
-      const pedidosAnidados = (pedidoFinal.pedido || []).map((p: any) => {
-        const extras = (p.pedido_extra || [])
-          .map((pe: any): MappedExtra | null => {
-            if (!pe.extra) {
-              return null;
-            }
-            const precioFinalCalculado = pe.extra.precio * pe.cantidad;
-            return {
-              cantidad: pe.cantidad,
-              precio_final: precioFinalCalculado,
-              extra: pe.extra,
-            };
-          })
-          .filter(
-            (extra: MappedExtra | null): extra is MappedExtra => extra !== null
+    const response: TodosLosPedidos[] = pedidosFinalesData.map(
+      (pedidoFinal) => {
+        const pedidosAnidados = (pedidoFinal.pedido || []).map((p: any) => {
+          const extras = (p.pedido_extra || [])
+            .map((pe: any): MappedExtra | null => {
+              if (!pe.extra) {
+                return null;
+              }
+              const precioFinalCalculado = pe.extra.precio * pe.cantidad;
+              return {
+                cantidad: pe.cantidad,
+                precio_final: precioFinalCalculado,
+                extra: pe.extra,
+              };
+            })
+            .filter(
+              (extra: MappedExtra | null): extra is MappedExtra =>
+                extra !== null
+            );
+
+          const { producto, pedido_extra, ...informacionPedido } = p;
+
+          const totalExtras = extras.reduce(
+            (total: number, extra: MappedExtra) => total + extra.precio_final,
+            0
           );
+          const precioUnitario = producto.precio + totalExtras;
+          informacionPedido.precio_final =
+            precioUnitario * informacionPedido.cantidad;
 
-        const { producto, pedido_extra, ...informacionPedido } = p;
+          return {
+            informacion: informacionPedido,
+            producto: p.producto,
+            extras: extras,
+          };
+        });
 
-        const totalExtras = extras.reduce(
-          (total: number, extra: MappedExtra) => total + extra.precio_final,
-          0
-        );
-        const precioUnitario = producto.precio + totalExtras;
-        informacionPedido.precio_final =
-          precioUnitario * informacionPedido.cantidad;
+        const { pedido, ...informacionPedidoFinal } = pedidoFinal;
 
         return {
-          informacion: informacionPedido,
-          producto: p.producto,
-          extras: extras,
+          pedido_final: {
+            informacion: informacionPedidoFinal,
+            pedidos: pedidosAnidados,
+          },
         };
-      });
-
-      const { pedido, ...informacionPedidoFinal } = pedidoFinal;
-
-      return {
-        pedido_final: {
-          informacion: informacionPedidoFinal,
-          pedidos: pedidosAnidados,
-        },
-      };
-    });
+      }
+    );
 
     return response;
   }
@@ -220,110 +223,118 @@ class PedidoFinalService {
       console.error("Error al eliminar pedido:", error);
       throw error;
     }
-
     return true;
   }
 
-  public async gestionarPedidoFinal(args: GestionarPedidoFinalArgs): Promise<string> {
+  // Tipos para los argumentos de la función RPC
+  private rpcExtraSchema = {
+    extra_id: z.string(),
+    cantidad: z.number(),
+  };
+
+  private rpcDetalleSchema = {
+    producto_id: z.string(),
+    cantidad: z.number(),
+    precio_final: z.number(),
+    extras: z.array(z.object(this.rpcExtraSchema)).optional(),
+  } as const;
+
+  private rpcArgsSchema = {
+    p_total_final: z.number(),
+    p_detalles: z.array(z.object(this.rpcDetalleSchema)),
+    p_usuario_id: z.string(),
+    p_tipo_envio: z.string(),
+    p_estado: z.string(),
+    p_pedido_final_id: z.string().optional().nullable(),
+    p_direccion: z.string().optional().nullable(),
+    p_razon_cancelacion: z.string().optional().nullable(),
+  } as const;
+
+  public async gestionarPedidoFinal(
+    args: GestionarPedidoFinalArgs
+  ): Promise<string> {
     const { pedido_final_id, usuario_id, pedido_final } = args;
+    const { 
+      tipo_envio, 
+      direccion, 
+      razon_cancelacion, 
+      total_final, 
+      detalles, 
+      estado = "Recibido" 
+    } = pedido_final;
 
-    // Asegurarnos de que los valores sean exactamente los del enum de la base de datos
-    const tipoEnvio: Database["public"]["Enums"]["TipoEnvio"] = 
-      pedido_final.tipo_envio === 'Delivery' ? 'Delivery' : 'Retiro en tienda';
-      
-    const estado: Database["public"]["Enums"]["EstadoPedidos"] = 
-      (['Recibido', 'En preparación', 'En camino', 'Entregado', 'Cancelado'].includes(pedido_final.estado))
-        ? pedido_final.estado as Database["public"]["Enums"]["EstadoPedidos"]
-        : 'Recibido'; // Valor por defecto
+    console.log("Iniciando gestión de pedido final:", {
+      pedido_final_id,
+      usuario_id,
+      tipo_envio,
+      total_final,
+      cantidad_detalles: detalles?.length || 0
+    });
 
-    try {
-      // 1. Crear o actualizar el pedido final
-      let pedidoFinalId = pedido_final_id;
-      
-      if (pedido_final_id) {
-        // Actualizar pedido existente
-        const { data: updatedPedido, error: updateError } = await supabase
-          .from('pedido_final')
-          .update({
-            estado,
-            tipo_envio: tipoEnvio,
-            razon_cancelacion: pedido_final.razon_cancelacion || '',
-            total_final: pedido_final.total_final,
-            user_id: usuario_id,
-            fecha_hora: new Date().toISOString()
-          })
-          .eq('id', pedido_final_id)
-          .select()
-          .single();
-          
-        if (updateError) throw updateError;
-      } else {
-        // Crear nuevo pedido
-        const { data: newPedido, error: insertError } = await supabase
-          .from('pedido_final')
-          .insert({
-            estado,
-            tipo_envio: tipoEnvio,
-            razon_cancelacion: pedido_final.razon_cancelacion || '',
-            total_final: pedido_final.total_final,
-            user_id: usuario_id,
-            fecha_hora: new Date().toISOString()
-          })
-          .select()
-          .single();
-          
-        if (insertError) throw insertError;
-        pedidoFinalId = newPedido.id;
-      }
-      
-      if (!pedidoFinalId) throw new Error('No se pudo obtener el ID del pedido final');
-      
-      // 2. Eliminar los pedidos existentes (si es una actualización)
-      if (pedido_final_id) {
-        const { error: deleteError } = await supabase
-          .from('pedido')
-          .delete()
-          .eq('pedido_final_id', pedidoFinalId);
-          
-        if (deleteError) throw deleteError;
-      }
-      
-      // 3. Insertar los nuevos pedidos
-      for (const detalle of pedido_final.detalles) {
-        // Insertar el pedido principal
-        const { data: newPedido, error: pedidoError } = await supabase
-          .from('pedido')
-          .insert({
-            pedido_final_id: pedidoFinalId,
-            producto_id: detalle.producto.id,
-            cantidad: detalle.cantidad,
-            precio_final: detalle.precio_final
-          })
-          .select()
-          .single();
-          
-        if (pedidoError) throw pedidoError;
-        
-        // Insertar los extras del pedido si los hay
-        if (detalle.extras && detalle.extras.length > 0) {
-          const extrasToInsert = detalle.extras.map(extra => ({
-            pedido_id: newPedido.id,
+    // Validar que el pedido tenga detalles
+    if (!Array.isArray(detalles) || detalles.length === 0) {
+      throw new Error("El pedido debe tener al menos un producto");
+    }
+
+    // Validar dirección si es envío a domicilio
+    if (tipo_envio === "Delivery" && (!direccion || direccion.trim() === "")) {
+      throw new Error("La dirección es requerida para envíos a domicilio");
+    }
+
+    // Preparar los detalles para la función RPC
+    const detallesRpc = detalles.map(detalle => {
+      const detalleBase = {
+        producto_id: detalle.producto.id,
+        cantidad: detalle.cantidad,
+        precio_final: detalle.precio_final
+      };
+
+      // Agregar extras si existen
+      if (detalle.extras?.length) {
+        return {
+          ...detalleBase,
+          extras: detalle.extras.map(extra => ({
             extra_id: extra.extra_id,
             cantidad: extra.cantidad
-          }));
-          
-          const { error: extrasError } = await supabase
-            .from('pedido_extra')
-            .insert(extrasToInsert);
-            
-          if (extrasError) throw extrasError;
-        }
+          }))
+        };
       }
-      
-      return pedidoFinalId;
-    } catch (error: any) {
-      console.error('Error en la llamada:', error);
-      throw error;
+      return detalleBase;
+    });
+
+    try {
+      // Validar los argumentos con Zod
+      const rpcArgs = {
+        p_total_final: total_final,
+        p_detalles: detallesRpc,
+        p_usuario_id: usuario_id,
+        p_tipo_envio: tipo_envio,
+        p_estado: estado,
+        p_pedido_final_id: pedido_final_id || null,
+        p_direccion: tipo_envio === "Delivery" ? (direccion || '') : '',
+        p_razon_cancelacion: razon_cancelacion || ''
+      };
+
+      // Validar con Zod
+      const validatedArgs = z.object(this.rpcArgsSchema).parse(rpcArgs);
+
+      // Llamar a la función RPC con aserción de tipo
+      const { data, error } = await (supabase.rpc as any)('gestionar_pedido_final', {
+        ...validatedArgs,
+        p_pedido_final_id: validatedArgs.p_pedido_final_id || null
+      }) as { data: string; error: any };
+
+      if (error) {
+        console.error("Error en la función RPC:", error);
+        throw new Error(error.message || "Error al procesar el pedido");
+      }
+
+      console.log("Pedido procesado exitosamente con ID:", data);
+      return data as string;
+    } catch (error) {
+      console.error("Error en gestionarPedidoFinal:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido al procesar el pedido';
+      throw new Error(`Error al procesar el pedido: ${errorMessage}`);
     }
   }
 }

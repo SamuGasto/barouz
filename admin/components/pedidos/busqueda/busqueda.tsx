@@ -25,11 +25,14 @@ function Busqueda({ searchTerm, onSearchChange, activeTab, onTabChange, activeSu
                 <FiltroCompletado activeTab={activeTab} onTabChange={onTabChange} />
                 <FiltroEstado activeSubTab={activeSubTab} onSubTabChange={onSubTabChange} />
             </div>
-            <div className='order-first md:order-last'>
+            <div className='order-first md:order-last w-full md:w-auto'>
                 <DialogPedido
                     pedido_final_arg={undefined}
                     usuarios={usuarios}
-                />
+                    className="w-full md:w-auto bg-brand-primary hover:bg-brand-primary/90 text-brand-primary-foreground shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
+                >
+                    <span className="font-semibold">+ Nuevo Pedido</span>
+                </DialogPedido>
             </div>
         </div>
     )
