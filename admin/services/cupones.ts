@@ -1,9 +1,9 @@
 import supabase from "@/utils/supabase/client";
-import { Database } from "@/types/supabase";
-
-type CuponRow = Database["public"]["Tables"]["cupon"]["Row"];
-type CuponInsert = Database["public"]["Tables"]["cupon"]["Insert"];
-type CuponUpdate = Database["public"]["Tables"]["cupon"]["Update"];
+import {
+  CuponRow,
+  CuponInsert,
+  CuponUpdate,
+} from "@/types/tipos_supabase_resumidos";
 
 class CuponesService {
   public async obtenerTodosLosCupones(): Promise<CuponRow[]> {
@@ -35,7 +35,7 @@ class CuponesService {
   public async crearCupon(cupon: CuponInsert): Promise<CuponRow> {
     const { data, error } = await supabase
       .from("cupon")
-      .insert([cupon])
+      .insert(cupon)
       .select("*")
       .single();
 
@@ -54,7 +54,7 @@ class CuponesService {
 
     const { data, error } = await supabase
       .from("cupon")
-      .update([cupon])
+      .update(cupon)
       .eq("id", cupon.id)
       .select("*")
       .single();

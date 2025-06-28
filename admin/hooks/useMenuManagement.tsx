@@ -8,6 +8,7 @@ import { storageService } from '@/services/storage';
 type ProductRow = Database["public"]["Tables"]["producto"]["Row"];
 type ProductInsert = Database["public"]["Tables"]["producto"]["Insert"];
 type ProductUpdate = Database["public"]["Tables"]["producto"]["Update"];
+type PedidoRow = Database["public"]["Tables"]["pedido"]["Row"];
 
 export function useProducts() {
     return useQuery<ProductRow[]>({
@@ -99,18 +100,18 @@ export function useDeleteProduct() {
     })
 }
 
+export function usePedidosByPedidoId(pedido_id: string | undefined) {
+    return useQuery<PedidoRow[]>({
+        queryKey: ["productsByPedido", pedido_id],
+        queryFn: () => menuService.obtenerPedidosPorPedidoFinal(pedido_id!),
+        enabled: !!pedido_id,
+    })
+}
+
 export function useProductsByPedidoId(pedido_id: string | undefined) {
     return useQuery<ProductRow[]>({
         queryKey: ["productsByPedido", pedido_id],
         queryFn: () => menuService.obtenerTodosLosProductosPorPedido(pedido_id!),
         enabled: !!pedido_id,
-    })
-}
-
-export function usePedidoDetails(pedido_final_id: string | undefined) {
-    return useQuery<ProductRow[]>({
-        queryKey: ["pedidoDetails", pedido_final_id],
-        queryFn: () => menuService.obtenerDetalleProductos(pedido_final_id!),
-        enabled: !!pedido_final_id,
     })
 }

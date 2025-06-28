@@ -1,10 +1,12 @@
-import { Database } from "@/types/supabase";
 import supabase from "@/utils/supabase/client";
+import {
+  ProductoInsert,
+  ProductoRow,
+  ProductoUpdate,
+} from "@/types/tipos_supabase_resumidos";
 
 class MenuService {
-  public async getAllProducts(): Promise<
-    Database["public"]["Tables"]["producto"]["Row"][]
-  > {
+  public async getAllProducts(): Promise<ProductoRow[]> {
     const { data, error } = await supabase.from("producto").select("*");
 
     if (error) {
@@ -15,9 +17,7 @@ class MenuService {
     return data;
   }
 
-  public async getProductById(
-    id: string
-  ): Promise<Database["public"]["Tables"]["producto"]["Row"]> {
+  public async getProductById(id: string): Promise<ProductoRow> {
     const { data, error } = await supabase
       .from("producto")
       .select("*")
@@ -46,7 +46,7 @@ class MenuService {
     return data;
   }
 
-  public async obtenerDetalleProductos(id_pedido_final: string) {
+  public async obtenerPedidosPorPedidoFinal(id_pedido_final: string) {
     const { data, error } = await supabase
       .from("pedido")
       .select("*")
@@ -60,9 +60,7 @@ class MenuService {
     return data;
   }
 
-  public async crearProducto(
-    producto: Database["public"]["Tables"]["producto"]["Insert"]
-  ): Promise<Database["public"]["Tables"]["producto"]["Row"]> {
+  public async crearProducto(producto: ProductoInsert): Promise<ProductoRow> {
     const { data, error } = await supabase
       .from("producto")
       .insert([producto])
@@ -78,8 +76,8 @@ class MenuService {
   }
 
   public async actualizarProducto(
-    producto: Database["public"]["Tables"]["producto"]["Update"]
-  ): Promise<Database["public"]["Tables"]["producto"]["Row"]> {
+    producto: ProductoUpdate
+  ): Promise<ProductoRow> {
     if (!producto.id) {
       throw new Error("El ID del producto es requerido");
     }

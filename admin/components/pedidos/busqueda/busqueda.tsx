@@ -27,8 +27,7 @@ function Busqueda({ searchTerm, onSearchChange, activeTab, onTabChange, activeSu
             </div>
             <div className='order-first md:order-last'>
                 <DialogPedido
-                    pedido_final={undefined}
-                    detalles={undefined}
+                    pedido_final_arg={undefined}
                     usuarios={usuarios}
                 />
             </div>

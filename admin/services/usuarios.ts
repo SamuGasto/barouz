@@ -1,9 +1,9 @@
-import { Database } from "@/types/supabase";
 import { supabase } from "@/utils/supabase/client";
-
-type UsuarioRow = Database["public"]["Tables"]["usuario"]["Row"];
-type UsuarioInsert = Database["public"]["Tables"]["usuario"]["Insert"];
-type UsuarioUpdate = Database["public"]["Tables"]["usuario"]["Update"];
+import {
+  UsuarioInsert,
+  UsuarioRow,
+  UsuarioUpdate,
+} from "@/types/tipos_supabase_resumidos";
 
 class UsuarioService {
   public async obtenerTodosLosUsuarios(): Promise<UsuarioRow[]> {

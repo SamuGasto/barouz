@@ -15,7 +15,7 @@ type ProductoRow = Database['public']['Tables']['producto']['Row']
 type ExtraRow = Database['public']['Tables']['extra']['Row']
 
 type Detalle = {
-    pedido_id: string;
+    pedido_id: string | null;
     producto: {
         id: string;
         nombre: string;
@@ -70,25 +70,30 @@ function GestorPedidos({ detalles, onChange }: GestorPedidosProps) {
 
     }
 
-    function ModificarPedido(pedidoId: string, nuevaCantidad: number) {
+    function ModificarPedido(pedidoId: string | null, nuevaCantidad: number) {
+    if (!pedidoId) return;
         const nuevosDetalles = detalles.map((detalle) => {
             if (detalle.pedido_id === pedidoId) {
-                if (detalle.cantidad + nuevaCantidad <= 1) {
-                    return detalle
+                if (nuevaCantidad < 1) {
+                    return detalle;
                 }
+                const totalExtras = detalle.extras.reduce((total, extra) => total + (extra.precio_final || 0), 0);
+                const precioUnitario = detalle.producto.precio + totalExtras;
+                const nuevoPrecioFinal = precioUnitario * nuevaCantidad;
                 return {
                     ...detalle,
                     cantidad: nuevaCantidad,
-                    precio_final: detalle.producto.precio * nuevaCantidad
-                }
+                    precio_final: nuevoPrecioFinal,
+                };
             }
             return detalle;
-        })
-        onChange(nuevosDetalles)
+        });
+        onChange(nuevosDetalles);
         console.log("Pedido modificado: ", nuevosDetalles);
     }
 
-    function EliminarProductoPedido(pedidoId: string) {
+    function EliminarProductoPedido(pedidoId: string | null) {
+    if (!pedidoId) return;
         const nuevosDetalles = detalles.filter((detalle) => detalle.pedido_id !== pedidoId)
         onChange(nuevosDetalles)
         console.log("Pedido modificado: ", nuevosDetalles);
@@ -140,20 +145,24 @@ function GestorPedidos({ detalles, onChange }: GestorPedidosProps) {
                                     <div className="flex flex-col items-start gap-2">
                                         <div className="flex flex-wrap items-center gap-2">
                                             <div className="font-medium">{item.producto.nombre}</div>
-                                            <div>{item.extras?.map((extra) => (<Badge key={extra.extra_id} className="bg-brand-primary/70">{extra.extra_nombre}</Badge>))}</div>
+                                            <div>{item.extras?.map((extra) => (<Badge key={extra.extra_id} className="bg-brand-primary/70">{`${extra.extra_nombre} (x${extra.cantidad})`}</Badge>))}</div>
                                             <DialogExtras
                                                 categoria_producto={item.producto.categoria_producto}
                                                 extras={item.extras}
                                                 onChange={(extras) => {
                                                     const nuevosDetalles = detalles.map((detalle) => {
                                                         if (detalle.pedido_id === item.pedido_id) {
+                                                            const precioTotalExtras = extras.reduce((total, extra) => total + (extra.precio_final || 0), 0);
+                                                            const precioUnitario = detalle.producto.precio + precioTotalExtras;
+                                                            const nuevoPrecioFinal = precioUnitario * detalle.cantidad;
                                                             return {
                                                                 ...detalle,
-                                                                extras: extras
-                                                            }
+                                                                extras: extras,
+                                                                precio_final: nuevoPrecioFinal
+                                                            };
                                                         }
                                                         return detalle;
-                                                    })
+                                                    });
                                                     onChange(nuevosDetalles)
                                                 }}
                                             />
@@ -167,7 +176,7 @@ function GestorPedidos({ detalles, onChange }: GestorPedidosProps) {
                                             className="h-7 w-7"
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                ModificarPedido(item.pedido_id, item.cantidad - 1)
+                                                if (item.pedido_id) ModificarPedido(item.pedido_id, item.cantidad - 1)
                                             }}
                                         >
                                             <Minus className="h-3 w-3" />
@@ -179,7 +188,7 @@ function GestorPedidos({ detalles, onChange }: GestorPedidosProps) {
                                             className="h-7 w-7"
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                ModificarPedido(item.pedido_id, item.cantidad + 1)
+                                                if (item.pedido_id) ModificarPedido(item.pedido_id, item.cantidad + 1)
                                             }}
                                         >
                                             <Plus className="h-3 w-3" />
@@ -190,7 +199,7 @@ function GestorPedidos({ detalles, onChange }: GestorPedidosProps) {
                                             className="h-7 w-7"
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                EliminarProductoPedido(item.pedido_id)
+                                                if (item.pedido_id) EliminarProductoPedido(item.pedido_id)
                                             }}
                                         >
                                             <Trash2 className="h-4 w-4" />

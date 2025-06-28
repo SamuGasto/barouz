@@ -1,9 +1,9 @@
 import { TarjetaPedido } from "./tarjeta-pedido"
-import { EstadoVacio } from "./estado-vacio"
-import usePedidosFinal from "@/hooks/usePedidos"
+import { TodosLosPedidos } from "@/types/res_pedidos_final"
 import { Tables } from "@/types/supabase"
 
 interface Props {
+    pedidosFinales: TodosLosPedidos[]
     searchTerm: string
     type: "active" | "completed" | "cancelled" | "all"
     activeSubTab?: string
@@ -14,6 +14,7 @@ interface Props {
 }
 
 export function ListaTarjetas({
+    pedidosFinales,
     searchTerm,
     type,
     activeSubTab,
@@ -23,20 +24,12 @@ export function ListaTarjetas({
     onReactivate,
 }: Props) {
 
-    const { data: pedidosFinales, isLoading: pedidosLoading } = usePedidosFinal();
-
-    const isBusy = pedidosLoading
-
-    if (isBusy) {
-        return <EstadoVacio searchTerm={searchTerm} type={type} activeSubTab={activeSubTab} />
-    }
-
     return (
         <div className="flex flex-col md:flex-wrap w-full max-w-7xl gap-2">
-            {pedidosFinales?.map((pedido) => (
+            {pedidosFinales?.map((pedido_final) => (
                 <TarjetaPedido
-                    key={pedido.id}
-                    pedido_final={pedido}
+                    key={pedido_final.pedido_final.informacion.id}
+                    pedido_final={pedido_final.pedido_final}
                     usuarios={usuarios}
                     onCancel={onCancel}
                     onUpdateStatus={onUpdateStatus}

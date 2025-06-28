@@ -49,7 +49,7 @@ function DialogExtras({ categoria_producto, extras, onChange }: IDialogExtras) {
                     id: extra.id,
                     nombre: extra.nombre,
                     precio: extra.precio,
-                    cantidad: extraSeleccionado ? 1 : 0
+                    cantidad: extraSeleccionado ? extraSeleccionado.cantidad : 0
                 }
             }) || [];
             const cantidad_total = cantidades_finales.reduce((total, extra) => total + extra.cantidad, 0);

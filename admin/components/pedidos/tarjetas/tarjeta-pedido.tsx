@@ -4,21 +4,20 @@ import { Button } from "@/components/ui/button"
 import { Clock, FileText, ArrowRight, CheckCircle, XCircle, Loader2 } from "lucide-react"
 import { PedidoBadge } from "./pedido-badge"
 import type { Database } from "@/types/supabase"
-import { useState } from "react"
 import { DialogPedido } from "./dialog-pedido"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { useDetallePedidosFinal } from "@/hooks/usePedidos"
+import { useDetallePedidosFinal, usePedidosPorPedidoFinal } from "@/hooks/usePedidosFinales"
+import { parseTimestamp } from "@/utils/timestamp-chile"
+import { UsuarioRow } from "@/types/tipos_supabase_resumidos"
+import { TodosLosPedidos } from "@/types/res_pedidos_final"
 
-type PedidoFinalRow = Database['public']['Tables']['pedido_final']['Row']
-type UsuarioRow = Database['public']['Tables']['usuario']['Row']
-type ProductoRow = Database['public']['Tables']['producto']['Row']
-type ExtraRow = Database['public']['Tables']['extra']['Row']
+
 
 
 
 interface TarjetaPedidoProps {
-    pedido_final: PedidoFinalRow
+    pedido_final: TodosLosPedidos["pedido_final"]
     usuarios: UsuarioRow[]
     onCancel?: (orderId: string) => void
     onUpdateStatus: (orderId: string) => void
@@ -36,53 +35,42 @@ export function TarjetaPedido({
     showCancelButton = false,
     showReactivateButton = false,
 }: TarjetaPedidoProps) {
-    const { data: detalles, isPending: detallesPending } = useDetallePedidosFinal(pedido_final.id)
 
-    const isBusy = detallesPending
+    // --- GUARDIA PRINCIPAL: Si no hay datos, no renderizar nada para evitar crashes.
+    if (!pedido_final || !pedido_final.informacion) {
+        console.error("TarjetaPedido recibió un pedido inválido:", pedido_final);
+        return null; 
+    }
 
-    const getActionButtonText = () => {
-        if (showReactivateButton) return "Reactivar Pedido"
+    const usuario = usuarios.find((usuario) => usuario.id === pedido_final.informacion.user_id);
 
-        switch (pedido_final.estado) {
+    function getActionButtonText() {
+        switch (pedido_final.informacion.estado) {
             case "Recibido":
-                return "Iniciar Preparación"
             case "En preparación":
-                return pedido_final.tipo_envio === "Delivery" ? "Enviar Pedido" : "Listo para Entrega"
+                return "Enviar a cocina";
             case "En camino":
-                return "Marcar Entregado"
+            case "Entregado":
+                return "Entregar";
+            case "Cancelado":
+                return "Reactivar";
             default:
-                return "Completar Pedido"
+                return "";
         }
     }
 
-    const getActionButtonIcon = () => {
-        if (showReactivateButton) return null
-
-        switch (pedido_final.estado) {
-            case "Recibido":
-            case "En preparación":
-                return <ArrowRight className="mr-2 h-3 w-3" />
-            case "En camino":
-                return <CheckCircle className="mr-2 h-3 w-3" />
-            default:
-                return null
-        }
+    function getActionButtonIcon() {
+        return <ArrowRight className="mr-2 h-3 w-3" />;
     }
 
     const formatearFechaHora = (fechaHora: string) => {
-        const fecha = fechaHora.split("T")[0];
-        const fechaFormateada = fecha.split("-").reverse().join("-");
-
-        const hora = fechaHora.split("T")[1].split("+")[0].split(":").map((item, index) => { if (index === 0 || index === 1) return item; }).join(":").slice(0, -1);
-        return `${fechaFormateada} ${hora}`;
+        const { date, time } = parseTimestamp(fechaHora);
+        return `${date} ${time}`;
     }
 
-    if (isBusy) {
-        return (
-            <div className="flex items-center justify-center h-full">
-                <Loader2 className="animate-spin" />
-            </div>
-        )
+    const formatCurrency = (value: number | null | undefined) => {
+        if (value == null) return '$0';
+        return value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' });
     }
 
     return (
@@ -90,42 +78,43 @@ export function TarjetaPedido({
             <div className="flex items-center justify-between p-4 rounded-t-lg">
                 <div className="grid gap-1">
                     <div className="font-semibold">
-                        {usuarios.find((usuario) => usuario.id === pedido_final.user_id)?.nombre}
+                        {usuario?.nombre || 'Cliente sin nombre'}
                     </div>
                     <div className="text-sm">
-                        <Clock className="inline-block mr-1 h-3 w-3" /> {formatearFechaHora(pedido_final.fecha_hora)}
+                        <Clock className="inline-block mr-1 h-3 w-3" />
+                        {pedido_final.informacion.fecha_hora ? formatearFechaHora(pedido_final.informacion.fecha_hora) : 'Sin fecha'}
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <PedidoBadge status={pedido_final.estado} />
+                    <PedidoBadge status={pedido_final.informacion.estado} />
                 </div>
             </div>
 
             <div className="border-t px-4 py-3">
                 <div className="space-y-2">
-                    {detalles?.map((item, idx) => (
+                    {pedido_final.pedidos?.map((item, idx) => (
                         <div key={idx} className="flex justify-between text-sm">
                             <div className="flex flex-row items-center gap-2">
-                                {item.cantidad}x {item.producto?.nombre}
-                                {item.pedido_extra.length > 0 && (
+                                {item.informacion.cantidad}x {item.producto?.nombre || 'Producto no encontrado'}
+                                {item.extras && item.extras.length > 0 && (
                                     <div className="flex flex-wrap items-center gap-1">
-                                        {item.pedido_extra.map((extra, idx) => (
+                                        {item.extras.map((extra, idx) => (
                                             <Badge key={idx} className="bg-brand-primary/70">{extra.extra?.nombre}</Badge>
                                         ))}
                                     </div>
                                 )}
                             </div>
-                            <div className="font-medium">{item.precio_final}</div>
+                            <div className="font-medium">{formatCurrency(item.informacion.precio_final)}</div>
                         </div>
                     ))}
                     <div className="flex justify-between font-medium pt-2 border-t">
                         <div>Total</div>
-                        <div>{pedido_final.total_final}</div>
+                        <div>{formatCurrency(pedido_final.informacion.total_final)}</div>
                     </div>
-                    {pedido_final.razon_cancelacion && (
+                    {pedido_final.informacion.razon_cancelacion && (
                         <div className="mt-2 p-2 rounded border ">
                             <div className="text-sm font-medium ">Motivo de cancelación:</div>
-                            <div className="text-sm">{pedido_final.razon_cancelacion}</div>
+                            <div className="text-sm">{pedido_final.informacion.razon_cancelacion}</div>
                         </div>
                     )}
                 </div>
@@ -133,16 +122,12 @@ export function TarjetaPedido({
 
             <div className="flex flex-col md:flex-row items-center justify-end gap-2 p-3 rounded-b-lg">
                 <div className="flex flex-row items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                    >
+                    <Button variant="outline" size="sm">
                         <FileText className="mr-2 h-3 w-3" />
                         Imprimir
                     </Button>
                     <DialogPedido
-                        pedido_final={pedido_final}
-                        detalles={detalles}
+                        pedido_final_arg={pedido_final}
                         usuarios={usuarios}
                     />
                 </div>
@@ -151,7 +136,7 @@ export function TarjetaPedido({
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => onCancel(pedido_final.id)}
+                        onClick={() => onCancel && onCancel(pedido_final.informacion.id)}
                     >
                         <XCircle className="mr-2 h-3 w-3" />
                         Cancelar
@@ -159,7 +144,7 @@ export function TarjetaPedido({
                 )}
                 <Button
                     size="sm"
-                    onClick={() => (showReactivateButton && onReactivate ? onReactivate(pedido_final.id) : onUpdateStatus(pedido_final.id))}
+                    onClick={() => (showReactivateButton && onReactivate ? onReactivate(pedido_final.informacion.id) : onUpdateStatus(pedido_final.informacion.id))}
                 >
                     {getActionButtonIcon()}
                     {getActionButtonText()}

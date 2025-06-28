@@ -1,72 +1,67 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { pedidoService } from '@/services/pedidos';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import pedidosService from "@/services/pedidos"
+import type { Database } from "@/types/supabase";
 
-type InformacionPedidoFinalCompleto = {
-    pedido_final: {
-        user_id: string;
-        tipo_envio: "Delivery" | "Retiro en tienda";
-        estado:
-        | "Recibido"
-        | "En preparación"
-        | "En camino"
-        | "Entregado"
-        | "Cancelado";
-        razon_cancelacion: string | undefined;
-    };
-    pedidos: {
-        pedido_id: string;
-        producto: {
-            id: string;
-            nombre: string;
-            precio: number;
-        };
-        cantidad: number;
-        precio_final: number;
-        extras: {
-            extra_id: string;
-            extra_nombre: string;
-            cantidad: number;
-            precio_final: number;
-        }[];
-    }[];
-    usuario: {
-        id: string;
-    };
-};
+type PedidoInsert = Database["public"]["Tables"]["pedido"]["Insert"];
+type PedidoUpdate = Database["public"]["Tables"]["pedido"]["Update"];
+type ModificarPedidoArgs = {
+    pedido_id: string;
+    pedido: PedidoUpdate;
+}
 
-function usePedidosFinal() {
+export function usePedidos() {
     return useQuery({
         queryKey: ["pedidos"],
-        queryFn: () => pedidoService.getAllPedidos(),
+        queryFn: () => pedidosService.obtenerTodosPedidos(),
         staleTime: 5 * 60 * 1000,
         refetchOnWindowFocus: true,
     })
 }
 
-export function useDatosPedidoFinal(pedido_final_id: string | undefined) {
+export function useProductosPorPedido(pedido_id: string | undefined) {
     return useQuery({
-        queryKey: ["pedido", pedido_final_id],
-        queryFn: () => pedidoService.obtenerDatosPedido(pedido_final_id!),
+        queryKey: ["pedidos", pedido_id],
+        queryFn: () => pedidosService.obtenerTodosLosProductosPorPedido(pedido_id!),
         staleTime: 5 * 60 * 1000,
+        enabled: !!pedido_id,
     })
 }
 
-export function useDetallePedidosFinal(pedido_final_id: string | undefined) {
+export function usePedidosById(pedido_id: string | undefined) {
     return useQuery({
-        queryKey: ["pedido", pedido_final_id],
-        queryFn: () => pedidoService.obtenerDetallePedidoFinal(pedido_final_id!),
+        queryKey: ["pedidos", pedido_id],
+        queryFn: () => pedidosService.obtenerPedidoPorId(pedido_id!),
         staleTime: 5 * 60 * 1000,
-        enabled: !!pedido_final_id,
+        enabled: !!pedido_id,
     })
 }
 
-// FALTA TERMINAR FUNCION
-export function useConstruirPedido() {
+export function useCrearPedido(pedido: PedidoInsert) {
+    const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (informacion: InformacionPedidoFinalCompleto) => pedidoService.construirPedido(informacion),
-    })
+        mutationFn: pedidosService.crearPedido,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["pedidos"] });
+        },
+    });
 }
 
+export function useModificarPedido() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (args: ModificarPedidoArgs) => pedidosService.modificarPedido(args.pedido_id, args.pedido),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["pedidos"] });
+        },
+    });
+}
 
-
-export default usePedidosFinal
+export function useEliminarPedido() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (pedido_id: string) => pedidosService.eliminarPedido(pedido_id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["pedidos"] });
+        },
+    });
+}

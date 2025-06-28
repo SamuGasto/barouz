@@ -1,10 +1,10 @@
 import supabase from "@/utils/supabase/client";
-import { Database, Tables } from "@/types/supabase";
-
-type PedidoExtra = Tables<"pedido_extra">;
-type ExtraRow = Database["public"]["Tables"]["extra"]["Row"];
-type ExtraInsert = Database["public"]["Tables"]["extra"]["Insert"];
-type ExtraUpdate = Database["public"]["Tables"]["extra"]["Update"];
+import {
+  ExtraRow,
+  ExtraInsert,
+  ExtraUpdate,
+  CategoriaProductos,
+} from "@/types/tipos_supabase_resumidos";
 
 class ExtraService {
   public async obtenerTodosLosExtras(): Promise<ExtraRow[]> {
@@ -48,7 +48,7 @@ class ExtraService {
   }
 
   public async obtenerExtrasPorCategoriaProducto(
-    categoria: Database["public"]["Enums"]["CategoriaProducto"]
+    categoria: CategoriaProductos
   ): Promise<{ extras: ExtraRow[]; categorias: string[] }> {
     const { data, error } = await supabase
       .from("extra")
