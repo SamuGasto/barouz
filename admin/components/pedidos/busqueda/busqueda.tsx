@@ -5,15 +5,16 @@ import FiltroCompletado from './filtro-completado'
 import FiltroEstado from './filtro-estado'
 import { DialogPedido } from '../tarjetas/dialog-pedido'
 import { Tables } from '@/types/supabase'
+import { Database } from '@/types/supabase'
 
 interface Props {
     usuarios: Tables<'usuario'>[]
     searchTerm: string
     onSearchChange: (value: string) => void
-    activeTab: string
-    onTabChange: (value: string) => void
-    activeSubTab: string
-    onSubTabChange: (value: string) => void
+    activeTab: 'Activos' | 'Completados' | 'Todos'
+    onTabChange: (value: 'Activos' | 'Completados' | 'Todos') => void
+    activeSubTab: 'Todos' | Database['public']['Enums']['EstadoPedidos']
+    onSubTabChange: (value: 'Todos' | Database['public']['Enums']['EstadoPedidos']) => void
 }
 
 function Busqueda({ searchTerm, onSearchChange, activeTab, onTabChange, activeSubTab, onSubTabChange, usuarios }: Props) {

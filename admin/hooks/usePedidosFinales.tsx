@@ -5,6 +5,7 @@ import {
 } from "@/services/pedidos_finales";
 import { TodosLosPedidos } from "@/types/res_pedidos_final";
 import { PedidoRow } from "@/types/tipos_supabase_resumidos";
+import { Database } from "@/types/supabase";
 
 function usePedidosFinal() {
   return useQuery<TodosLosPedidos[]>({
@@ -53,5 +54,26 @@ export const useGestionarPedidoFinal = () => {
     },
   });
 };
+
+export const useEliminarPedidoFinal = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (pedido_id: string) => pedidoFinalService.eliminarPedidoFinal(pedido_id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pedidos_finales"] });
+    },
+  });
+};
+
+export const useCambiarEstadoPedidoFinal = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (args: { pedido_final_id: string; estado: Database["public"]["Enums"]["EstadoPedidos"], razon_cancelacion?: string }) => pedidoFinalService.cambiarEstadoPedidoFinal(args.pedido_final_id, args.estado, args.razon_cancelacion),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pedidos_finales"] });
+    },
+  });
+};
+
 
 export default usePedidosFinal;

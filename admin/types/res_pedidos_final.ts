@@ -6,13 +6,17 @@ type ProductoRow = Database["public"]["Tables"]["producto"]["Row"];
 type ExtraRow = Database["public"]["Tables"]["extra"]["Row"];
 
 type PedidoExtraConDetalles = {
-    cantidad: number;
-    precio_final: number;
-    extra: ExtraRow;
-}
+  cantidad: number;
+  precio_final: number;
+  extra: ExtraRow;
+};
 
 export type TodosLosPedidos = {
   pedido_final: {
+    usuario: {
+      id: string;
+      nombre: string;
+    };
     informacion: PedidoFinalRow;
     pedidos: {
       informacion: PedidoRow;

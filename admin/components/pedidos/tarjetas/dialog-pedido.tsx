@@ -317,8 +317,8 @@ export function DialogPedido({ pedido_final_arg, usuarios, className, children, 
                 control={form.control}
                 name="pedido_final.tipo_envio"
                 render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel>Tipo de envío</FormLabel>
+                  <FormItem className="flex flex-row w-full mt-4 items-center col-span-3">
+                    <FormLabel className="w-1/3">Tipo de envío</FormLabel>
                     <FormControl>
                       <RadioGroup
                         onValueChange={field.onChange}

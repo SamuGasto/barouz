@@ -58,6 +58,10 @@ class PedidoFinalService {
       .select(
         `
         *,
+        user_id (
+          id,
+          nombre
+        ),
         pedido (
           *,
           producto (*),
@@ -67,14 +71,15 @@ class PedidoFinalService {
           )
         )
       `
-      );
+      )
+      .order("fecha_hora", { ascending: false });
 
     if (error) {
       console.error("Error al obtener todos los pedidos:", error);
       throw error;
     }
 
-    if (!pedidosFinalesData) {
+    if (!pedidosFinalesData || pedidosFinalesData.length === 0) {
       return [];
     }
 
@@ -108,18 +113,25 @@ class PedidoFinalService {
           informacionPedido.precio_final =
             precioUnitario * informacionPedido.cantidad;
 
-          return {
+          const pedidoFinal = {
             informacion: informacionPedido,
             producto: p.producto,
             extras: extras,
           };
+          return pedidoFinal;
         });
 
-        const { pedido, ...informacionPedidoFinal } = pedidoFinal;
-
+        const { pedido, user_id, ...informacionPedidoFinal } = pedidoFinal;
         return {
           pedido_final: {
-            informacion: informacionPedidoFinal,
+            informacion: {
+              ...informacionPedidoFinal,
+              user_id: user_id?.id || "",
+            },
+            usuario: {
+              id: user_id?.id || "",
+              nombre: user_id?.nombre || "Usuario no encontrado",
+            },
             pedidos: pedidosAnidados,
           },
         };
@@ -213,7 +225,30 @@ class PedidoFinalService {
     return data;
   }
 
-  public async eliminarPedido(pedido_id: string): Promise<boolean> {
+  public async cambiarEstadoPedidoFinal(
+    pedido_final_id: string,
+    estado: Database["public"]["Enums"]["EstadoPedidos"],
+    razon_cancelacion?: string
+  ) {
+    const { data, error } = await supabase
+      .from("pedido_final")
+      .update({
+        estado,
+        razon_cancelacion:
+          estado === "Cancelado" ? razon_cancelacion || "" : "",
+      })
+      .eq("id", pedido_final_id)
+      .select("*")
+      .single();
+
+    if (error) {
+      console.error("Error al cambiar el estado del pedido:", error);
+      throw error;
+    }
+    return data;
+  }
+
+  public async eliminarPedidoFinal(pedido_id: string): Promise<boolean> {
     const { error } = await supabase
       .from("pedido_final")
       .delete()
@@ -254,13 +289,13 @@ class PedidoFinalService {
     args: GestionarPedidoFinalArgs
   ): Promise<string> {
     const { pedido_final_id, usuario_id, pedido_final } = args;
-    const { 
-      tipo_envio, 
-      direccion, 
-      razon_cancelacion, 
-      total_final, 
-      detalles, 
-      estado = "Recibido" 
+    const {
+      tipo_envio,
+      direccion,
+      razon_cancelacion,
+      total_final,
+      detalles,
+      estado = "Recibido",
     } = pedido_final;
 
     console.log("Iniciando gestión de pedido final:", {
@@ -268,7 +303,7 @@ class PedidoFinalService {
       usuario_id,
       tipo_envio,
       total_final,
-      cantidad_detalles: detalles?.length || 0
+      cantidad_detalles: detalles?.length || 0,
     });
 
     // Validar que el pedido tenga detalles
@@ -282,21 +317,21 @@ class PedidoFinalService {
     }
 
     // Preparar los detalles para la función RPC
-    const detallesRpc = detalles.map(detalle => {
+    const detallesRpc = detalles.map((detalle) => {
       const detalleBase = {
         producto_id: detalle.producto.id,
         cantidad: detalle.cantidad,
-        precio_final: detalle.precio_final
+        precio_final: detalle.precio_final,
       };
 
       // Agregar extras si existen
       if (detalle.extras?.length) {
         return {
           ...detalleBase,
-          extras: detalle.extras.map(extra => ({
+          extras: detalle.extras.map((extra) => ({
             extra_id: extra.extra_id,
-            cantidad: extra.cantidad
-          }))
+            cantidad: extra.cantidad,
+          })),
         };
       }
       return detalleBase;
@@ -311,18 +346,22 @@ class PedidoFinalService {
         p_tipo_envio: tipo_envio,
         p_estado: estado,
         p_pedido_final_id: pedido_final_id || null,
-        p_direccion: tipo_envio === "Delivery" ? (direccion || '') : '',
-        p_razon_cancelacion: razon_cancelacion || ''
+        p_direccion: tipo_envio === "Delivery" ? direccion || "" : "",
+        p_razon_cancelacion:
+          estado === "Cancelado" ? razon_cancelacion || "" : "",
       };
 
       // Validar con Zod
       const validatedArgs = z.object(this.rpcArgsSchema).parse(rpcArgs);
 
       // Llamar a la función RPC con aserción de tipo
-      const { data, error } = await (supabase.rpc as any)('gestionar_pedido_final', {
-        ...validatedArgs,
-        p_pedido_final_id: validatedArgs.p_pedido_final_id || null
-      }) as { data: string; error: any };
+      const { data, error } = (await (supabase.rpc as any)(
+        "gestionar_pedido_final",
+        {
+          ...validatedArgs,
+          p_pedido_final_id: validatedArgs.p_pedido_final_id || null,
+        }
+      )) as { data: string; error: any };
 
       if (error) {
         console.error("Error en la función RPC:", error);
@@ -333,7 +372,10 @@ class PedidoFinalService {
       return data as string;
     } catch (error) {
       console.error("Error en gestionarPedidoFinal:", error);
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido al procesar el pedido';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Error desconocido al procesar el pedido";
       throw new Error(`Error al procesar el pedido: ${errorMessage}`);
     }
   }

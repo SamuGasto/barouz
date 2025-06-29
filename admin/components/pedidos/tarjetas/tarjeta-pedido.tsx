@@ -1,66 +1,71 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Clock, FileText, ArrowRight, CheckCircle, XCircle, Loader2 } from "lucide-react"
+import { Clock, FileText, ArrowRight, CheckCircle, XCircle, Loader2, CircleX } from "lucide-react"
 import { PedidoBadge } from "./pedido-badge"
 import type { Database } from "@/types/supabase"
 import { DialogPedido } from "./dialog-pedido"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { useDetallePedidosFinal, usePedidosPorPedidoFinal } from "@/hooks/usePedidosFinales"
+import { useDetallePedidosFinal, useEliminarPedidoFinal, usePedidosPorPedidoFinal } from "@/hooks/usePedidosFinales"
 import { parseTimestamp } from "@/utils/timestamp-chile"
 import { UsuarioRow } from "@/types/tipos_supabase_resumidos"
 import { TodosLosPedidos } from "@/types/res_pedidos_final"
-
-
-
-
+import AlertDialogEliminarPedido from "./alert-dialog-eliminar-pedido"
+import { useCambiarEstadoPedidoFinal } from "@/hooks/usePedidosFinales"
+import { cn } from "@/lib/utils"
 
 interface TarjetaPedidoProps {
     pedido_final: TodosLosPedidos["pedido_final"]
     usuarios: UsuarioRow[]
-    onCancel?: (orderId: string) => void
-    onUpdateStatus: (orderId: string) => void
-    onReactivate?: (orderId: string) => void
-    showCancelButton?: boolean
-    showReactivateButton?: boolean
+}
+
+function ColoresTarjetaSegunEstadoPedido(pedido_final: TodosLosPedidos["pedido_final"]) {
+    switch (pedido_final.informacion.estado) {
+        case "Recibido":
+            return "border-l-sky-200 border-l-8 dark:border-l-sky-800"
+        case "En preparación":
+            return "border-l-yellow-200 border-l-8 dark:border-l-yellow-800"
+        case "En camino":
+            return "border-l-blue-200 border-l-8 dark:border-l-blue-800"
+        case "Entregado":
+            return "border-l-green-200 border-l-8 dark:border-l-green-800"
+        case "Cancelado":
+            return "border-l-red-200 border-l-8 dark:border-l-red-800"
+        default:
+            return "border-l-gray-200 border-l-8 dark:border-l-gray-800"
+    }
 }
 
 export function TarjetaPedido({
     pedido_final,
     usuarios,
-    onCancel,
-    onUpdateStatus,
-    onReactivate,
-    showCancelButton = false,
-    showReactivateButton = false,
 }: TarjetaPedidoProps) {
-
     // --- GUARDIA PRINCIPAL: Si no hay datos, no renderizar nada para evitar crashes.
     if (!pedido_final || !pedido_final.informacion) {
         console.error("TarjetaPedido recibió un pedido inválido:", pedido_final);
         return null;
     }
+    const { mutate: cambiarEstadoPedidoFinal } = useCambiarEstadoPedidoFinal()
 
     const usuario = usuarios.find((usuario) => usuario.id === pedido_final.informacion.user_id);
 
-    function getActionButtonText() {
+
+    function obtenerSiguienteEstado(): Database['public']['Enums']['EstadoPedidos'] {
         switch (pedido_final.informacion.estado) {
             case "Recibido":
+                return "En preparación"
             case "En preparación":
-                return "Enviar a cocina";
+                return "En camino";
             case "En camino":
+                return "Entregado";
             case "Entregado":
-                return "Entregar";
+                return "Entregado";
             case "Cancelado":
-                return "Reactivar";
+                return "Cancelado";
             default:
-                return "";
+                return "Recibido";
         }
-    }
-
-    function getActionButtonIcon() {
-        return <ArrowRight className="mr-2 h-3 w-3" />;
     }
 
     const formatearFechaHora = (fechaHora: string) => {
@@ -73,9 +78,11 @@ export function TarjetaPedido({
         return value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' });
     }
 
+
+
     return (
-        <div className="w-full sm:w-[300px] md:w-[320px] lg:w-[350px] xl:w-[380px] h-fit">
-            <Card className="flex flex-col py-0 gap-1 w-full h-full">
+        <div className="w-fit h-fit">
+            <Card className={cn("flex flex-col py-0 gap-1 w-[250px] md:w-[450px] h-fit dark:bg-zinc-900", ColoresTarjetaSegunEstadoPedido(pedido_final))}>
                 <div className="flex items-center justify-between p-3 rounded-t-lg">
                     <div className="grid gap-0.5">
                         <div className="font-semibold text-sm sm:text-base">
@@ -125,38 +132,28 @@ export function TarjetaPedido({
                     </div>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-end gap-1.5 p-2 border-t rounded-b-lg bg-muted/20">
+                <div className="flex flex-wrap md:flex-row items-center justify-center gap-1.5 p-2 border-t rounded-b-lg bg-muted/20">
+                    {pedido_final.informacion.estado !== "Cancelado" && pedido_final.informacion.estado !== "Entregado" && <AlertDialogEliminarPedido pedido_id={pedido_final.informacion.id} />}
+
                     <Button variant="ghost" size="sm" className="h-8 px-2 text-xs">
                         <FileText className="h-3 w-3 mr-1" />
                         Imprimir
                     </Button>
-                    
+
                     <DialogPedido
                         pedido_final_arg={pedido_final}
                         usuarios={usuarios}
                         className="h-8 px-2 text-xs"
                     />
 
-                    {showCancelButton && onCancel && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 px-2 text-xs text-destructive hover:text-destructive"
-                            onClick={() => onCancel(pedido_final.informacion.id)}
-                        >
-                            <XCircle className="h-3 w-3 mr-1" />
-                            Cancelar
-                        </Button>
-                    )}
-                    
-                    <Button
+                    {pedido_final.informacion.estado !== "Cancelado" && pedido_final.informacion.estado !== "Entregado" && <Button
                         size="sm"
                         className="h-8 px-2 text-xs"
-                        onClick={() => (showReactivateButton && onReactivate ? onReactivate(pedido_final.informacion.id) : onUpdateStatus(pedido_final.informacion.id))}
+                        onClick={() => cambiarEstadoPedidoFinal({ pedido_final_id: pedido_final.informacion.id, estado: obtenerSiguienteEstado() })}
                     >
-                        {getActionButtonIcon()}
-                        {getActionButtonText()}
-                    </Button>
+                        <ArrowRight className="mr-2 h-3 w-3" />
+                        {obtenerSiguienteEstado()}
+                    </Button>}
                 </div>
             </Card >
         </div>
