@@ -53,7 +53,8 @@ class ExtraService {
     const { data, error } = await supabase
       .from("extra")
       .select("*")
-      .eq("categoria-producto", categoria);
+      .eq("categoria-producto", categoria)
+      .order("nombre", { ascending: true });
 
     if (error) {
       console.error("Error al obtener extras por categoria:", error);
@@ -67,6 +68,19 @@ class ExtraService {
       extras: data,
       categorias: categorias_unicas,
     };
+  }
+
+  public async obtenerCategoriasExtras(): Promise<string[]> {
+    const { data, error } = await supabase
+      .from("categorias_unicas_view")
+      .select("categoria");
+
+    if (error) {
+      console.error("Error al obtener categorias extras:", error);
+      throw error;
+    }
+
+    return data.map((item) => item.categoria || "");
   }
 
   public async crearExtra(extra: ExtraInsert): Promise<ExtraRow> {

@@ -31,3 +31,13 @@ export type CategoriaProductos =
   Database["public"]["Enums"]["CategoriaProducto"];
 export type EstadoPedido = Database["public"]["Enums"]["EstadoPedidos"];
 export type TipoEnvio = Database["public"]["Enums"]["TipoEnvio"];
+export type LocalRow = Database["public"]["Tables"]["local"]["Row"];
+export type LocalInsert = Database["public"]["Tables"]["local"]["Insert"];
+export type LocalUpdate = Database["public"]["Tables"]["local"]["Update"];
+export type HorarioRow = Database["public"]["Tables"]["horario"]["Row"];
+export type HorarioInsert = Database["public"]["Tables"]["horario"]["Insert"];
+export type HorarioUpdate = Database["public"]["Tables"]["horario"]["Update"];
+export type DiaSemana = Database["public"]["Enums"]["DiasDeLaSemana"];
+export type LocalConHorarios = LocalRow & {
+  horarios: HorarioRow[];
+};

@@ -1,11 +1,7 @@
-import React from 'react'
+// app/protected/locales/page.tsx
+"use client"
 
-function Locales() {
-  return (
-    <div className="flex flex-col gap-4">
-      <h1>Locales</h1>
-    </div>
-  )
+
+export default function LocalesPage() {
+  return <div></div>
 }
-
-export default Locales

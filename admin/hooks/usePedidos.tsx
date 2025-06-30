@@ -36,7 +36,7 @@ export function usePedidosById(pedido_id: string | undefined) {
     })
 }
 
-export function useCrearPedido(pedido: PedidoInsert) {
+export function useCrearPedido() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: pedidosService.crearPedido,

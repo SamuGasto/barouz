@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 const links = [
     { href: "/protected/pedidos", label: "Pedidos" },
     { href: "/protected/menu", label: "Menu" },
+    { href: "/protected/extras", label: "Extras" },
     { href: "/protected/promociones", label: "Promociones" },
     { href: "/protected/locales", label: "Locales" },
 ]
