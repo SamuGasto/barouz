@@ -1,6 +1,7 @@
 import extraService from "@/services/extras";
 import { Database } from "@/types/supabase";
-import { useQuery } from "@tanstack/react-query";
+import { ExtraInsert, ExtraUpdate } from "@/types/tipos_supabase_resumidos";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 export function useTodosLosExtras() {
     return useQuery({
@@ -24,5 +25,23 @@ export function useExtrasPorCategoriaProducto(categoria: Database["public"]["Enu
         queryKey: ["extras", categoria],
         queryFn: () => extraService.obtenerExtrasPorCategoriaProducto(categoria),
         staleTime: 5 * 60 * 1000,
+    })
+}
+
+export function useCrearExtra(extra: ExtraInsert) {
+    return useMutation({
+        mutationFn: () => extraService.crearExtra(extra),
+    })
+}
+
+export function useActualizarExtra(extra: ExtraUpdate) {
+    return useMutation({
+        mutationFn: () => extraService.actualizarExtra(extra),
+    })
+}
+
+export function useEliminarExtra(id: string) {
+    return useMutation({
+        mutationFn: () => extraService.eliminarExtra(id),
     })
 }

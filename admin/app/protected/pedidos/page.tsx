@@ -9,7 +9,7 @@ import { Database } from '@/types/supabase';
 
 function Pedidos() {
   const [searchTerm, setSearchTerm] = React.useState("");
-  const [activeTab, setActiveTab] = React.useState<'Activos' | 'Completados' | 'Todos'>("Activos");
+  const [activeTab, setActiveTab] = React.useState<'Activos' | 'Completados' | 'Todos'>("Todos");
   const [activeSubTab, setActiveSubTab] = React.useState<'Todos' | Database['public']['Enums']['EstadoPedidos']>("Todos");
   const { data: todosUsuarios, isPending: todosUsuariosPending } = useUsuarios()
   const { data: pedidosFinales, isLoading: pedidosLoading } = usePedidosFinal();
