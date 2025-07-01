@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Clock, FileText, ArrowRight, CheckCircle, XCircle, Loader2, CircleX } from "lucide-react"
+import { Clock, ArrowRight } from "lucide-react"
 import { PedidoBadge } from "./pedido-badge"
 import type { Database } from "@/types/supabase"
 import { DialogPedido } from "./dialog-pedido"
@@ -14,6 +14,7 @@ import { TodosLosPedidos } from "@/types/res_pedidos_final"
 import AlertDialogEliminarPedido from "./alert-dialog-eliminar-pedido"
 import { useCambiarEstadoPedidoFinal } from "@/hooks/usePedidosFinales"
 import { cn } from "@/lib/utils"
+import { BotonImprimirPedido } from "../imprimir-pedido"
 
 interface TarjetaPedidoProps {
     pedido_final: TodosLosPedidos["pedido_final"]
@@ -135,10 +136,10 @@ export function TarjetaPedido({
                 <div className="flex flex-wrap md:flex-row items-center justify-center gap-1.5 p-2 border-t rounded-b-lg bg-muted/20">
                     {pedido_final.informacion.estado !== "Cancelado" && pedido_final.informacion.estado !== "Entregado" && <AlertDialogEliminarPedido pedido_id={pedido_final.informacion.id} />}
 
-                    <Button variant="ghost" size="sm" className="h-8 px-2 text-xs">
-                        <FileText className="h-3 w-3 mr-1" />
-                        Imprimir
-                    </Button>
+                    <BotonImprimirPedido 
+                        pedido_final={pedido_final} 
+                        usuario={usuario} 
+                    />
 
                     <DialogPedido
                         pedido_final_arg={pedido_final}
