@@ -16,7 +16,6 @@ function Pedidos() {
 
   const isGeneralLoading = pedidosLoading || todosUsuariosPending
 
-  console.log(pedidosFinales)
 
   return (
     <div className="flex w-full justify-center items-center flex-col gap-10">
