@@ -2,7 +2,7 @@ import { Database } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/client";
 
 async function obtenerExtras(
-  categoria: string,
+  categoria: Database['public']['Enums']['CategoriaProducto'],
 ): Promise<Database["public"]["Tables"]["extra"]["Row"][] | null> {
   const supabase = createClient();
   const { data, error } = await supabase

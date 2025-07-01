@@ -1,7 +1,7 @@
 // app/protected/reset-password/page.tsx
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,7 +10,7 @@ import { toast } from "sonner"
 import { Loader2, CheckCircle } from "lucide-react"
 import Link from "next/link"
 
-export default function ResetPassword() {
+function ResetPasswordContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const email = searchParams.get("email")
@@ -173,3 +173,17 @@ export default function ResetPassword() {
     </div>
   )
 }
+
+function ResetPassword() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    }>
+      <ResetPasswordContent />
+    </Suspense>
+  )
+}
+
+export default ResetPassword

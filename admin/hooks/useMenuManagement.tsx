@@ -48,16 +48,20 @@ export function useCreateProduct() {
 export function useUpdateProduct() {
     const queryClient = useQueryClient();
 
-    return useMutation<ProductRow, Error, ProductUpdate>({
-        mutationFn: menuService.actualizarProducto,
+    return useMutation<
+        ProductRow, 
+        Error, 
+        { id: string; updates: Partial<ProductUpdate> }
+    >({
+        mutationFn: ({ id, updates }) => menuService.actualizarProducto(id, updates),
         onSuccess: (updatedProduct: ProductRow) => {
             queryClient.setQueryData<ProductRow[]>(['products'], (old) => {
-                return old ? old.map(product => product.id === updatedProduct.id ? updatedProduct : product) : [updatedProduct]
-            })
-            queryClient.invalidateQueries({ queryKey: ['products'] })
+                return old ? old.map(product => product.id === updatedProduct.id ? updatedProduct : product) : [updatedProduct];
+            });
+            queryClient.invalidateQueries({ queryKey: ['products'] });
         },
         onError: (error) => {
-            console.error("Error al actualizar producto: ", error)
+            console.error("Error al actualizar producto: ", error);
         }
     })
 }

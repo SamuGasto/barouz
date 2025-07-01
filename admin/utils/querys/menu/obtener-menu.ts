@@ -1,19 +1,27 @@
-import { Database } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/client";
+import { Database } from "@/types/supabase";
 
-async function obtenerMenu(): Promise<
+export async function obtenerMenu(): Promise<
   Database["public"]["Tables"]["producto"]["Row"][] | null
 > {
   const supabase = createClient();
 
-  const { data, error } = await supabase.from("producto").select("*");
+  try {
+    const { data, error } = await supabase
+      .from("producto")
+      .select("*")
+      .order("categoria", { ascending: true });
 
-  if (error) {
-    console.error("Error al obtener productos:", error);
+    if (error) {
+      console.error("Error al obtener productos:", error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error inesperado al obtener el menú:", error);
     return null;
   }
-
-  return data;
 }
 
 export default obtenerMenu;

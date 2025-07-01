@@ -26,7 +26,10 @@ export function useUpdateLocale() {
     const queryClient = useQueryClient()
 
     return useMutation<LocalRow, Error, LocalUpdate & { id: string }>({
-        mutationFn: (locale) => localesService.updateLocale(locale),
+        mutationFn: (locale) => {
+            const { id, ...updates } = locale;
+            return localesService.updateLocale(id, updates as LocalUpdate);
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["locales"] })
         }

@@ -109,7 +109,10 @@ function CrearProductoDialog({ open, producto, onClose }: CrearProductoDialogPro
 
             // 2. Guardar/Actualizar el producto en la base de datos
             if (isEditing) {
-                await updateProduct({ ...productDataToSave as ProductUpdate, id: producto!.id });
+                await updateProduct({ 
+                    id: producto!.id, 
+                    updates: productDataToSave as ProductUpdate 
+                });
                 toast.success("Producto actualizado exitosamente.");
             } else {
                 await createProduct(productDataToSave as ProductInsert);

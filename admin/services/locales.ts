@@ -1,31 +1,32 @@
 import { Database } from "@/types/supabase";
 import {
-  LocalRow,
-  LocalInsert,
-  LocalUpdate,
-  DiaSemana,
   LocalConHorarios,
+  HorarioInsert
 } from "@/types/tipos_supabase_resumidos";
 import supabase from "@/utils/supabase/client";
 
+type Horario = Database["public"]["Tables"]["horario"]["Row"];
+
 export type Locale = Database["public"]["Tables"]["local"]["Row"] & {
-  horarios?: Database["public"]["Tables"]["horario"]["Row"][];
+  horarios: Horario[];
 };
 
 export type LocaleInsert = Database["public"]["Tables"]["local"]["Insert"] & {
-  horarios?: Database["public"]["Tables"]["horario"]["Insert"][];
+  horarios?: HorarioInsert[];
 };
 
 export type LocaleUpdate = Database["public"]["Tables"]["local"]["Update"] & {
-  horarios?: Database["public"]["Tables"]["horario"]["Update"][];
+  horarios?: HorarioInsert[];
 };
 
 class LocalesService {
   public async getLocales(): Promise<LocalConHorarios[]> {
-    // Primero obtenemos los locales
     const { data: locales, error } = await supabase
       .from("local")
-      .select("*, horarios(*)")
+      .select(`
+        *,
+        horarios:horario(*)
+      `)
       .order("nombre", { ascending: true });
 
     if (error) {
@@ -33,147 +34,162 @@ class LocalesService {
       throw error;
     }
 
-    // Luego obtenemos todos los horarios
-    const { data: horarios, error: horariosError } = await supabase
-      .from("horario")
-      .select("*");
-
-    if (horariosError) {
-      console.error("Error fetching horarios:", horariosError);
-      throw horariosError;
-    }
-
-    // Combinamos los datos
     return (locales || []).map((locale) => ({
       ...locale,
-      horarios: (horarios || []).filter((h) => h.local_id === locale.id),
-    }));
+      horarios: locale?.horarios || [],
+    })) as LocalConHorarios[];
   }
 
   public async getLocaleById(id: string): Promise<LocalConHorarios | null> {
-    // Obtener el local
     const { data: locale, error } = await supabase
       .from("local")
-      .select("*")
+      .select(`
+        *,
+        horarios:horario(*)
+      `)
       .eq("id", id)
       .single();
 
-    if (error || !locale) {
-      console.error("Error fetching locale:", error);
-      throw error;
-    }
-
-    // Obtener sus horarios
-    const { data: horarios, error: horariosError } = await supabase
-      .from("horario")
-      .select("*")
-      .eq("local_id", id);
-
-    if (horariosError) {
-      console.error("Error fetching horarios:", horariosError);
-      throw horariosError;
+    if (error) {
+      console.error(`Error fetching locale ${id}:`, error);
+      return null;
     }
 
     return {
       ...locale,
-      horarios: horarios || [],
-    };
+      horarios: locale?.horarios || [],
+    } as LocalConHorarios;
   }
 
-  public async createLocale({
-    horarios = [],
-    ...locale
-  }: LocaleInsert): Promise<Locale> {
-    const { data: newLocale, error } = await supabase
-      .from("local")
-      .insert(locale)
+  public async createLocale(localeData: LocaleInsert): Promise<LocalConHorarios> {
+    const { horarios, ...localeWithoutHorarios } = localeData;
+
+    // Insert the locale
+    const { data: newLocale, error: localeError } = await supabase
+      .from('local')
+      .insert(localeWithoutHorarios)
       .select()
       .single();
 
-    if (error) {
-      console.error("Error creating locale:", error);
-      throw error;
+    if (localeError || !newLocale) {
+      throw new Error(localeError?.message || 'Failed to create locale');
     }
 
-    // Crear horarios si existen
+    // Save horarios if provided
     if (horarios && horarios.length > 0) {
       await this.saveHorarios(newLocale.id, horarios);
     }
 
-    return this.getLocaleById(newLocale.id) as Promise<Locale>;
+    // Return the complete locale with horarios
+    const completeLocale = await this.getLocaleById(newLocale.id);
+    if (!completeLocale) {
+      throw new Error('Failed to fetch created locale');
+    }
+
+    return completeLocale;
   }
 
-  public async updateLocale({
-    id,
-    horarios = [],
-    ...updates
-  }: LocaleUpdate & { id: string }): Promise<Locale> {
-    const { error } = await supabase.from("local").update(updates).eq("id", id);
+  public async updateLocale(id: string, updates: LocaleUpdate): Promise<LocalConHorarios> {
+    const { horarios, ...localeUpdates } = updates;
 
-    if (error) {
-      console.error("Error updating locale:", error);
-      throw error;
+    // Update basic locale data
+    const { data: updatedLocale, error: updateError } = await supabase
+      .from('local')
+      .update(localeUpdates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (updateError || !updatedLocale) {
+      throw new Error(updateError?.message || 'Failed to update locale');
     }
 
-    // Ensure we're passing a properly typed array to saveHorarios with local_id
-    if (horarios && Array.isArray(horarios)) {
-      const typedHorarios = horarios
-        .filter(
-          (h): h is { dia: DiaSemana; hora_inicio: string; hora_fin: string } =>
-            Boolean(h?.dia && h?.hora_inicio && h?.hora_fin)
-        )
-        .map((horario) => ({
-          ...horario,
-          local_id: id, // Add the local_id to each horario
-        }));
-
-      await this.saveHorarios(id, typedHorarios);
+    // Save horarios if provided
+    if (horarios && horarios.length > 0) {
+      await this.saveHorarios(id, horarios);
     }
 
-    return this.getLocaleById(id) as Promise<Locale>;
+    // Return the updated locale with horarios
+    const updatedLocaleWithHorarios = await this.getLocaleById(id);
+    if (!updatedLocaleWithHorarios) {
+      throw new Error('Failed to fetch updated locale');
+    }
+
+    return updatedLocaleWithHorarios;
   }
 
   public async deleteLocale(id: string): Promise<void> {
-    // Primero eliminamos los horarios asociados
-    await supabase.from("horario").delete().eq("local_id", id);
-
-    // Luego eliminamos el local
-    const { error } = await supabase.from("local").delete().eq("id", id);
-
-    if (error) {
-      console.error("Error deleting locale:", error);
-      throw error;
+    // First delete related schedules
+    const { error: scheduleError } = await supabase
+      .from("horario")
+      .delete()
+      .eq("local_id", id);
+    
+    if (scheduleError) {
+      console.error('Error deleting schedules:', scheduleError);
+      throw new Error('Failed to delete related schedules');
+    }
+    
+    // Then delete the locale
+    const { error: deleteError } = await supabase
+      .from("local")
+      .delete()
+      .eq("id", id);
+      
+    if (deleteError) {
+      console.error('Error deleting locale:', deleteError);
+      throw new Error('Failed to delete locale');
     }
   }
 
-  public async saveHorarios(
-    localId: string,
-    horarios: Database["public"]["Tables"]["horario"]["Insert"][]
-  ): Promise<void> {
-    // Filter out any incomplete horarios and ensure required fields
-    const validHorarios = horarios
-      .filter((h) => h.dia && h.hora_inicio && h.hora_fin)
-      .map((horario) => ({
-        ...horario,
-        local_id: localId,
-        dia: horario.dia as DiaSemana, // Ensure dia is not undefined
-        hora_inicio: horario.hora_inicio || "",
-        hora_fin: horario.hora_fin || "",
-      }));
+  private async saveHorarios(localId: string, horarios: HorarioInsert[]): Promise<void> {
+    if (!localId) {
+      throw new Error('Local ID is required to save horarios');
+    }
 
-    // Delete existing horarios
-    await supabase.from("horario").delete().eq("local_id", localId);
+    // First delete existing schedules
+    const { error: deleteError } = await supabase
+      .from('horario')
+      .delete()
+      .eq('local_id', localId);
 
-    // Only insert if we have valid horarios
-    if (validHorarios.length > 0) {
-      const { error } = await supabase.from("horario").insert(validHorarios);
-      if (error) {
-        console.error("Error saving horarios:", error);
-        throw error;
-      }
+    if (deleteError) {
+      console.error('Error deleting existing schedules:', deleteError);
+      throw new Error('Failed to delete existing schedules');
+    }
+
+    // If no new schedules, we're done
+    if (!horarios || horarios.length === 0) {
+      return;
+    }
+
+    // Filter valid schedules
+    const horariosValidos = horarios.filter(h => 
+      h?.dia && h?.hora_inicio && h?.hora_fin
+    );
+
+    if (horariosValidos.length === 0) {
+      return;
+    }
+
+    // Insert new schedules
+    const { error: insertError } = await supabase
+      .from('horario')
+      .insert(
+        horariosValidos.map(h => ({
+          ...h,
+          local_id: localId
+        }))
+      );
+
+    if (insertError) {
+      console.error('Error saving schedules:', insertError);
+      throw new Error('Failed to save schedules');
     }
   }
 }
 
-export const localesService = new LocalesService();
-export default localesService;
+// Create a single instance of the service
+const localesService = new LocalesService();
+
+export { localesService as default };

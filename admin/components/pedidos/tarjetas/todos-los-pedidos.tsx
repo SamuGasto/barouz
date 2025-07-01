@@ -42,9 +42,25 @@ function TodosLosPedidos({ searchTerm, activeTab, activeSubTab }: Props) {
 
     return (
         <Card className="flex w-full max-w-7xl flex-col gap-2">
-            {pedidos.map((pedido) => (
-                <TarjetaPedido key={pedido.id} pedido={pedido} onEdit={() => { }} onUpdateStatus={() => { }} menu={menu} todosUsuarios={todosUsuarios} />
-            ))}
+            {pedidos.map((pedido) => {
+                // Transform the pedido to match the expected pedido_final structure
+                const pedido_final = {
+                    informacion: pedido,
+                    usuario: {
+                        id: pedido.user_id,
+                        nombre: todosUsuarios.find(u => u.id === pedido.user_id)?.nombre || 'Usuario desconocido'
+                    },
+                    pedidos: [] // Add empty array for pedidos if needed
+                };
+                
+                return (
+                    <TarjetaPedido 
+                        key={pedido.id} 
+                        pedido_final={pedido_final}
+                        usuarios={todosUsuarios} 
+                    />
+                );
+            })}
         </Card>
     )
 }
