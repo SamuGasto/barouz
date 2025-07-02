@@ -33,7 +33,7 @@ const Navbar = () => {
         <SheetContent side='left' className='transition-all'>
           <SheetHeader>
             <SheetTitle className='hidden'>Menu</SheetTitle>
-            <Link href="/protected/pedidos" className="flex flex-row items-center gap-2" onClick={() => onOpenChange(false)}>
+            <Link href="/" className="flex flex-row items-center gap-2" onClick={() => onOpenChange(false)}>
               <Image className="rounded-full" src={logo} alt="Logo" />
               <Image src={logo_texto} alt="Logo" />
             </Link>
@@ -51,7 +51,7 @@ const Navbar = () => {
   }
   const NormalMenu = () => {
     return (<div id="navigation" className='hidden md:flex flex-row items-center gap-2'>
-      <Link href="/protected/pedidos" className="flex flex-row items-center gap-2">
+      <Link href="/" className="flex flex-row items-center gap-2">
         <Image className="rounded-full" src={logo} alt="Logo" />
         <Image src={logo_texto} alt="Logo" />
       </Link>

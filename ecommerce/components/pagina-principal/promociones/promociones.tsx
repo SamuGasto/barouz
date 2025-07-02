@@ -1,9 +1,9 @@
 import React from "react";
-import { obtenerPromocionesCarrusel } from "@/utils/querys/servidor/principal/obtener-promociones";
 import CarruselDeProductos from "@/components/general/carrusel-de-productos";
+import { Producto } from "@/data/tipos";
 
 async function Promociones() {
-  const promociones = await obtenerPromocionesCarrusel();
+  const promociones: Producto[] = [];
   return (
     <div className="bg-brand-background-1 flex w-full flex-col items-center justify-center gap-6 p-4 md:gap-8 md:p-8">
       <div className="flex flex-col items-center justify-center gap-2">
@@ -13,7 +13,7 @@ async function Promociones() {
         </p>
       </div>
       <div className="w-full max-w-5xl rounded-xl p-4 md:w-3/4 md:p-0 dark:shadow-none">
-        <CarruselDeProductos productos={promociones} />
+        {/* <CarruselDeProductos productos={promociones} /> */}
       </div>
       <a className="text-brand-primary font-semibold" href="/promociones">
         Ver todas las promociones

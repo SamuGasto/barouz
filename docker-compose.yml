@@ -2,48 +2,47 @@ services:
   admin:
     container_name: admin
     build:
-      context: ./admin
-      dockerfile: Dockerfile
+      context: ./admin # El contexto de la build para 'admin' es el subdirectorio './admin'
+      dockerfile: Dockerfile # El Dockerfile está dentro de './admin'
     ports:
       - "3001:3000"
     volumes:
-      - ./admin/app:/app/app
-      - ./admin/components:/app/components
-      - ./admin/services:/app/services
-      - ./admin/hooks:/app/hooks
-      - ./admin/lib:/app/lib
-      - ./admin/utils:/app/utils
-      - ./admin/public:/app/images
-      - ./admin/images:/app/public
-      - ./admin/stores:/app/stores
-      - ./admin/types:/app/types
+      # 1. Monta el directorio raíz de la aplicación 'admin' en /app del contenedor.
+      # Esto mapea TODO el contenido de ./admin (incluyendo app, components, public, .next, etc.)
+      # del host a /app en el contenedor. Así, los cambios del host se reflejan,
+      # y Next.js encuentra sus carpetas esperadas (app, public, .next) correctamente.
+      - ./admin:/app
+
+      # 2. Volumen anónimo para node_modules.
+      # Esto asegura que node_modules, una vez instalado dentro del contenedor,
+      # no sea sobrescrito por un node_modules potencialmente inconsistente o vacío del host.
       - /app/node_modules
+
+      # NO NECESITAS VOLÚMENES INDIVIDUALES PARA app, components, public, etc.,
+      # ya que ./admin:/app ya cubre todo eso.
+
     environment:
       - NODE_ENV=development
+      # CRÍTICO: Next.js necesita saber en qué host escuchar para Fast Refresh y el servidor de desarrollo
+      - HOST=0.0.0.0
+      # Descomenta la siguiente línea si sigues teniendo problemas con el hot-reloading de archivos
+      # - CHOKIDAR_USEPOLLING=true
     restart: unless-stopped
-    command: npm run dev
+    command: npm run dev # Ejecuta Next.js en modo desarrollo
 
   ecommerce:
     container_name: ecommerce
     build:
-      context: ./ecommerce
-      dockerfile: Dockerfile
+      context: ./ecommerce # El contexto de la build para 'ecommerce' es el subdirectorio './ecommerce'
+      dockerfile: Dockerfile # El Dockerfile está dentro de './ecommerce'
     ports:
       - "3002:3000"
     volumes:
-      - ./ecommerce/app:/app/app
-      - ./ecommerce/components:/app/components
-      - ./ecommerce/services:/app/services
-      - ./ecommerce/hooks:/app/hooks
-      - ./ecommerce/data:/app/data
-      - ./ecommerce/images:/app/images
-      - ./ecommerce/public:/app/public
-      - ./ecommerce/lib:/app/lib
-      - ./ecommerce/utils:/app/utils
-      - ./ecommerce/stores:/app/stores
-      - ./ecommerce/types:/app/types
-      - /app/node_modules
+      - ./ecommerce:/app # Monta el directorio raíz de la aplicación 'ecommerce'
+      - /app/node_modules # Volumen para node_modules
     environment:
       - NODE_ENV=development
+      - HOST=0.0.0.0
+      # - CHOKIDAR_USEPOLLING=true
     restart: unless-stopped
     command: npm run dev

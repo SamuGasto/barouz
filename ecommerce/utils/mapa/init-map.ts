@@ -1,7 +1,31 @@
 import { Local } from "@/data/tipos";
+interface AdvancedMarkerElement {
+  // Add any properties/methods you use from AdvancedMarkerElement
+  position: google.maps.LatLng | google.maps.LatLngLiteral | null;
+  map: google.maps.Map | null;
+  // Add other methods/properties you use
+  setMap(map: google.maps.Map | null): void;
+  // ... other methods
+}
+
+declare global {
+  namespace google.maps {
+    // This extends the existing google.maps namespace
+    let AdvancedMarkerElement: {
+      prototype: AdvancedMarkerElement;
+      new (options?: {
+        map?: google.maps.Map;
+        position?: google.maps.LatLng | google.maps.LatLngLiteral;
+        content?: Node | null;
+        title?: string;
+        // Add other constructor options you need
+      }): AdvancedMarkerElement;
+    };
+  }
+}
 
 export let map: google.maps.Map;
-export let marcadores: google.maps.marker.AdvancedMarkerElement[] = [];
+export let marcadores: AdvancedMarkerElement[] = [];
 
 function injectPriceTagStyles() {
   if (document.getElementById("price-tag-style")) return; // Evita duplicados
@@ -34,7 +58,11 @@ function injectPriceTagStyles() {
 
 async function initMap(locales: Local[]) {
   // Request needed libraries.
-  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+  const { AdvancedMarkerElement } = (await google.maps.importLibrary(
+    "marker"
+  )) as unknown as {
+    AdvancedMarkerElement: typeof google.maps.AdvancedMarkerElement;
+  };
 
   injectPriceTagStyles();
 

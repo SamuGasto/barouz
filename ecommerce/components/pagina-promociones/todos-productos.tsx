@@ -1,12 +1,9 @@
-import { obtenerPromocionesDestacadas } from "@/utils/querys/servidor/promociones/obtener-ofertas-destacadas";
 import React from "react";
-import CarruselDeProductos from "@/components/general/carrusel-de-productos";
 import TarjetaPromocion from "./tarjeta-promocion";
-import obtenerTodasLasPromociones from "@/utils/querys/servidor/promociones/obtener-todas-las-promociones";
+import { Promocion } from "@/data/tipos";
 
 async function TodosProductos() {
-  const promocionesDestacadas = await obtenerPromocionesDestacadas();
-  const todasLasPromociones = await obtenerTodasLasPromociones();
+  const todasLasPromociones: Promocion[] = [];
 
   return (
     <>
@@ -20,7 +17,7 @@ async function TodosProductos() {
             <h2 className="text-4xl font-thin">Productos en oferta</h2>
           </div>
           <div className="w-full rounded-xl p-4 md:ml-10 md:w-11/12 md:p-0 dark:shadow-none">
-            <CarruselDeProductos productos={promocionesDestacadas} />
+            {/* <CarruselDeProductos productos={promocionesDestacadas} /> */}
           </div>
         </div>
       </section>

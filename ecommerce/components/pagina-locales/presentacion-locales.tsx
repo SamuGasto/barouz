@@ -2,7 +2,6 @@
 import React from "react";
 import MapaGoogle from "./mapa";
 import Locales from "./locales";
-import { obtenerLocales } from "@/utils/querys/cliente/obtener-locales";
 import { Local } from "@/data/tipos";
 
 function PresentacionLocales() {
@@ -10,7 +9,7 @@ function PresentacionLocales() {
 
   React.useEffect(() => {
     const fetchLocal = async () => {
-      const locales = await obtenerLocales();
+      const locales: Local[] = [];
       setLocales(locales);
     };
     fetchLocal();
