@@ -6,10 +6,10 @@ import {
 } from "@/components/ui/carousel";
 import React from "react";
 import TarjetaProducto from "./producto";
-import { Producto } from "@/data/tipos";
+import { ProductoRow } from "@/types/resumen-tipos";
 
 interface PropType {
-  productos: Producto[];
+  productos: ProductoRow[];
 }
 
 function CarruselDeProductos(props: PropType) {

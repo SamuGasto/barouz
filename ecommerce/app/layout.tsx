@@ -1,10 +1,12 @@
 import { Geist } from "next/font/google";
-import { ThemeProvider } from "next-themes";
 import "@/globals.css";
 import Navbar from "@/components/general/navbar/navbar";
 import Footer from "@/components/general/footer/footer";
 import { Metadata } from "next";
 import og_image from "@/images/barouz-logo.png";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Providers } from "@/components/providers/providers";
+import { Toaster } from "sonner";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -38,31 +40,28 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+const queryClient = new QueryClient();
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={geistSans.className} suppressHydrationWarning>
+    <html lang="es" className={geistSans.className} suppressHydrationWarning>
       <body className="bg-background text-foreground">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <Providers>
           <main className="flex min-h-screen flex-col items-center">
             <div className="flex w-full flex-1 flex-col items-center">
               <Navbar />
               <div className="flex w-full flex-col items-center justify-center gap-6">
                 {children}
               </div>
-
               <Footer />
             </div>
+            <Toaster richColors />
           </main>
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

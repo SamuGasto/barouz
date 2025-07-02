@@ -4,10 +4,10 @@ import TodosProductos from "@/components/pagina-promociones/todos-productos";
 
 export default function Home() {
   return (
-    <main className="flex w-full flex-col items-center gap-6">
+    <div className="flex w-full flex-col items-center gap-6">
       <Banner />
       <CarruselPromociones />
       <TodosProductos />
-    </main>
+    </div>
   );
 }

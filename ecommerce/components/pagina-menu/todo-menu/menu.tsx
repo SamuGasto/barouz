@@ -1,7 +1,9 @@
 import menu from "@/data/examples/menu";
 import React from "react";
 import CarruselDeProductos from "../../general/carrusel-de-productos";
-import obtenerTodosLosProductos from "@/utils/querys/servidor/todos-productos";
+import { useProductos } from "@/hooks/useProductos";
+import { Loader2 } from "lucide-react";
+import { createClient } from "@/utils/supabase/server";
 
 const colores: { [key: number]: string } = {
   1: "bg-brand-background-1",
@@ -13,7 +15,12 @@ const colores: { [key: number]: string } = {
 };
 
 async function Menu() {
-  const productos = await obtenerTodosLosProductos();
+  const supabase = await createClient();
+  const { data: productos, error } = await supabase.from("producto").select("*");
+
+  if (error || !productos) {
+    return <Loader2 className="h-12 w-12 animate-spin" />;
+  }
 
   return (
     <div className="flex w-full flex-col items-center gap-6">

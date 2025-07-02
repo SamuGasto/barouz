@@ -3,9 +3,9 @@ import PresentacionLocales from "@/components/pagina-locales/presentacion-locale
 
 export default function Home() {
   return (
-    <main className="flex w-full flex-col items-center justify-center gap-6">
+    <div className="flex w-full flex-col items-center justify-center gap-6">
       <Banner />
       <PresentacionLocales />
-    </main>
+    </div>
   );
 }
