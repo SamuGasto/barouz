@@ -17,8 +17,6 @@ import { Switch } from '@/components/ui/switch'
 import { Database } from '@/types/supabase'
 import { useCreateProduct, useUpdateProduct } from '@/hooks/useMenuManagement'
 import { toast } from 'sonner'
-import { useUploadImage } from '@/hooks/useUploadImage'
-import { storageService } from '@/services/storage'
 import { useHandleImageUpload } from '@/hooks/useUploadImage'
 
 type ProductRow = Database["public"]["Tables"]["producto"]["Row"];
@@ -54,7 +52,7 @@ function CrearProductoDialog({ open, producto, onClose }: CrearProductoDialogPro
         resolver: zodResolver(ProductFormSchema),
         defaultValues: {
             nombre: producto?.nombre || "",
-            precio: producto?.precio.toString() || "0",
+            precio: producto?.precio.toString() || "",
             descripcion: producto?.descripcion || "",
             categoria: producto?.categoria || "Waffles",
             disponible: producto?.disponible || true,
@@ -76,7 +74,7 @@ function CrearProductoDialog({ open, producto, onClose }: CrearProductoDialogPro
         } else {
             form.reset({
                 nombre: "",
-                precio: "0",
+                precio: "",
                 descripcion: "",
                 categoria: "Waffles",
                 disponible: true,
@@ -109,9 +107,9 @@ function CrearProductoDialog({ open, producto, onClose }: CrearProductoDialogPro
 
             // 2. Guardar/Actualizar el producto en la base de datos
             if (isEditing) {
-                await updateProduct({ 
-                    id: producto!.id, 
-                    updates: productDataToSave as ProductUpdate 
+                await updateProduct({
+                    id: producto!.id,
+                    updates: productDataToSave as ProductUpdate
                 });
                 toast.success("Producto actualizado exitosamente.");
             } else {
@@ -143,6 +141,11 @@ function CrearProductoDialog({ open, producto, onClose }: CrearProductoDialogPro
                     <DialogTitle>
                         {dialogTitle}
                     </DialogTitle>
+                    <DialogDescription>
+                        {isEditing
+                            ? "Modifica los datos del producto."
+                            : "Completa los datos para agregar un nuevo producto."}
+                    </DialogDescription>
                 </DialogHeader>
                 {/* Formulario */}
                 <Form {...form}>

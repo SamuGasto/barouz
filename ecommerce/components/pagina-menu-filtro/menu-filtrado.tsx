@@ -1,20 +1,9 @@
 "use client";
 import React from "react";
-
 import { useFiltrosStore } from "@/components/providers/filtros-provider";
-import { Producto } from "@/data/tipos";
 import TarjetaProducto from "../general/producto";
 import { useProductos } from "@/hooks/useProductos";
 import { Loader2 } from "lucide-react";
-
-const nombresFiltros = [
-  "Waffles",
-  "Helados",
-  "Churros",
-  "Waffles Cookies",
-  "Postres",
-  "Bebidas",
-];
 
 function MenuFiltrado() {
   const filtrosCategoria = useFiltrosStore((state) => state.filtro_categoria);
@@ -22,10 +11,8 @@ function MenuFiltrado() {
   const { data: productos, isLoading } = useProductos()
 
   const filtrado = productos?.filter((producto) => {
-    if (filtrosCategoria.every((item) => item == 0)) return true;
-    return (
-      filtrosCategoria[nombresFiltros.indexOf(producto.categoria)] == 1
-    );
+    if (filtrosCategoria.some((item) => item === producto.categoria)) return true;
+    return false;
   })
     .filter((producto) => {
       if (filtrosTexto == "") return true;

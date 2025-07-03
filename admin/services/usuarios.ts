@@ -1,4 +1,4 @@
-import { supabase } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import {
   UsuarioInsert,
   UsuarioRow,
@@ -7,6 +7,7 @@ import {
 
 class UsuarioService {
   public async obtenerTodosLosUsuarios(): Promise<UsuarioRow[]> {
+    const supabase = createClient();
     const { data, error } = await supabase.from("usuario").select("*");
 
     if (error) {
@@ -21,7 +22,7 @@ class UsuarioService {
     if (!id || id === "") {
       throw new Error("No se proporciono un ID");
     }
-
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("usuario")
       .select("*")
@@ -37,6 +38,7 @@ class UsuarioService {
   }
 
   public async crearUsuario(usuario: UsuarioInsert): Promise<UsuarioRow> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("usuario")
       .insert([usuario])
@@ -55,7 +57,7 @@ class UsuarioService {
     if (!usuario.id || usuario.id === "") {
       throw new Error("No se proporciono un ID");
     }
-
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("usuario")
       .update(usuario)
@@ -72,6 +74,7 @@ class UsuarioService {
   }
 
   public async eliminarUsuario(id: string): Promise<boolean> {
+    const supabase = createClient();
     const { error } = await supabase.from("usuario").delete().eq("id", id);
 
     if (error) {

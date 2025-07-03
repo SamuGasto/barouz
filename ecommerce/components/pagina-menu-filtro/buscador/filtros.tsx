@@ -2,12 +2,13 @@
 import { Badge } from "@/components/ui/badge";
 import React from "react";
 import { useFiltrosStore } from "@/components/providers/filtros-provider";
+import { CategoriaProductos } from "@/types/resumen-tipos";
 
-const nombresFiltros = [
+const nombresFiltros: CategoriaProductos[] = [
   "Waffles",
   "Helados",
   "Churros",
-  "Waffles Cookies",
+  "Waffle Cookies",
   "Postres",
   "Bebidas",
   "Otros",
@@ -28,10 +29,14 @@ function Filtros() {
             <Badge
               key={index}
               className="cursor-pointer"
-              variant={filtrosCategoria[index] == 0 ? "secondary" : "default"}
+              variant={filtrosCategoria.includes(nombre) ? "default" : "secondary"}
               onClick={() => {
                 const nuevoEstado = [...filtrosCategoria];
-                nuevoEstado[index] = nuevoEstado[index] == 0 ? 1 : 0;
+                if (filtrosCategoria.includes(nombre)) {
+                  nuevoEstado.splice(filtrosCategoria.indexOf(nombre), 1);
+                } else {
+                  nuevoEstado.push(nombre);
+                }
                 setFiltrosCategoria(nuevoEstado);
               }}
             >

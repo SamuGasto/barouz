@@ -5,12 +5,23 @@ import { useCarritoStore } from "@/components/providers/carrito-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, ImageOffIcon, ArrowRight } from "lucide-react";
+import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, ImageOffIcon, ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import AlertDialogDelete from "@/components/cart/alert-dialog-delete";
 import AlertDialogEliminarCarrito from "@/components/cart/alert-dialog-eliminar-carrito";
+import { z } from "zod/v4";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useCupones } from "@/hooks/useCupones";
+import { toast } from "sonner";
+
+const CuponScheme = z.object({
+    nombre: z.string(),
+});
 
 export default function CartPage() {
     const items = useCarritoStore((state) => state.items);
@@ -18,6 +29,17 @@ export default function CartPage() {
     const eliminarDelCarrito = useCarritoStore((state) => state.eliminarDelCarrito);
     const totalItems = useCarritoStore((state) => state.totalItems);
     const limpiarCarrito = useCarritoStore((state) => state.limpiarCarrito);
+    const cupon = useCarritoStore((state) => state.cupon);
+    const aplicarCupon = useCarritoStore((state) => state.aplicarCupon);
+    const eliminarCupon = useCarritoStore((state) => state.eliminarCupon);
+    const { data: cupones, isLoading: cuponesLoading } = useCupones();
+
+    const form = useForm<z.infer<typeof CuponScheme>>({
+        resolver: zodResolver(CuponScheme),
+        defaultValues: {
+            nombre: "",
+        },
+    });
 
     const handleUpdateQuantity = (id: string, change: number) => {
         const item = items.find(item => item.id === id);
@@ -31,6 +53,16 @@ export default function CartPage() {
 
     const formatPrice = (price: number) => {
         return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    };
+
+    const onSubmit = (data: z.infer<typeof CuponScheme>) => {
+        const cuponSeleccionado = cupones?.find(cupon => cupon.nombre === data.nombre);
+        if (cuponSeleccionado) {
+            aplicarCupon(cuponSeleccionado);
+            toast.success("Cupon aplicado correctamente");
+        } else {
+            toast.error("Cupon no encontrado");
+        }
     };
 
     if (items.length === 0) {
@@ -164,6 +196,32 @@ export default function CartPage() {
                                 <span>Total</span>
                                 <span className="text-lg">${formatPrice(items.reduce((sum, item) => sum + item.precio_final, 0))}</span>
                             </div>
+                            <Form {...form}>
+                                <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full flex-col items-center">
+                                    <p className="font-semibold text-left">Cupón</p>
+                                    <div className="flex w-full flex-row gap-1 justify-between">
+                                        <FormField
+                                            control={form.control}
+                                            name="nombre"
+                                            render={({ field }) => (
+                                                <FormItem className="w-full">
+                                                    <FormControl className="w-full">
+                                                        <Input className="w-full" placeholder="Código de cupón" {...field} />
+                                                    </FormControl>
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <Button type="submit"><Check className="h-4 w-4" /></Button>
+                                    </div>
+                                    <p className="text-muted-foreground text-sm">Introduce el código de cupón para aplicar el descuento.</p>
+                                </form>
+                            </Form>
+                            {cupon && (
+                                <div className="flex justify-between font-medium text-lime-500">
+                                    <span>Descuento</span>
+                                    <span className="text-md">-${formatPrice(cupon.valor_descuento)}</span>
+                                </div>
+                            )}
                         </CardContent>
                         <CardFooter className="flex flex-col gap-2">
                             <Button size="lg" className="w-full bg-brand-primary hover:bg-brand-primary/90">

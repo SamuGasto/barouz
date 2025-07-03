@@ -1,4 +1,4 @@
-import supabase from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import {
   PedidoRow,
   PedidoInsert,
@@ -8,6 +8,7 @@ import {
 
 class PedidosService {
   public async obtenerTodosPedidos(): Promise<PedidoRow[]> {
+    const supabase = createClient();
     const { data, error } = await supabase.from("pedido").select("*");
 
     if (error) {
@@ -19,6 +20,7 @@ class PedidosService {
   }
 
   public async obtenerPedidoPorId(id: string): Promise<PedidoRow> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("pedido")
       .select("*")
@@ -36,6 +38,7 @@ class PedidosService {
   public async obtenerTodosLosProductosPorPedido(
     pedido_id: string
   ): Promise<ProductoRow[]> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("producto")
       .select("*")
@@ -50,6 +53,7 @@ class PedidosService {
   }
 
   public async crearPedido(pedido: PedidoInsert): Promise<PedidoRow> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("pedido")
       .insert(pedido)
@@ -68,6 +72,7 @@ class PedidosService {
     pedido_id: string,
     pedido: PedidoUpdate
   ): Promise<PedidoRow> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("pedido")
       .update(pedido)
@@ -84,6 +89,7 @@ class PedidosService {
   }
 
   public async eliminarPedido(pedido_id: string): Promise<boolean> {
+    const supabase = createClient();
     const { error } = await supabase
       .from("pedido")
       .delete()

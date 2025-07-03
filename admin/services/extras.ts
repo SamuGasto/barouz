@@ -1,4 +1,4 @@
-import supabase from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import {
   ExtraRow,
   ExtraInsert,
@@ -8,6 +8,7 @@ import {
 
 class ExtraService {
   public async obtenerTodosLosExtras(): Promise<ExtraRow[]> {
+    const supabase = createClient();
     const { data, error } = await supabase.from("extra").select("*");
 
     if (error) {
@@ -19,6 +20,7 @@ class ExtraService {
   }
 
   public async obtenerExtraPorId(id: string): Promise<ExtraRow> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("extra")
       .select("*")
@@ -34,6 +36,7 @@ class ExtraService {
   }
 
   public async obtenerExtrasPorPedido(pedido_id: string) {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("pedido_extra")
       .select("extra_id")
@@ -50,6 +53,7 @@ class ExtraService {
   public async obtenerExtrasPorCategoriaProducto(
     categoria: CategoriaProductos
   ): Promise<{ extras: ExtraRow[]; categorias: string[] }> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("extra")
       .select("*")
@@ -71,6 +75,7 @@ class ExtraService {
   }
 
   public async obtenerCategoriasExtras(): Promise<string[]> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("categorias_unicas_view")
       .select("categoria");
@@ -84,6 +89,7 @@ class ExtraService {
   }
 
   public async crearExtra(extra: ExtraInsert): Promise<ExtraRow> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("extra")
       .insert([extra])
@@ -99,6 +105,7 @@ class ExtraService {
   }
 
   public async actualizarExtra(extra: ExtraUpdate): Promise<ExtraRow> {
+    const supabase = createClient();
     if (!extra.id) {
       throw new Error("El ID del extra es requerido");
     }
@@ -119,6 +126,7 @@ class ExtraService {
   }
 
   public async eliminarExtra(id: string): Promise<void> {
+    const supabase = createClient();
     const { error } = await supabase.from("extra").delete().eq("id", id);
 
     if (error) {

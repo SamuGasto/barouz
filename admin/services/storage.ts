@@ -1,4 +1,4 @@
-import supabase from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 interface HandleImageUploadParams {
   newImageData: File | string | undefined; // `File` si es nueva, `string` si es URL existente o vacía, `undefined` si no se tocó
@@ -7,13 +7,21 @@ interface HandleImageUploadParams {
   isEditing: boolean; // Indica si estamos en modo edición
 }
 
-class StorageService {
-  public async uploadImage(bucketName: string, file: File): Promise<string> {
-    const safeFileName = file.name;
+interface UploadImageParams {
+  bucketName: string;
+  file: File;
+}
 
+class StorageService {
+  // Convert to arrow functions
+  public uploadImage = async (props: UploadImageParams): Promise<string> => {
+    const { bucketName, file } = props;
+    const safeFileName = file.name;
     const filePath = `${safeFileName}`; // Genera un path único
+
+    const supabase = createClient();
     const { data, error } = await supabase.storage
-      .from(bucketName) // Asegúrate de que este bucket exista en Supabase
+      .from(bucketName)
       .upload(filePath, file, {
         cacheControl: "3600",
         upsert: false,
@@ -24,7 +32,6 @@ class StorageService {
       throw error;
     }
 
-    // Obtener la URL pública del archivo subido
     const { data: publicUrlData } = supabase.storage
       .from(bucketName)
       .getPublicUrl(filePath);
@@ -34,60 +41,58 @@ class StorageService {
     } else {
       throw new Error("No se pudo obtener la URL pública de la imagen.");
     }
-  }
+  };
 
-  public async deleteImage(
+  public deleteImage = async (
     bucketName: string,
     imageUrl: string
-  ): Promise<void> {
+  ): Promise<void> => {
     if (!imageUrl) {
       console.warn("No se proporcionó URL de imagen para eliminar.");
-      return; // No hacer nada si no hay URL
+      return;
     }
 
-    try {
-      // Supabase Storage necesita la ruta dentro del bucket, no la URL completa
-      // Necesitamos extraer la ruta del archivo de la URL pública
-      const urlParts = imageUrl.split(`/${bucketName}/`); // Divide la URL en el nombre del bucket
+    const supabase = createClient();
 
+    try {
+      const urlParts = imageUrl.split(`/${bucketName}/`);
       if (urlParts.length < 2) {
         console.warn(
           `La URL "${imageUrl}" no parece contener el bucket "${bucketName}".`
         );
-        return; // La URL no tiene el formato esperado
+        return;
       }
 
-      const filePath = urlParts[1]; // La parte después del nombre del bucket es la ruta del archivo
-
-      // Eliminar el archivo del bucket
+      const filePath = urlParts[1];
       const { data, error } = await supabase.storage
         .from(bucketName)
-        .remove([filePath]); // remove espera un array de rutas
+        .remove([filePath]);
 
       if (error) {
         console.error("Error al eliminar imagen del storage:", error);
         throw error;
       }
-
       console.log(`Imagen "${filePath}" eliminada del storage.`);
     } catch (error) {
       console.error("Error inesperado al eliminar imagen:", error);
       throw error;
     }
-  }
+  };
 
-  public async handleImageUpload(
+  public handleImageUpload = async (
     params: HandleImageUploadParams
-  ): Promise<string> {
+  ): Promise<string> => {
     const { newImageData, oldImageUrl, bucketName, isEditing } = params;
-    let finalImageUrl: string = oldImageUrl; // Por defecto, mantenemos la imagen antigua
+    let finalImageUrl: string = oldImageUrl;
 
-    // Caso 1: El usuario seleccionó un NUEVO archivo (File)
     if (newImageData instanceof File) {
       try {
-        finalImageUrl = await this.uploadImage(bucketName, newImageData);
+        // Now 'this' will correctly refer to the StorageService instance
+        finalImageUrl = await this.uploadImage({
+          bucketName,
+          file: newImageData,
+        });
 
-        // Si estamos editando y había una imagen antigua Y es diferente de la nueva, la eliminamos.
         if (
           isEditing &&
           oldImageUrl &&
@@ -102,15 +107,11 @@ class StorageService {
           `Error al subir nueva imagen para el bucket ${bucketName}:`,
           error
         );
-        // Aquí podrías decidir si quieres lanzar el error o devolver la URL antigua/vacía
         throw new Error("No se pudo subir la nueva imagen.");
       }
-    }
-    // Caso 2: `newImageData` es un string (URL existente o string vacío)
-    else if (typeof newImageData === "string") {
-      finalImageUrl = newImageData; // Usamos el string que viene del formulario (URL o "")
+    } else if (typeof newImageData === "string") {
+      finalImageUrl = newImageData;
 
-      // Si estamos editando y la nueva URL es vacía (usuario la borró) Y había una imagen antigua, la eliminamos.
       if (
         isEditing &&
         finalImageUrl === "" &&
@@ -127,12 +128,8 @@ class StorageService {
             `No se pudo eliminar la imagen antigua del bucket ${bucketName} al dejar el campo vacío:`,
             error
           );
-          // No lanzamos el error aquí para no bloquear la actualización de la entidad en DB
         }
-      }
-      // Si la nueva URL es diferente de la antigua (e.g., se pegó una URL distinta)
-      // Y la antigua no estaba vacía, también la eliminamos.
-      else if (
+      } else if (
         isEditing &&
         finalImageUrl !== oldImageUrl &&
         oldImageUrl !== ""
@@ -150,13 +147,8 @@ class StorageService {
         }
       }
     }
-    // Caso 3: `newImageData` es `undefined` (el campo de imagen no se modificó en el formulario)
-    // En este caso, `finalImageUrl` ya es `oldImageUrl`, lo cual es el comportamiento deseado:
-    // mantener la imagen existente si no se proporciona una nueva ni se vacía el campo.
-    // No se requiere lógica adicional aquí.
-
     return finalImageUrl;
-  }
+  };
 }
 
 export const storageService = new StorageService();

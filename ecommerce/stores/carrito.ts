@@ -1,3 +1,5 @@
+import { CuponRow } from "@/types/resumen-tipos";
+import { Database } from "@/types/supabase";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -27,6 +29,7 @@ export type ItemCarrito = {
 export type CarritoState = {
   items: ItemCarrito[];
   totalItems: number;
+  cupon: CuponRow | null;
 };
 
 export type CarritoActions = {
@@ -37,6 +40,8 @@ export type CarritoActions = {
   actualizarCantidad: (id: string, cantidad: number) => void;
   actualizarExtras: (id: string, extras: ExtraCarrito[]) => void;
   limpiarCarrito: () => void;
+  aplicarCupon: (cupon: CuponRow) => void;
+  eliminarCupon: () => void;
 };
 
 export type CarritoStore = CarritoState & CarritoActions;
@@ -60,6 +65,7 @@ export const createCarritoStore = () => {
       (set, get) => ({
         items: [],
         totalItems: 0,
+        cupon: null,
 
         agregarAlCarrito: (item) =>
           set((state) => {
@@ -87,6 +93,7 @@ export const createCarritoStore = () => {
             ...state,
             items: state.items.filter((item: ItemCarrito) => item.id !== id),
             totalItems: state.totalItems - 1,
+            cupon: state.items.length === 0 ? null : state.cupon,
           })),
 
         actualizarCantidad: (id, cantidad) =>
@@ -126,7 +133,11 @@ export const createCarritoStore = () => {
           })),
 
         limpiarCarrito: () =>
-          set((state) => ({ ...state, items: [], totalItems: 0 })),
+          set((state) => ({ ...state, items: [], totalItems: 0, cupon: null })),
+
+        aplicarCupon: (cupon) => set((state) => ({ ...state, cupon })),
+
+        eliminarCupon: () => set((state) => ({ ...state, cupon: null })),
       }),
       {
         name: "carrito-storage",

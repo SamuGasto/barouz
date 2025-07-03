@@ -1,5 +1,5 @@
 import { Database } from "@/types/supabase";
-import { supabase } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { PedidoFinalScheme } from "@/components/pedidos/tarjetas/dialog-pedido";
 import { z } from "zod";
 import { TodosLosPedidos } from "@/types/res_pedidos_final";
@@ -53,6 +53,7 @@ type MappedExtra = {
 
 class PedidoFinalService {
   public async obtenerTodosLosPedidos(): Promise<TodosLosPedidos[]> {
+    const supabase = createClient();
     const { data: pedidosFinalesData, error } = await supabase
       .from("pedido_final")
       .select(
@@ -144,6 +145,7 @@ class PedidoFinalService {
   public async obtenerDatosPedidoFinal(
     pedido_id: string
   ): Promise<PedidoFinalRow> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("pedido_final")
       .select("*")
@@ -161,6 +163,7 @@ class PedidoFinalService {
   public async crearPedidoFinalEnBD(
     pedido: PedidoFinalInsert
   ): Promise<PedidoFinalRow> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("pedido_final")
       .insert([pedido])
@@ -176,6 +179,7 @@ class PedidoFinalService {
   }
 
   public async obtenerDetallePedidoFinal(pedido_final_id: string) {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("pedido")
       .select(
@@ -195,6 +199,7 @@ class PedidoFinalService {
   public async obtenerPedidosPorPedidoFinal(
     pedido_final_id: string
   ): Promise<PedidoRow[]> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("pedido")
       .select("*")
@@ -211,6 +216,7 @@ class PedidoFinalService {
   public async obtenerTodosLosProductosPorPedido(
     pedido_id: string
   ): Promise<ProductoRow[]> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("producto")
       .select("*")
@@ -230,6 +236,7 @@ class PedidoFinalService {
     estado: Database["public"]["Enums"]["EstadoPedidos"],
     razon_cancelacion?: string
   ) {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("pedido_final")
       .update({
@@ -249,6 +256,7 @@ class PedidoFinalService {
   }
 
   public async eliminarPedidoFinal(pedido_id: string): Promise<boolean> {
+    const supabase = createClient();
     const { error } = await supabase
       .from("pedido_final")
       .delete()
@@ -288,6 +296,7 @@ class PedidoFinalService {
   public async gestionarPedidoFinal(
     args: GestionarPedidoFinalArgs
   ): Promise<string> {
+    const supabase = createClient();
     const { pedido_final_id, usuario_id, pedido_final } = args;
     const {
       tipo_envio,

@@ -1,4 +1,4 @@
-import supabase from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import {
   CuponRow,
   CuponInsert,
@@ -7,6 +7,7 @@ import {
 
 class CuponesService {
   public async obtenerTodosLosCupones(): Promise<CuponRow[]> {
+    const supabase = createClient();
     const { data, error } = await supabase.from("cupon").select("*");
 
     if (error) {
@@ -18,6 +19,7 @@ class CuponesService {
   }
 
   public async obtenerCuponPorId(id: string): Promise<CuponRow> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("cupon")
       .select("*")
@@ -33,6 +35,7 @@ class CuponesService {
   }
 
   public async crearCupon(cupon: CuponInsert): Promise<CuponRow> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("cupon")
       .insert(cupon)
@@ -48,6 +51,7 @@ class CuponesService {
   }
 
   public async editarCupon(cupon: CuponUpdate): Promise<CuponRow> {
+    const supabase = createClient();
     if (!cupon.id) {
       throw new Error("El ID del cupon es requerido");
     }
@@ -68,7 +72,8 @@ class CuponesService {
   }
 
   public async eliminarCupon(id: string): Promise<boolean> {
-    const { data, error } = await supabase.from("cupon").delete().eq("id", id);
+    const supabase = createClient();
+    const { error } = await supabase.from("cupon").delete().eq("id", id);
 
     if (error) {
       console.error("Error al eliminar cupon:", error);

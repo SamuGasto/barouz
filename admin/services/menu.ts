@@ -7,11 +7,10 @@ import {
 } from "@/types/tipos_supabase_resumidos";
 
 class MenuService {
-  private supabase = createClient();
-
   public async getAllProducts(): Promise<ProductoRow[]> {
     try {
-      const { data, error } = await this.supabase
+      const supabase = createClient();
+      const { data, error } = await supabase
         .from("producto")
         .select("*")
         .order("categoria", { ascending: true });
@@ -30,7 +29,8 @@ class MenuService {
 
   public async getProductById(id: string): Promise<ProductoRow> {
     try {
-      const { data, error } = await this.supabase
+      const supabase = createClient();
+      const { data, error } = await supabase
         .from("producto")
         .select("*")
         .eq("id", id)
@@ -51,27 +51,36 @@ class MenuService {
     }
   }
 
-  public async obtenerTodosLosProductosPorPedido(pedido_id: string): Promise<ProductoRow[]> {
+  public async obtenerTodosLosProductosPorPedido(
+    pedido_id: string
+  ): Promise<ProductoRow[]> {
     try {
-      const { data, error } = await this.supabase
+      const supabase = createClient();
+      const { data, error } = await supabase
         .from("producto")
         .select("*")
         .eq("pedido_id", pedido_id);
 
       if (error) {
-        throw new Error(`Error al obtener productos del pedido: ${error.message}`);
+        throw new Error(
+          `Error al obtener productos del pedido: ${error.message}`
+        );
       }
 
       return data || [];
     } catch (error) {
-      console.error("Error inesperado en obtenerTodosLosProductosPorPedido:", error);
+      console.error(
+        "Error inesperado en obtenerTodosLosProductosPorPedido:",
+        error
+      );
       throw new Error("No se pudieron obtener los productos del pedido");
     }
   }
 
   public async obtenerPedidosPorPedidoFinal(id_pedido_final: string) {
     try {
-      const { data, error } = await this.supabase
+      const supabase = createClient();
+      const { data, error } = await supabase
         .from("pedido")
         .select("*")
         .eq("pedido_final_id", id_pedido_final);
@@ -88,10 +97,11 @@ class MenuService {
   }
 
   public async crearProducto(
-    producto: Omit<ProductoInsert, 'id' | 'created_at' | 'updated_at'>
+    producto: Omit<ProductoInsert, "id" | "created_at" | "updated_at">
   ): Promise<ProductoRow> {
     try {
-      const { data, error } = await this.supabase
+      const supabase = createClient();
+      const { data, error } = await supabase
         .from("producto")
         .insert([producto])
         .select()
@@ -117,7 +127,8 @@ class MenuService {
     updates: Partial<ProductoUpdate>
   ): Promise<ProductoRow> {
     try {
-      const { data, error } = await this.supabase
+      const supabase = createClient();
+      const { data, error } = await supabase
         .from("producto")
         .update(updates)
         .eq("id", id)
@@ -141,10 +152,8 @@ class MenuService {
 
   public async eliminarProducto(id: string): Promise<void> {
     try {
-      const { error } = await this.supabase
-        .from("producto")
-        .delete()
-        .eq("id", id);
+      const supabase = createClient();
+      const { error } = await supabase.from("producto").delete().eq("id", id);
 
       if (error) {
         throw new Error(`Error al eliminar producto: ${error.message}`);

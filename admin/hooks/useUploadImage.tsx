@@ -15,18 +15,20 @@ interface HandleImageUploadParams {
 
 export function useUploadImage() {
     return useMutation<string, Error, UploadImageParams>({
-        mutationFn: ({ bucketName, file }) => storageService.uploadImage(bucketName, file),
+        mutationFn: storageService.uploadImage.bind(storageService),
         onError: (error) => {
             console.error("Error al subir imagen:", error);
+            throw error;
         },
     })
 }
 
 export function useHandleImageUpload() {
     return useMutation<string, Error, HandleImageUploadParams>({
-        mutationFn: ({ bucketName, newImageData, oldImageUrl, isEditing }) => storageService.handleImageUpload({ bucketName, newImageData, oldImageUrl, isEditing }),
+        mutationFn: storageService.handleImageUpload.bind(storageService),
         onError: (error) => {
             console.error("Error al subir imagen:", error);
+            throw error;
         },
     })
 }

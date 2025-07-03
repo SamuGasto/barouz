@@ -4,7 +4,6 @@ import Navbar from "@/components/general/navbar/navbar";
 import Footer from "@/components/general/footer/footer";
 import { Metadata } from "next";
 import og_image from "@/images/barouz-logo.png";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Providers } from "@/components/providers/providers";
 import { Toaster } from "sonner";
 
@@ -39,8 +38,6 @@ const geistSans = Geist({
   display: "swap",
   subsets: ["latin"],
 });
-
-const queryClient = new QueryClient();
 
 export default function RootLayout({
   children,
