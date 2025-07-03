@@ -125,7 +125,8 @@ export const createCarritoStore = () => {
             ),
           })),
 
-        limpiarCarrito: () => set({ items: [] }),
+        limpiarCarrito: () =>
+          set((state) => ({ ...state, items: [], totalItems: 0 })),
       }),
       {
         name: "carrito-storage",

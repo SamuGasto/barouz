@@ -1,4 +1,3 @@
-"use client";
 import ProductCarousel from "@/components/pagina-principal/carrusel-principal/product-carousel";
 import Promociones from "@/components/pagina-principal/promociones/promociones";
 import Banner from "@/components/pagina-principal/banner";

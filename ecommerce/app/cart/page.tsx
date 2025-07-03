@@ -9,6 +9,8 @@ import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, ImageOffIcon, ArrowRight 
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
+import AlertDialogDelete from "@/components/cart/alert-dialog-delete";
+import AlertDialogEliminarCarrito from "@/components/cart/alert-dialog-eliminar-carrito";
 
 export default function CartPage() {
     const items = useCarritoStore((state) => state.items);
@@ -91,14 +93,8 @@ export default function CartPage() {
                                                 ${formatPrice(item.precio_unitario)} c/u
                                             </p>
                                         </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => eliminarDelCarrito(item.id)}
-                                            className="text-destructive hover:text-destructive/90"
-                                        >
-                                            <Trash2 className="h-5 w-5" />
-                                        </Button>
+
+                                        <AlertDialogDelete funcionEliminar={() => eliminarDelCarrito(item.id)} />
                                     </div>
 
                                     {item.extras && item.extras.length > 0 && (
@@ -174,13 +170,7 @@ export default function CartPage() {
                                 Continuar al pago
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
-                            <Button
-                                variant="outline"
-                                className="w-full"
-                                onClick={limpiarCarrito}
-                            >
-                                Vaciar carrito
-                            </Button>
+                            <AlertDialogEliminarCarrito funcionEliminar={limpiarCarrito} />
                         </CardFooter>
                     </Card>
 
