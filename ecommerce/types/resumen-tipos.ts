@@ -24,6 +24,11 @@ export type PedidoExtraUpdate =
 export type UsuarioRow = Database["public"]["Tables"]["usuario"]["Row"];
 export type UsuarioInsert = Database["public"]["Tables"]["usuario"]["Insert"];
 export type UsuarioUpdate = Database["public"]["Tables"]["usuario"]["Update"];
+export type RolesInsert =
+  Database["public"]["Tables"]["roles_usuarios"]["Insert"];
+export type RolesUpdate =
+  Database["public"]["Tables"]["roles_usuarios"]["Update"];
+export type RolesRow = Database["public"]["Tables"]["roles_usuarios"]["Row"];
 export type CuponRow = Database["public"]["Tables"]["cupon"]["Row"];
 export type CuponInsert = Database["public"]["Tables"]["cupon"]["Insert"];
 export type CuponUpdate = Database["public"]["Tables"]["cupon"]["Update"];

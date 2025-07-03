@@ -1,4 +1,5 @@
 import { Local } from "@/data/tipos";
+import { LocalRow } from "@/types/resumen-tipos";
 interface AdvancedMarkerElement {
   // Add any properties/methods you use from AdvancedMarkerElement
   position: google.maps.LatLng | google.maps.LatLngLiteral | null;
@@ -56,7 +57,7 @@ function injectPriceTagStyles() {
   document.head.appendChild(style);
 }
 
-async function initMap(locales: Local[]) {
+async function initMap(locales: LocalRow[]) {
   // Request needed libraries.
   const { AdvancedMarkerElement } = (await google.maps.importLibrary(
     "marker"

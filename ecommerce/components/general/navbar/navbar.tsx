@@ -1,16 +1,11 @@
-"use client";
 import Link from "next/link";
 import Image from "next/image";
 import logo from "@/images/barouz-logo.png";
 import logo_texto from "@/images/barouz-letras.png";
 import { ThemeSwitcher } from "./theme-switcher";
 import CarritoCompra from "./carrito-compra";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { LogOut, Menu } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { createClient } from "@/utils/supabase/client";
-import SideMenu from "./nav-bar-extend";
+import { Lock } from "lucide-react";
+import Logout from "./logout";
 
 const links = [
   { href: "/", label: "Inicio" },
@@ -30,14 +25,18 @@ const Navbar = () => {
           <Image src={logo_texto} alt="Logo" />
         </Link>
         {links.map((link) => (
-          <Link key={link.href} href={link.href} className="hover:underline cursor-pointer">
-            {link.label}
-          </Link>
+          <div key={link.href} className="flex flex-row items-center gap-2">
+            <Link key={`${link.href}-link`} href={link.href} className="flex flex-row items-center gap-1 hover:underline cursor-pointer">
+              {link.href === "/mis-pedidos" && <Lock key={`${link.href}-lock`} className="w-3 h-3" />}
+              {link.label}
+            </Link>
+          </div>
         ))}
       </div>
       <div id="actions" className='flex flex-row items-center gap-2'>
         <CarritoCompra />
         <ThemeSwitcher />
+        <Logout />
       </div>
     </nav>
   )

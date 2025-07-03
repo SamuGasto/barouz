@@ -6,7 +6,6 @@ export default async function Home() {
   return (
     <div className="mb-6 flex w-full flex-col items-center gap-6">
       <Banner />
-      <Populares />
       <Menu />
     </div>
   );

@@ -7,7 +7,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../ui/carousel";
-import TarjetaCarrusel from "../pagina-principal/carrusel-principal/tarjeta-carrusel";
+import TarjetaCarrusel from "../pagina-principal/carrusel-principal/cupon-carrusel";
 
 function CarruselPromociones({ ofertas }: { ofertas: Oferta[] }) {
   return (

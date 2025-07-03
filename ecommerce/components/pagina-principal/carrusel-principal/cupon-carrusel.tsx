@@ -1,34 +1,46 @@
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import React from "react";
-import { Clock } from "lucide-react";
+import { Clock, ImageOffIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Oferta } from "@/data/tipos";
+import { CuponRow } from "@/types/resumen-tipos";
 
-function TarjetaCarrusel({ oferta }: { oferta: Oferta }) {
+interface PropType {
+  cupon: CuponRow;
+}
+
+function CuponCarrusel(props: PropType) {
+  const { cupon } = props;
   return (
     <Card className="h-fit w-full px-2 py-2">
       <div className="relative">
-        <Image
-          className="h-[460px] w-full rounded-lg object-cover"
-          quality={100}
-          src={oferta.image}
-          alt={oferta.oferta_texto}
-          placeholder="blur"
-        />
+        {cupon.imagen_url !== "" ? (
+          <Image
+            className="h-[460px] w-full rounded-lg object-cover"
+            quality={100}
+            width={460}
+            height={460}
+            src={cupon.imagen_url}
+            alt={cupon.nombre}
+          />
+        ) : (
+          <div className="flex h-[460px] w-full items-center justify-center">
+            <ImageOffIcon className="h-12 w-12" />
+          </div>
+        )}
         <div className="absolute top-0 flex h-full w-fit flex-col justify-center gap-2 rounded-lg bg-linear-to-r/srgb from-black/50 to-transparent p-4">
           <Badge className="bg-brand-state-1 text-brand-state-1-foreground hover:bg-brand-state-1 w-fit text-xs">
             Oferta por tiempo limitado
           </Badge>
           <h3 className="text-primary-foreground dark:text-primary text-md font-bold md:text-5xl">
-            {oferta.oferta_texto}
+            {cupon.nombre}
           </h3>
           <div className="dark:text-primary flex flex-row items-center gap-2">
             <Clock className="text-primary-foreground dark:text-primary size-4 md:size-6" />
             <p className="text-primary-foreground dark:text-primary text-sm font-light md:text-2xl">
               Valido hasta el{" "}
-              <span className="font-bold">{oferta.oferta_termino}</span>
+              <span className="font-bold">{cupon.fecha_fin}</span>
             </p>
           </div>
           <Button className="bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary/90 mt-2 w-fit">
@@ -40,4 +52,4 @@ function TarjetaCarrusel({ oferta }: { oferta: Oferta }) {
   );
 }
 
-export default TarjetaCarrusel;
+export default CuponCarrusel;

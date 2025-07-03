@@ -42,6 +42,7 @@ export type CarritoActions = {
   limpiarCarrito: () => void;
   aplicarCupon: (cupon: CuponRow) => void;
   eliminarCupon: () => void;
+  isCuponUsado: (cupon: string) => boolean;
 };
 
 export type CarritoStore = CarritoState & CarritoActions;
@@ -138,6 +139,11 @@ export const createCarritoStore = () => {
         aplicarCupon: (cupon) => set((state) => ({ ...state, cupon })),
 
         eliminarCupon: () => set((state) => ({ ...state, cupon: null })),
+
+        isCuponUsado: (cupon) => {
+          const { cupon: cuponActual } = get();
+          return cuponActual?.nombre === cupon;
+        },
       }),
       {
         name: "carrito-storage",

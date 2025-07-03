@@ -55,15 +55,6 @@ export const updateSession = async (request: NextRequest) => {
       return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    if (
-      protectedRoutes.some((route) =>
-        request.nextUrl.pathname.startsWith(route)
-      ) &&
-      !user.error
-    ) {
-      return NextResponse.redirect(new URL("/mis-pedidos", request.url));
-    }
-
     return response;
   } catch (e) {
     // If you are here, a Supabase client could not be created!

@@ -7,15 +7,20 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../ui/carousel";
-import TarjetaCarrusel from "../pagina-principal/carrusel-principal/tarjeta-carrusel";
+import CuponCarrusel from "../pagina-principal/carrusel-principal/cupon-carrusel";
+import { CuponRow } from "@/types/resumen-tipos";
 
-function CarruselOfertas({ ofertas }: { ofertas: Oferta[] }) {
+interface PropType {
+  cupones: CuponRow[];
+}
+
+function CarruselOfertas({ cupones }: PropType) {
   return (
     <Carousel>
       <CarouselContent>
-        {ofertas?.map((oferta: Oferta) => (
-          <CarouselItem key={oferta.id}>
-            <TarjetaCarrusel oferta={oferta} />
+        {cupones?.map((cupon: CuponRow) => (
+          <CarouselItem key={cupon.id}>
+            <CuponCarrusel cupon={cupon} />
           </CarouselItem>
         ))}
       </CarouselContent>

@@ -18,6 +18,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { useCupones } from "@/hooks/useCupones";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const CuponScheme = z.object({
     nombre: z.string(),
@@ -33,6 +34,7 @@ export default function CartPage() {
     const aplicarCupon = useCarritoStore((state) => state.aplicarCupon);
     const eliminarCupon = useCarritoStore((state) => state.eliminarCupon);
     const { data: cupones, isLoading: cuponesLoading } = useCupones();
+    const router = useRouter();
 
     const form = useForm<z.infer<typeof CuponScheme>>({
         resolver: zodResolver(CuponScheme),
@@ -224,7 +226,7 @@ export default function CartPage() {
                             )}
                         </CardContent>
                         <CardFooter className="flex flex-col gap-2">
-                            <Button size="lg" className="w-full bg-brand-primary hover:bg-brand-primary/90">
+                            <Button size="lg" onClick={() => router.push('/checkout')} className="w-full bg-brand-primary hover:bg-brand-primary/90">
                                 Continuar al pago
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
