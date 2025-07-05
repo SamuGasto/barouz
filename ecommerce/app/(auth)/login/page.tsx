@@ -39,11 +39,15 @@ export default function Login() {
         setIsLoading(true);
 
         try {
+            console.log(values);
             await signInAction({ email: values.email, password: values.password });
+
+            toast.success("¡Inicio de sesión exitoso!");
             router.back();
 
         } catch (error: any) {
             const errorMessage = "Credenciales inválidas. Por favor, verifica e intenta de nuevo.";
+            console.error(error);
             toast.error(errorMessage);
         } finally {
             setIsLoading(false);
@@ -80,7 +84,8 @@ export default function Login() {
                                                     className="pl-9"
                                                     disabled={isLoading}
                                                     autoComplete="username"
-                                                    {...field}
+                                                    value={field.value}
+                                                    onChange={field.onChange}
                                                 />
                                             </FormControl>
                                         </div>
@@ -112,7 +117,8 @@ export default function Login() {
                                                     className="pl-9 pr-10"
                                                     disabled={isLoading}
                                                     autoComplete="current-password"
-                                                    {...field}
+                                                    value={field.value}
+                                                    onChange={field.onChange}
                                                 />
                                             </FormControl>
                                             <button

@@ -3,8 +3,7 @@
 import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
-import { redirect, useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { redirect } from "next/navigation";
 
 export const signUpAction = async ({
   email,
@@ -26,9 +25,8 @@ export const signUpAction = async ({
 
   if (error) {
     console.error(error.code + " " + error.message);
-    return encodedRedirect("error", "/sign-up", error.message);
+    return encodedRedirect("error", "/register", error.message);
   }
-  toast.success("¡Registro exitoso!");
 
   if (data.user) return data.user.id;
 };
@@ -42,15 +40,11 @@ export const signInAction = async ({
 }) => {
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return encodedRedirect("error", "/sign-in", error.message);
+    return encodedRedirect("error", "/login", error.message);
   }
-  toast.success("¡Inicio de sesión exitoso!");
 };
 
 export const signInWithOtp = async ({ email }: { email: string }) => {
