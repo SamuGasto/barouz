@@ -24,7 +24,7 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
-    const supabase = createClient();
+
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -38,6 +38,7 @@ export default function Login() {
         setIsLoading(true);
 
         try {
+            const supabase = createClient();
             const { error } = await supabase.auth.signInWithPassword({
                 email: values.email,
                 password: values.password,

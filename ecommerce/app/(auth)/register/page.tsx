@@ -73,7 +73,7 @@ export default function Register() {
     const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null);
 
     const router = useRouter();
-    const supabase = createClient();
+
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -91,6 +91,7 @@ export default function Register() {
 
         try {
             // Check if user already exists
+            const supabase = createClient();
             const { data: userExists } = await supabase
                 .from('usuario')
                 .select('email')
