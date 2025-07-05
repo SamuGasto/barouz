@@ -12,10 +12,8 @@ import {
 
 import { useRouter } from "next/navigation";
 import { Button } from "../../ui/button";
-import { Pedido } from "@/data/tipos";
 import { CheckCircle2, CirclePlus, Plus, ShoppingCart } from "lucide-react";
 import TarjetaVentaProducto from "../tarjeta-venta-producto";
-import extras_waffle from "@/data/extras-waffle";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Extras from "./extras";
 import { Separator } from "@/components/ui/separator";
@@ -26,11 +24,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useExtrasPorCategoriaProducto } from "@/hooks/useExtras";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import TarjetaExtra from "./waffles/tarjeta-detalle";
 import { useCarritoStore } from "@/components/providers/carrito-provider";
 import { toast } from "sonner";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface PropType {
   producto: ProductoRow;

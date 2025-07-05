@@ -2,7 +2,6 @@
 import { FiltrosStore, createFiltrosStore } from "@/stores/filtros-store";
 import { createContext, ReactNode, useContext, useRef } from "react";
 import { useStore } from "zustand";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export type FiltrosStoreApi = ReturnType<typeof createFiltrosStore>;
 

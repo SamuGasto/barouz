@@ -29,23 +29,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const supabase = createClient();
 
     useEffect(() => {
-        const FetchUser = async () => {
-            const user = await supabase.auth.getUser();
-            if (user.data.user) {
-                const { data: userDB, error } = await supabase.from('usuario').select('nombre').eq('id', user.data.user.id).single();
-                if (!userDB?.nombre || error) {
-                    toast.error(error?.message || "Error al obtener el usuario");
-                }
-                const userFinal: UserExtend = {
-                    ...user.data.user,
-                    nombre: userDB?.nombre || ""
-                }
+        // Log 9: AuthProvider montado
+        console.log("AUTH PROVIDER: Componente montado. Iniciando verificación de sesión.");
 
-                setUser(userFinal);
+        const fetchUserData = async (sessionUser: User | null) => {
+            // Log 10: Datos de usuario de la sesión de Supabase
+            console.log("AUTH PROVIDER: Sesión de Supabase recibida:", sessionUser ? sessionUser.id : "No hay sesión");
+
+            if (sessionUser) {
+                const { data: userDB, error: errorInUserDB } = await supabase
+                    .from('usuario')
+                    .select('nombre')
+                    .eq('id', sessionUser.id)
+                    .single();
+
+                if (errorInUserDB) {
+                    // Log 11: Error al obtener nombre de la DB
+                    console.error('AUTH PROVIDER ERROR: Error al obtener nombre del usuario de la DB:', errorInUserDB.message);
+                    toast.error('Error al cargar los datos del usuario.');
+                    setUser(sessionUser as UserExtend); // Aún así, establece el usuario básico
+                } else {
+                    // Log 12: Nombre del usuario de la DB obtenido
+                    console.log("AUTH PROVIDER: Nombre del usuario de la DB obtenido:", userDB?.nombre);
+                    setUser({ ...sessionUser, nombre: userDB?.nombre });
+                }
+            } else {
+                setUser(null);
             }
-        }
-        FetchUser();
-        setLoading(false);
+            setLoading(false); // La carga inicial o después del cambio ha terminado
+            // Log 13: Carga del AuthProvider finalizada
+            console.log("AUTH PROVIDER: loading es ahora false. Estado final del usuario:", user ? user.id : "null");
+        };
+
+        // 1. Obtener la sesión inicial
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            fetchUserData(session?.user || null);
+        }).catch(error => {
+            // Log 14: Error al obtener la sesión inicial
+            console.error("AUTH PROVIDER ERROR: Error al obtener la sesión inicial con getSession:", error.message);
+            setLoading(false);
+            setUser(null);
+        });
+
+        // 2. Suscribirse a los cambios de estado
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            // Log 15: Evento de cambio de estado de autenticación
+            console.log("AUTH PROVIDER: Evento onAuthStateChange:", event, "Sesión:", session ? session.user?.id : "null");
+            fetchUserData(session?.user || null);
+        });
+
+        return () => {
+            // Log 16: AuthProvider desmontado / Limpieza de suscripción
+            console.log("AUTH PROVIDER: Limpieza de suscripción onAuthStateChange.");
+            subscription.unsubscribe();
+        };
     }, [supabase]);
 
     return (

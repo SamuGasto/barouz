@@ -1,5 +1,4 @@
 import React from "react";
-import { Oferta } from "@/data/tipos";
 import {
   Carousel,
   CarouselContent,

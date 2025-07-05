@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import { Local } from "@/data/tipos";
 import { Card } from "../ui/card";
 import { MapPin } from "lucide-react";
 import { Separator } from "../ui/separator";

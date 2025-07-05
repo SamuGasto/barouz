@@ -1,7 +1,6 @@
 import React from "react";
 import { Card } from "../ui/card";
 import Image from "next/image";
-import { Producto } from "@/data/tipos";
 import { Button } from "../ui/button";
 import { ImageOffIcon, Trash } from "lucide-react";
 import { ProductoRow } from "@/types/resumen-tipos";

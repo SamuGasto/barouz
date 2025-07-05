@@ -5,30 +5,30 @@ import React from 'react'
 import { ThemeSwitcher } from './theme-switcher'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { createClient } from '@/utils/supabase/client'
 import { useAuth } from '@/components/providers/auth-provider'
 import { Button } from '@/components/ui/button'
+import { signOutAction } from '@/app/actions'
 
 function UserData() {
     const router = useRouter()
-    const { user } = useAuth()
+    const { user, loading } = useAuth()
 
     const handleLogout = async () => {
-        const supabase = createClient();
-        const { error } = await supabase.auth.signOut()
-        if (error) {
-            console.error('Error al cerrar sesión:', error)
+        try {
+            await signOutAction()
+        } catch (error) {
+            console.error(error)
             toast.error('Error al cerrar sesión')
-            return
         }
-        toast.success('Sesión cerrada correctamente')
-        router.push('/')
     }
     return (
         <div className='flex flex-row items-center gap-2'>
-            {!user ?
-                <Button variant="default" onClick={() => { router.push('/login') }}><LogIn className="h-4 w-4" />Iniciar Sesión</Button> :
-                <p className='text-xs'>Hola, <span className='font-bold'>{user?.nombre}</span></p>
+            {loading ?
+                <p>Cargando...</p> :
+                user ? <p className='text-xs'>Hola, <span className='font-bold'>{user?.nombre}</span></p> :
+                    <Button variant="default" onClick={() => { router.push('/login') }}>
+                        <LogIn className="h-4 w-4" />Iniciar Sesión
+                    </Button>
             }
             <DropdownMenu>
                 <DropdownMenuTrigger>

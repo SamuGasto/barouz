@@ -1,14 +1,11 @@
 "use client"
 import React from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { LogOut, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { createClient } from "@/utils/supabase/client";
+
 import Link from 'next/link';
 import Image from 'next/image';
-import CarritoCompra from './carrito-compra';
-import { ThemeSwitcher } from './theme-switcher';
 import logo from "@/images/barouz-logo.png";
 import logo_texto from "@/images/barouz-letras.png";
 

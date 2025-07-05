@@ -4,6 +4,7 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 export const signUpAction = async ({
   email,
@@ -31,26 +32,66 @@ export const signUpAction = async ({
   if (data.user) return data.user.id;
 };
 
-export const signInAction = async (formData: FormData) => {
+export async function signInAction({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}) {
+  // Log 3: Inicio de Server Action de login
+  console.log("SERVER ACTION: Iniciando signInAction para email:", email);
   const supabase = await createClient();
 
-  const email = formData.get("email")?.toString();
-  const password = formData.get("password")?.toString();
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-  if (!email || !password) {
-    return encodedRedirect(
-      "error",
-      "/login",
-      "Email and password are required"
+  if (error) {
+    // Log 4: Error detallado de Supabase en Server Action
+    console.error(
+      "SERVER ACTION ERROR: Error de Supabase al iniciar sesión:",
+      error.message,
+      error.status
+    );
+    // Lanza un error genérico para el cliente para evitar exponer detalles sensibles
+    throw new Error(
+      "Credenciales inválidas o error de servidor. Por favor, verifica e intenta de nuevo."
     );
   }
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  // Log 5: Login exitoso en Server Action
+  console.log(
+    "SERVER ACTION: Inicio de sesión exitoso. Revalidando y redirigiendo."
+  );
+  revalidatePath("/", "layout");
+  redirect("/mis-pedidos");
+}
+
+export async function signOutAction() {
+  // Log 6: Inicio de Server Action de logout
+  console.log("SERVER ACTION: Iniciando signOutAction.");
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signOut();
 
   if (error) {
-    return encodedRedirect("error", "/login", error.message);
+    // Log 7: Error detallado de Supabase al cerrar sesión
+    console.error(
+      "SERVER ACTION ERROR: Error de Supabase al cerrar sesión:",
+      error.message,
+      error.status
+    );
+    throw new Error("No se pudo cerrar sesión.");
   }
-};
+
+  // Log 8: Cierre de sesión exitoso en Server Action
+  console.log(
+    "SERVER ACTION: Cierre de sesión exitoso. Revalidando y redirigiendo."
+  );
+  revalidatePath("/", "layout");
+  redirect("/login");
+}
 
 export const signInWithOtp = async ({ email }: { email: string }) => {
   const supabase = await createClient();
@@ -181,10 +222,4 @@ export const resetPasswordAction = async (formData: FormData) => {
   }
 
   encodedRedirect("success", "/protected/reset-password", "Password updated");
-};
-
-export const signOutAction = async () => {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
-  return redirect("/sign-in");
 };
