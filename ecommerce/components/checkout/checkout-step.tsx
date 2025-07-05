@@ -44,7 +44,7 @@ export function CheckoutStep() {
 
         <div className="relative flex justify-between">
           {steps.map((step, index) => {
-            const isCompleted = index < currentStepIndex;
+            const isCompleted = index <= currentStepIndex;
             const isCurrent = index === currentStepIndex;
             const isUpcoming = index > currentStepIndex;
 
