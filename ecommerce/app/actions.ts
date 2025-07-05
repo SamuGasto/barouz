@@ -31,14 +31,19 @@ export const signUpAction = async ({
   if (data.user) return data.user.id;
 };
 
-export const signInAction = async ({
-  email,
-  password,
-}: {
-  email: string;
-  password: string;
-}) => {
+export const signInAction = async (formData: FormData) => {
   const supabase = await createClient();
+
+  const email = formData.get("email")?.toString();
+  const password = formData.get("password")?.toString();
+
+  if (!email || !password) {
+    return encodedRedirect(
+      "error",
+      "/login",
+      "Email and password are required"
+    );
+  }
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 

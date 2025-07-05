@@ -29,42 +29,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const supabase = createClient();
 
     useEffect(() => {
-        const {
-            data: { subscription },
-        } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            if (session?.user) {
-                const { data: userDB, error: errorInUserDB } = await supabase.from('usuario').select('nombre').eq('id', session.user.id).single();
-                if (errorInUserDB) {
-                    console.error('Error al obtener el usuario:', errorInUserDB)
-                    toast.error('Error al obtener el usuario')
-                    return
+        const FetchUser = async () => {
+            const user = await supabase.auth.getUser();
+            if (user.data.user) {
+                const { data: userDB, error } = await supabase.from('usuario').select('nombre').eq('id', user.data.user.id).single();
+                if (!userDB?.nombre || error) {
+                    toast.error(error?.message || "Error al obtener el usuario");
                 }
-                setUser({ ...session.user, nombre: userDB?.nombre })
-            } else {
-                setUser(null);
-            }
-            setLoading(false);
-        });
-
-        // Inicialmente, verifica si ya hay una sesión
-        supabase.auth.getSession().then(async ({ data: { session } }) => {
-            if (session?.user) {
-                const { data: userDB, error: errorInUserDB } = await supabase.from('usuario').select('nombre').eq('id', session.user.id).single();
-                if (errorInUserDB) {
-                    console.error('Error al obtener el usuario:', errorInUserDB)
-                    toast.error('Error al obtener el usuario')
-                    return
+                const userFinal: UserExtend = {
+                    ...user.data.user,
+                    nombre: userDB?.nombre || ""
                 }
-                setUser({ ...session.user, nombre: userDB?.nombre })
-            } else {
-                setUser(null);
+
+                setUser(userFinal);
             }
-            setLoading(false);
-        });
-
-
-
-        return () => subscription.unsubscribe(); // Limpieza al desmontar
+        }
+        FetchUser();
+        setLoading(false);
     }, [supabase]);
 
     return (
