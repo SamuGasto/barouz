@@ -3,11 +3,11 @@
 import { createContext, useContext, ReactNode } from 'react';
 import { useCheckoutStore } from '@/stores/checkout-store';
 
-import { CheckoutStep } from '@/types/checkout';
+import { PasosCheckout } from '@/types/checkout';
 
 interface CheckoutContextType {
-  currentStep: CheckoutStep;
-  setCurrentStep: (step: CheckoutStep) => void;
+  currentStep: PasosCheckout;
+  setCurrentStep: (step: PasosCheckout) => void;
   formData: any;
   updateFormData: (data: any) => void;
   submitOrder: () => Promise<{ success: boolean; orderId?: string }>;

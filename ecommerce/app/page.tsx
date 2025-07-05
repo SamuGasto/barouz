@@ -5,10 +5,8 @@ import Menu from "@/components/pagina-principal/menu/menu";
 
 export default async function Home() {
   return (
-    <main className="flex w-full flex-col items-center gap-6">
-      <Banner />
+    <><Banner />
       <Promociones />
-      <Menu />
-    </main>
+      <Menu /></>
   );
 }

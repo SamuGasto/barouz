@@ -48,16 +48,18 @@ export default function RootLayout({
     <html lang="es" className={geistSans.className} suppressHydrationWarning>
       <body className="bg-background text-foreground">
         <Providers>
-          <main className="flex min-h-screen flex-col items-center">
-            <div className="flex w-full flex-1 flex-col items-center">
+          <div className="flex w-full flex-1 flex-col items-center">
+            <nav className="flex w-full h-16 border p-3 px-5">
               <Navbar />
-              <div className="flex w-full flex-col items-center justify-center gap-6">
+            </nav>
+            <div className="flex w-full flex-col items-center justify-center gap-6">
+              <main className="flex w-full flex-col items-center gap-6">
                 {children}
-              </div>
-              <Footer />
+              </main>
             </div>
-            <Toaster richColors />
-          </main>
+            <Footer />
+          </div>
+          <Toaster richColors />
         </Providers>
       </body>
     </html>

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useCarritoStore } from "../providers/carrito-provider";
 import { CuponRow } from "@/types/resumen-tipos";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface BotonAplicarCuponProps {
     cupon: CuponRow;
@@ -20,6 +21,7 @@ export function BotonAplicarCupon({
     const [isLoading, setIsLoading] = useState(false);
     const aplicarCupon = useCarritoStore((state) => state.aplicarCupon);
     const cuponActual = useCarritoStore((state) => state.cupon);
+    const router = useRouter();
 
     // Check if current coupon is applied
     const isCuponAplicado = cuponActual?.id === cupon.id;
@@ -36,6 +38,7 @@ export function BotonAplicarCupon({
             setIsLoading(true);
             await aplicarCupon(cupon);
             toast.success("¡Cupón aplicado correctamente!");
+            router.push("/cart");
         } catch (error) {
             toast.error(
                 error instanceof Error ? error.message : "Error al aplicar el cupón"

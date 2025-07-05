@@ -1,158 +1,194 @@
 import { Button } from "../../components/ui/button";
-// Import the RadioGroup components directly from the Radix UI package
-import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
-
-// Create a local RadioGroup component with proper typing
-const RadioGroup = RadioGroupPrimitive.Root;
-const RadioGroupItem = RadioGroupPrimitive.Item;
-import { Label } from "../../components/ui/label";
 import { Input } from "../../components/ui/input";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckoutFormData, ShippingType, CheckoutSchema } from "../../types/checkout";
+import { CheckoutFormData, tipoEnvioArray } from "../../types/checkout";
 import { useCheckoutStore } from "../../stores/checkout-store";
 import { useRouter } from "next/navigation";
-import { z } from "zod";
+import { z } from "zod/v4";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
+import { useState } from "react";
+import { TipoEnvio } from "@/types/resumen-tipos";
+import { useForm } from "react-hook-form";
+import { Card } from "../ui/card";
+import { Check, Truck, Store, MapPin, Clock } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ShippingStepProps {
   onNext: () => void;
 }
 
+const FormSchema = z.object({
+  tipoDeEnvio: z.enum(tipoEnvioArray),
+  direccion: z.string().optional()
+}).refine((data) => {
+  if (data.tipoDeEnvio === 'Delivery' && !data.direccion) {
+    throw new Error('La dirección es requerida');
+  }
+  return true;
+}, {
+  message: 'La dirección es requerida',
+  path: ['direccion'],
+});
+
+
 export function ShippingStep({ onNext }: ShippingStepProps) {
   const { formData, updateFormData, setCurrentStep } = useCheckoutStore();
   const router = useRouter();
 
-  // Create a schema that matches our form fields
-  const ShippingSchema = z.object({
-    shippingType: z.enum(["delivery", "pickup"]),
-    address: z.string().min(1, { message: "La dirección es requerida" }).optional()
-  });
-
-  type ShippingFormData = z.infer<typeof ShippingSchema>;
-
-  const form = useForm<ShippingFormData>({
-    resolver: zodResolver(ShippingSchema),
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
     defaultValues: {
-      shippingType: 'delivery',
-      address: '',
+      tipoDeEnvio: formData.tipoDeEnvio || 'Delivery',
+      direccion: formData.direccion || '',
     },
   });
 
-  const { register, handleSubmit, formState: { errors }, watch } = form;
+  // Keep local state in sync with form
+  const tipoDeEnvio = form.watch('tipoDeEnvio') as TipoEnvio;
 
-  const shippingType = watch('shippingType');
-
-  const onSubmit = (data: ShippingFormData) => {
-    updateFormData({
-      shippingType: data.shippingType,
-      address: data.shippingType === 'delivery' ? data.address : '',
-    } as CheckoutFormData);
+  const onSubmit = (data: z.infer<typeof FormSchema>) => {
+    const checkoutData: Partial<CheckoutFormData> = {
+      tipoDeEnvio: data.tipoDeEnvio,
+      direccion: tipoDeEnvio === 'Delivery' ? data.direccion : '',
+    };
+    updateFormData(checkoutData);
     onNext();
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="space-y-6">
-        <RadioGroup
-          defaultValue="delivery"
-          className="space-y-4"
-          onValueChange={(value: string) => form.setValue('shippingType', value as ShippingType)}
-          value={shippingType}
-        >
-          <div className="flex items-center space-x-3">
-            <RadioGroupItem value="delivery" id="delivery" />
-            <Label htmlFor="delivery" className="text-base font-medium">
-              Envío a domicilio
-            </Label>
-          </div>
-          <div className="flex items-center space-x-3">
-            <RadioGroupItem value="pickup" id="pickup" />
-            <Label htmlFor="pickup" className="text-base font-medium">
-              Recojo en tienda
-            </Label>
-          </div>
-        </RadioGroup>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Método de envío</h3>
+            <div className="grid gap-4">
+              <FormField
+                control={form.control}
+                name="tipoDeEnvio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="space-y-4">
+                        <div
+                          onClick={() => {
+                            field.onChange('Delivery');
+                          }}
+                          className={cn(
+                            "relative flex w-full cursor-pointer rounded-lg border-2 p-4 transition-all hover:border-primary/50",
+                            field.value === 'Delivery'
+                              ? "border-primary bg-primary/5"
+                              : "border-muted-foreground/20"
+                          )}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className={cn(
+                              "flex h-6 w-6 items-center justify-center rounded-full border",
+                              field.value === 'Delivery'
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-muted-foreground/30"
+                            )}>
+                              {field.value === 'Delivery' && <Check className="h-4 w-4" />}
+                            </div>
+                            <div className="flex flex-col">
+                              <div className="flex items-center">
+                                <Truck className="mr-2 h-5 w-5 text-muted-foreground" />
+                                <span className="font-medium">Envío a domicilio</span>
+                              </div>
+                              <span className="mt-1 text-sm text-muted-foreground">
+                                Recibe tu pedido en la puerta de tu casa
+                              </span>
+                            </div>
+                          </div>
+                        </div>
 
-        {shippingType === 'delivery' && (
-          <div className="space-y-2 pt-2">
-            <Label htmlFor="address" className="text-sm font-medium">
-              Dirección de envío
-            </Label>
-            <div className="relative">
-              <input 
-                id="address" 
-                placeholder="Ingresa tu dirección" 
-                {...register('address')}
-                className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.address ? 'border-red-500' : ''}`}
+                        <div
+                          onClick={() => {
+                            field.onChange('Retiro en tienda');
+                          }}
+                          className={cn(
+                            "relative flex w-full cursor-pointer rounded-lg border-2 p-4 transition-all hover:border-primary/50",
+                            field.value === 'Retiro en tienda'
+                              ? "border-primary bg-primary/5"
+                              : "border-muted-foreground/20"
+                          )}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className={cn(
+                              "flex h-6 w-6 items-center justify-center rounded-full border",
+                              field.value === 'Retiro en tienda'
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-muted-foreground/30"
+                            )}>
+                              {field.value === 'Retiro en tienda' && <Check className="h-4 w-4" />}
+                            </div>
+                            <div className="flex flex-col">
+                              <div className="flex items-center">
+                                <Store className="mr-2 h-5 w-5 text-muted-foreground" />
+                                <span className="font-medium">Retiro en tienda</span>
+                              </div>
+                              <span className="mt-1 text-sm text-muted-foreground">
+                                Retira tu pedido en nuestro local
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.address && (
-                <p className="mt-1 text-sm text-red-500">
-                  {errors.address?.message}
-                </p>
-              )}
             </div>
           </div>
-        )}
-      </div>
 
-      <div className="flex justify-end space-x-4 pt-6">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.push('/cart')}
-        >
-          Volver al carrito
-        </Button>
-        <Button type="submit">
-          Continuar al pago
-        </Button>
-      </div>
-    </form>
-  );
-}
+          {tipoDeEnvio === 'Delivery' && (
+            <div className="space-y-4 rounded-lg border bg-card p-4">
+              <div className="flex items-center space-x-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                <h4 className="font-medium">Dirección de envío</h4>
+              </div>
 
-// Simple icons for the shipping options
-function Truck(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11" />
-      <path d="M19 18h-4c0-1.7 1.3-3 3-3h1c.6 0 1 .4 1 1v1c0 .6-.4 1-1 1Z" />
-      <circle cx="7" cy="18" r="2" />
-      <path d="M9 18h6" />
-      <circle cx="17" cy="18" r="2" />
-    </svg>
-  );
-}
+              <FormField
+                control={form.control}
+                name="direccion"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          {...field}
+                          placeholder="Ingresa tu dirección completa"
+                          className="pl-10"
+                        />
+                        <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                    <div className="mt-3 flex items-center text-sm text-muted-foreground">
+                      <Clock className="mr-2 h-4 w-4" />
+                      <span>Tiempo estimado de entrega: 30-45 minutos</span>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
 
-function Package(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m7.5 4.27 9 5.15" />
-      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-      <path d="m3.3 7 8.7 5 8.7-5" />
-      <path d="M12 22V12" />
-    </svg>
+        </div>
+
+        <div className="flex justify-end space-x-4 pt-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push('/cart')}
+          >
+            Volver al carrito
+          </Button>
+          <Button type="submit">
+            Continuar al pago
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

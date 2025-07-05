@@ -65,3 +65,12 @@ export type PedidoExtraConDetalles = {
   precio_final: number;
   extra: ExtraRow;
 };
+export type MetodoDePago = Database["public"]["Enums"]["MetodoDePago"];
+export type TipoDescuento = Database["public"]["Enums"]["TipoDescuento"];
+export const estadoPedidoArray: EstadoPedido[] = [
+  "Recibido",
+  "En preparación",
+  "En camino",
+  "Entregado",
+  "Cancelado",
+] as const;

@@ -1,10 +1,11 @@
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { useCheckoutStore } from "../../stores/checkout-store";
-import { useCartStore } from "../../stores/cart-store";
+import { useCarritoStore } from "@/components/providers/carrito-provider";
 import { formatPrice } from "../../lib/utils";
 import { CheckCircle } from "lucide-react";
-import { ShippingType, CheckoutFormData } from "../../types/checkout";
+import { CheckoutFormData } from "../../types/checkout";
+import { useAuth } from "../providers/auth-provider";
 
 // Define the extra type for cart items
 interface CartItemExtra {
@@ -32,29 +33,29 @@ export function ReviewStep({
   isSubmitting: boolean;
 }) {
   const { formData } = useCheckoutStore();
-  const { items, total, subtotal, shippingCost } = useCartStore();
-  
-  // Ensure items is an array to prevent errors and type it as CartItem[]
-  const cartItems: CartItem[] = Array.isArray(items) ? items : [];
+  const user = useAuth();
+  const items = useCarritoStore((state) => state.items);
+
+  const subtotal = items.reduce((total, item) => total + item.precio_final * item.cantidad, 0);
+  const shippingCost = 5000;
+  const total = subtotal + (formData.tipoDeEnvio === 'Delivery' ? shippingCost : 0);
 
   const getShippingMethod = (): string => {
-    const shippingType = (formData as CheckoutFormData)?.shippingType as ShippingType;
-    const address = (formData as CheckoutFormData)?.address;
-    if (shippingType === 'delivery') {
-      return `Envío a domicilio${address ? ` (${address})` : ''}`;
+    const tipoDeEnvio = (formData as CheckoutFormData)?.tipoDeEnvio;
+    const direccion = (formData as CheckoutFormData)?.direccion;
+    if (tipoDeEnvio === 'Delivery') {
+      return `Envío a domicilio${direccion ? ` (${direccion})` : ''}`;
     }
-    return 'Recojo en tienda';
+    return 'Retiro en tienda';
   };
 
   const getPaymentMethod = (): string => {
-    const paymentMethod = (formData as CheckoutFormData)?.paymentMethod || '';
+    const paymentMethod = (formData as CheckoutFormData)?.metodoPago || '';
     switch (paymentMethod) {
-      case 'transfer':
+      case 'Transferencia':
         return 'Transferencia bancaria';
-      case 'cash':
+      case 'Efectivo':
         return 'Efectivo';
-      case 'card':
-        return 'Tarjeta de crédito/débito';
       default:
         return 'No especificado';
     }
@@ -72,7 +73,7 @@ export function ReviewStep({
             <div>
               <h3 className="font-medium mb-3">Productos</h3>
               <div className="space-y-4">
-                {cartItems.map((item: CartItem) => (
+                {items.map((item) => (
                   <div key={item.id} className="flex justify-between items-start">
                     <div className="flex-1">
                       <p className="font-medium">
@@ -80,12 +81,12 @@ export function ReviewStep({
                       </p>
                       {item.extras && item.extras.length > 0 && (
                         <p className="text-sm text-muted-foreground">
-                          {item.extras.map((extra: CartItemExtra) => extra.nombre).join(', ')}
+                          {item.extras.map((extra) => extra.nombre).join(', ')}
                         </p>
                       )}
                     </div>
                     <p className="font-medium">
-                      ${formatPrice(item.precio * item.cantidad)}
+                      {formatPrice(item.precio_final * item.cantidad)}
                     </p>
                   </div>
                 ))}
@@ -96,15 +97,15 @@ export function ReviewStep({
             <div className="border-t pt-4 space-y-2">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>${formatPrice(subtotal)}</span>
+                <span>{formatPrice(subtotal)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Envío</span>
-                <span>{shippingCost > 0 ? `$${formatPrice(shippingCost)}` : 'Gratis'}</span>
+                <span>{formData.tipoDeEnvio === 'Delivery' ? `${formatPrice(shippingCost)}` : 'Gratis'}</span>
               </div>
               <div className="flex justify-between font-bold text-lg pt-2 border-t">
                 <span>Total</span>
-                <span>${formatPrice(total)}</span>
+                <span>{formatPrice(total)}</span>
               </div>
             </div>
           </div>
@@ -127,9 +128,9 @@ export function ReviewStep({
           <div>
             <h4 className="font-medium">Información de contacto</h4>
             <p className="text-muted-foreground">
-              {formData.contactInfo?.name}<br />
-              {formData.contactInfo?.email}<br />
-              {formData.contactInfo?.phone}
+              {user?.user?.nombre}<br />
+              {user?.user?.email}<br />
+              {user?.user?.phone}
             </p>
           </div>
           {formData.notes && (
@@ -145,9 +146,9 @@ export function ReviewStep({
         <Button type="button" variant="outline" onClick={onBack}>
           Volver
         </Button>
-        <Button 
-          type="button" 
-          onClick={onSubmit}
+        <Button
+          type="button"
+          onClick={() => onSubmit()}
           disabled={isSubmitting}
           className="gap-2"
         >

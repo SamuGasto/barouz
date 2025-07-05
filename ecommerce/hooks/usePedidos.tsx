@@ -1,5 +1,6 @@
-import { useQuery } from "@tanstack/react-query"
-import { pedidosService } from "@/services/pedidos"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { CrearNuevoPedidoCompletoArgs, pedidosService } from "@/services/pedidos"
+
 
 export const usePedidos = <T = any>() => {
     return useQuery<T>({
@@ -14,3 +15,20 @@ export const usePedidoPorId = <T = any>(id: string) => {
         queryFn: () => pedidosService.obtenerPedidoPorId(id) as unknown as T
     })
 }
+
+export const useGestionarPedidoFinal = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (variables: CrearNuevoPedidoCompletoArgs) =>
+            pedidosService.crearNuevoPedidoCompleto(variables),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["pedidos_finales"],
+            });
+        },
+        onError: (error) => {
+            console.error("Error al gestionar el pedido final:", error);
+        },
+    });
+};

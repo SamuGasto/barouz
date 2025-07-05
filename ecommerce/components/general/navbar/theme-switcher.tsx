@@ -35,6 +35,7 @@ const ThemeSwitcher = () => {
           aria-label="Cambiar tema"
           variant="ghost"
           size={"sm"}
+          className="w-full"
         >
           {theme === "light" ? (
             <Sun

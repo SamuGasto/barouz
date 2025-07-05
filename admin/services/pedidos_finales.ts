@@ -35,15 +35,6 @@ type RpcDetalle = {
   extras: RpcExtra[];
 };
 
-type GestionarPedidoFinalRpcArgs = {
-  p_pedido_final_id: string | null;
-  p_usuario_id: string;
-  p_tipo_envio: string; // Cambiado a string para coincidir con la definición de la función RPC
-  p_estado: string; // Cambiado a string para coincidir con la definición de la función RPC
-  p_razon_cancelacion: string | null;
-  p_detalles: RpcDetalle[];
-};
-
 // Helper type for mapping extras in obtenerTodosLosPedidos
 type MappedExtra = {
   cantidad: number;

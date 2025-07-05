@@ -1,23 +1,26 @@
-import { create } from 'zustand';
-import { CheckoutFormData, CheckoutStep } from '@/types/checkout';
-
-export type { CheckoutStep };
+import { create } from "zustand";
+import { CheckoutFormData, PasosCheckout } from "@/types/checkout";
 
 interface CheckoutState {
-  currentStep: CheckoutStep;
+  currentStep: PasosCheckout;
   formData: Partial<CheckoutFormData>;
   orderId: string | null;
   isSubmitting: boolean;
   error: string | null;
-  setCurrentStep: (step: CheckoutStep) => void;
+  setCurrentStep: (step: PasosCheckout) => void;
   updateFormData: (data: Partial<CheckoutFormData>) => void;
-  submitOrder: () => Promise<{ success: boolean; orderId?: string; error?: string }>;
+  submitOrder: () => Promise<{
+    success: boolean;
+    orderId?: string;
+    error?: string;
+  }>;
+  setOrderId: (orderId: string) => void;
   reset: () => void;
 }
 
 // Export the store with proper typing
 export const useCheckoutStore = create<CheckoutState>((set, get) => ({
-  currentStep: 'shipping',
+  currentStep: "Envío",
   formData: {},
   orderId: null,
   isSubmitting: false,
@@ -25,35 +28,39 @@ export const useCheckoutStore = create<CheckoutState>((set, get) => ({
 
   setCurrentStep: (step) => set({ currentStep: step }),
 
-  updateFormData: (data) => 
+  updateFormData: (data) =>
     set((state) => ({
-      formData: { ...state.formData, ...data }
+      formData: { ...state.formData, ...data },
     })),
 
   submitOrder: async () => {
     set({ isSubmitting: true, error: null });
-    
+
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       // In a real app, this would be an API call to your backend
       const orderId = `order-${Math.random().toString(36).substr(2, 9)}`;
-      
-      set({ orderId, isSubmitting: false });
+
+      set((state) => ({ ...state, orderId, isSubmitting: false }));
       return { success: true, orderId };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al procesar el pedido';
-      set({ error: errorMessage, isSubmitting: false });
+      const errorMessage =
+        error instanceof Error ? error.message : "Error al procesar el pedido";
+      set((state) => ({ ...state, error: errorMessage, isSubmitting: false }));
       return { success: false, error: errorMessage };
     }
   },
 
-  reset: () => set({
-    currentStep: 'shipping',
-    formData: {},
-    orderId: null,
-    isSubmitting: false,
-    error: null,
-  }),
+  setOrderId: (orderId: string) => set((state) => ({ ...state, orderId })),
+
+  reset: () =>
+    set({
+      currentStep: "Envío",
+      formData: {},
+      orderId: null,
+      isSubmitting: false,
+      error: null,
+    }),
 }));

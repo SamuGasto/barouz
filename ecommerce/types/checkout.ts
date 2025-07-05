@@ -1,12 +1,10 @@
-import { z } from "zod";
-
-export type ShippingType = 'delivery' | 'pickup';
-export type PaymentMethod = 'transfer' | 'cash' | 'card';
+import { z } from "zod/v4";
+import { MetodoDePago, TipoEnvio } from "./resumen-tipos";
 
 export interface CheckoutFormData {
-  shippingType: ShippingType;
-  address?: string;
-  paymentMethod: PaymentMethod;
+  tipoDeEnvio: TipoEnvio;
+  direccion?: string;
+  metodoPago: MetodoDePago;
   contactInfo: {
     name: string;
     email: string;
@@ -15,16 +13,19 @@ export interface CheckoutFormData {
   notes?: string;
 }
 
+export const tipoEnvioArray: TipoEnvio[] = [
+  "Delivery",
+  "Retiro en tienda",
+] as const;
+export const metodoPagoArray: MetodoDePago[] = [
+  "Transferencia",
+  "Efectivo",
+] as const;
+
 export const CheckoutSchema = z.object({
-  shippingType: z.enum(['delivery', 'pickup']),
-  address: z.string().optional(),
-  paymentMethod: z.enum(['transfer', 'cash', 'card']),
-  contactInfo: z.object({
-    name: z.string().min(2, 'El nombre es requerido'),
-    email: z.string().email('Email inválido'),
-    phone: z.string().min(8, 'El teléfono es requerido'),
-  }),
-  notes: z.string().optional(),
+  tipoDeEnvio: z.enum(tipoEnvioArray),
+  direccion: z.string().optional(),
+  metodoPago: z.enum(metodoPagoArray),
 });
 
-export type CheckoutStep = 'shipping' | 'payment' | 'review' | 'confirmation';
+export type PasosCheckout = "Envío" | "Pago" | "Resumen" | "Confirmación";
