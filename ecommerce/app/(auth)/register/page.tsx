@@ -14,6 +14,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { RolesInsert, UsuarioInsert } from "@/types/resumen-tipos";
+import { signUpAction } from "@/app/actions";
 
 // OWASP Compliant Password Schema
 const passwordSchema = z
@@ -103,24 +104,15 @@ export default function Register() {
                 return;
             }
 
-            // Create user in Supabase Auth
-            const { data: authData, error: signUpError } = await supabase.auth.signUp({
-                email: values.email,
-                password: values.password,
-                options: {
-                    data: {
-                        full_name: values.fullName,
-                    },
-                    emailRedirectTo: `${window.location.origin}/auth/callback`,
-                },
-            });
+            const id_user = await signUpAction({ email: values.email, password: values.password });
 
-            if (signUpError) {
-                throw signUpError;
+            if (!id_user) {
+                toast.error("Error al crear el usuario");
+                return;
             }
 
             const dataUsuario: UsuarioInsert = {
-                id: authData.user?.id,
+                id: id_user,
                 gmail: values.email,
                 nombre: values.fullName,
                 rol: "cliente",
@@ -140,7 +132,7 @@ export default function Register() {
 
 
             const rolInsertar: RolesInsert = {
-                id_usuario: authData.user?.id || "",
+                id_usuario: id_user,
                 rol: 'cliente',
             };
 

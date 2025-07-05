@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { signInAction } from "@/app/actions";
 
 const formSchema = z.object({
     email: z.string().email("Por favor ingresa un correo electrónico válido"),
@@ -38,22 +39,9 @@ export default function Login() {
         setIsLoading(true);
 
         try {
-            const supabase = createClient();
-            const { error } = await supabase.auth.signInWithPassword({
-                email: values.email,
-                password: values.password,
-            });
-
-            if (error) {
-                if (error.message.includes('rate limit')) {
-                    toast.error("Demasiados intentos. Por favor, inténtalo de nuevo más tarde.");
-                    return;
-                }
-                throw error;
-            }
-
-            toast.success("¡Inicio de sesión exitoso!");
+            await signInAction({ email: values.email, password: values.password });
             router.back();
+
         } catch (error: any) {
             const errorMessage = "Credenciales inválidas. Por favor, verifica e intenta de nuevo.";
             toast.error(errorMessage);
