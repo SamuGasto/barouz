@@ -52,8 +52,7 @@ export default function Login() {
             }
 
             toast.success("¡Inicio de sesión exitoso!");
-            router.push("/mis-pedidos");
-            router.refresh();
+            router.back();
         } catch (error: any) {
             const errorMessage = "Credenciales inválidas. Por favor, verifica e intenta de nuevo.";
             toast.error(errorMessage);
@@ -108,12 +107,12 @@ export default function Login() {
                                     <FormItem>
                                         <div className="flex items-center justify-between">
                                             <FormLabel>Contraseña</FormLabel>
-                                            <Link
-                                                href="/recuperar-contrasena"
+                                            <p
+                                                onClick={() => router.replace("/recuperar-contrasena")}
                                                 className="text-xs text-muted-foreground hover:underline"
                                             >
                                                 ¿Olvidaste tu contraseña?
-                                            </Link>
+                                            </p>
                                         </div>
                                         <div className="relative">
                                             <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

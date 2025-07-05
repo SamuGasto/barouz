@@ -158,7 +158,8 @@ export default function Register() {
                     if (prev === 1) {
                         clearInterval(countdown);
                         // **Elimina router.refresh() aquí**
-                        router.push("/login");
+
+                        router.replace("/login");
                         return null;
                     }
                     return prev ? prev - 1 : null;
