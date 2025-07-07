@@ -112,7 +112,7 @@ export default function Register() {
             }
 
             const dataUsuario: UsuarioInsert = {
-                id: id_user,
+                id: id_user.id_user,
                 gmail: values.email,
                 nombre: values.fullName,
                 rol: "cliente",
@@ -132,7 +132,7 @@ export default function Register() {
 
 
             const rolInsertar: RolesInsert = {
-                id_usuario: id_user,
+                id_usuario: id_user.id_user,
                 rol: 'cliente',
             };
 

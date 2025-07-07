@@ -5,23 +5,22 @@ import { useCarritoStore } from "@/components/providers/carrito-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, ImageOffIcon, ArrowRight, Check } from "lucide-react";
+import { ShoppingCart, Plus, Minus, ArrowLeft, ImageOffIcon, ArrowRight, Check, X, Tag, Percent, Trash2, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import AlertDialogDelete from "@/components/cart/alert-dialog-delete";
-import AlertDialogEliminarCarrito from "@/components/cart/alert-dialog-eliminar-carrito";
 import { z } from "zod/v4";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useCupones } from "@/hooks/useCupones";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const CuponScheme = z.object({
-    nombre: z.string(),
+    nombre: z.string().min(1, "El código del cupón es requerido"),
 });
 
 export default function CartPage() {
@@ -53,17 +52,66 @@ export default function CartPage() {
         }
     };
 
+    // Función para redondear al entero más cercano según normas chilenas
+    const redondearChileno = (valor: number) => Math.round(valor);
+
     const formatPrice = (price: number) => {
-        return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        // Redondear al entero más cercano según normas chilenas
+        const rounded = redondearChileno(price);
+        // Formatear con separadores de miles
+        return rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     };
 
-    const onSubmit = (data: z.infer<typeof CuponScheme>) => {
-        const cuponSeleccionado = cupones?.find(cupon => cupon.nombre === data.nombre);
+    // Calcular totales
+    let subtotal = redondearChileno(items.reduce((sum, item) => sum + item.precio_final, 0));
+    const valor_iva = 0.19;
+
+    // Calcular base imponible (sin IVA)
+    const baseImponible = redondearChileno(subtotal / (1 + valor_iva));
+    // Calcular IVA sobre la base imponible
+    const iva = redondearChileno(baseImponible * valor_iva);
+
+    // El total sin descuento debe ser igual a subtotal (que ya incluye IVA)
+    const totalSinDescuento = subtotal;
+
+    // Calcular descuento sobre la base imponible (sin IVA)
+    const descuento = cupon
+        ? (cupon.tipo_descuento === 'porcentaje'
+            ? redondearChileno(baseImponible * (cupon.valor_descuento / 100))
+            : cupon.valor_descuento)
+        : 0;
+
+    const total = Math.max(0, redondearChileno(totalSinDescuento - descuento));
+
+    const onSubmit = async (data: z.infer<typeof CuponScheme>) => {
+        if (!data.nombre.trim()) {
+            toast.error("Por favor ingresa un código de cupón");
+            return;
+        }
+
+        const cuponSeleccionado = cupones?.find(c => c.nombre.toLowerCase() === data.nombre.toLowerCase());
+
         if (cuponSeleccionado) {
+            // Verificar si el cupón ya está aplicado
+            if (cupon?.id === cuponSeleccionado.id) {
+                toast.info("Este cupón ya está aplicado");
+                return;
+            }
+
+            // Verificar si el cupón está vencido
+            const hoy = new Date();
+            const fechaExpiracion = new Date(cuponSeleccionado.fecha_fin);
+
+            if (fechaExpiracion < hoy) {
+                toast.error("Este cupón ha expirado");
+                return;
+            }
+
             aplicarCupon(cuponSeleccionado);
-            toast.success("Cupon aplicado correctamente");
+            toast.success(`¡Cupón aplicado correctamente!`);
+            form.reset({ nombre: "" });
         } else {
-            toast.error("Cupon no encontrado");
+            toast.error("Cupón no encontrado o no válido");
         }
     };
 
@@ -128,7 +176,19 @@ export default function CartPage() {
                                             </p>
                                         </div>
 
-                                        <AlertDialogDelete funcionEliminar={() => eliminarDelCarrito(item.id)} />
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                            onClick={() => {
+                                                if (confirm(`¿Eliminar ${item.nombre} del carrito?`)) {
+                                                    eliminarDelCarrito(item.id);
+                                                }
+                                            }}
+                                            aria-label={`Eliminar ${item.nombre} del carrito`}
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
                                     </div>
 
                                     {item.extras && item.extras.length > 0 && (
@@ -153,10 +213,12 @@ export default function CartPage() {
                                     <div className="mt-auto flex items-center justify-between pt-4">
                                         <div className="flex items-center space-x-2">
                                             <Button
+                                                type="button"
                                                 variant="outline"
                                                 size="icon"
                                                 className="h-8 w-8"
                                                 onClick={() => handleUpdateQuantity(item.id, -1)}
+                                                aria-label={`Reducir cantidad de ${item.nombre}`}
                                             >
                                                 <Minus className="h-4 w-4" />
                                             </Button>
@@ -164,10 +226,12 @@ export default function CartPage() {
                                                 {item.cantidad}
                                             </span>
                                             <Button
+                                                type="button"
                                                 variant="outline"
                                                 size="icon"
                                                 className="h-8 w-8"
                                                 onClick={() => handleUpdateQuantity(item.id, 1)}
+                                                aria-label={`Aumentar cantidad de ${item.nombre}`}
                                             >
                                                 <Plus className="h-4 w-4" />
                                             </Button>
@@ -183,63 +247,157 @@ export default function CartPage() {
                 </div>
 
                 {/* Resumen del pedido */}
-                <div className="space-y-4">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Resumen del pedido</CardTitle>
+                <div className="space-y-6">
+                    <Card className="border-primary/20">
+                        <CardHeader className="pb-4">
+                            <CardTitle className="text-xl">Resumen del pedido</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="flex justify-between">
-                                <span>Subtotal ({totalItems} {totalItems === 1 ? 'producto' : 'productos'})</span>
-                                <span>${formatPrice(items.reduce((sum, item) => sum + (item.precio_unitario * item.cantidad), 0))}</span>
+                            <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                    <span>Subtotal ({totalItems} {totalItems === 1 ? 'producto' : 'productos'})</span>
+                                    <span>${formatPrice(subtotal)}</span>
+                                </div>
+
+                                <div className="flex justify-between text-sm">
+                                    <span>IVA (19%)</span>
+                                    <span>${formatPrice(iva)}</span>
+                                </div>
                             </div>
 
-                            <div className="flex justify-between font-medium">
-                                <span>Total</span>
-                                <span className="text-lg">${formatPrice(items.reduce((sum, item) => sum + item.precio_final, 0))}</span>
-                            </div>
-                            <Form {...form}>
-                                <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full flex-col items-center">
-                                    <p className="font-semibold text-left">Cupón</p>
-                                    <div className="flex w-full flex-row gap-1 justify-between">
-                                        <FormField
-                                            control={form.control}
-                                            name="nombre"
-                                            render={({ field }) => (
-                                                <FormItem className="w-full">
-                                                    <FormControl className="w-full">
-                                                        <Input className="w-full" placeholder="Código de cupón" {...field} />
-                                                    </FormControl>
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <Button type="submit"><Check className="h-4 w-4" /></Button>
+                            <Separator className="my-2" />
+
+                            {/* Cupón */}
+                            <div className="space-y-3">
+                                {cupon ? (
+                                    <div className="rounded-lg bg-green-50 dark:bg-green-900/20 p-3">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <Tag className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                                <span className="text-sm font-medium text-green-800 dark:text-green-200">
+                                                    Cupón: {cupon.nombre}
+                                                </span>
+                                            </div>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-6 px-2 text-green-700 hover:bg-green-100 dark:text-green-300 dark:hover:bg-green-800/50"
+                                                onClick={() => eliminarCupon()}
+                                            >
+                                                <X className="h-3.5 w-3.5" />
+                                            </Button>
+                                        </div>
+                                        <div className="mt-1 flex justify-between text-sm">
+                                            <span className="text-green-700 dark:text-green-300">
+                                                Descuento {cupon.tipo_descuento === 'porcentaje' ? `(${cupon.valor_descuento}%)` : ''}
+                                            </span>
+                                            <span className="font-medium text-green-700 dark:text-green-300">
+                                                -{formatPrice(descuento)}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <p className="text-muted-foreground text-sm">Introduce el código de cupón para aplicar el descuento.</p>
-                                </form>
-                            </Form>
-                            {cupon && (
-                                <div className="flex justify-between font-medium text-lime-500">
-                                    <span>Descuento</span>
-                                    <span className="text-md">-${formatPrice(cupon.valor_descuento)}</span>
+                                ) : (
+                                    <Form {...form}>
+                                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+                                            <div className="flex gap-2">
+                                                <FormField
+                                                    control={form.control}
+                                                    name="nombre"
+                                                    render={({ field }) => (
+                                                        <FormItem className="flex-1">
+                                                            <FormControl>
+                                                                <div className="relative">
+                                                                    <Input
+                                                                        placeholder="Código de cupón"
+                                                                        className="pr-10"
+                                                                        {...field}
+                                                                    />
+                                                                    <Tag className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                                                </div>
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <Button
+                                                    type="submit"
+                                                    variant="outline"
+                                                    className="whitespace-nowrap"
+                                                    disabled={cuponesLoading}
+                                                >
+                                                    {cuponesLoading ? 'Cargando...' : 'Aplicar'}
+                                                </Button>
+                                            </div>
+                                        </form>
+                                    </Form>
+                                )}
+                            </div>
+
+                            <Separator className="my-2" />
+
+                            {/* Total */}
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between font-medium">
+                                    <span className="text-base text-foreground">Total</span>
+                                    <div className="flex flex-col items-end">
+                                        {cupon && (
+                                            <span className="text-sm text-muted-foreground line-through">
+                                                ${formatPrice(totalSinDescuento)}
+                                            </span>
+                                        )}
+                                        <span className={cn(
+                                            "text-xl font-semibold",
+                                            cupon ? "text-green-600 dark:text-green-400" : "text-foreground"
+                                        )}>
+                                            ${formatPrice(total)}
+                                        </span>
+                                    </div>
                                 </div>
-                            )}
+                                {cupon && (
+                                    <p className="text-xs text-green-600 dark:text-green-400">
+                                        ¡Ahorras ${formatPrice(descuento)} con tu cupón!
+                                    </p>
+                                )}
+                            </div>
                         </CardContent>
                         <CardFooter className="flex flex-col gap-2">
-                            <Button size="lg" onClick={() => router.push('/checkout')} className="w-full bg-brand-primary hover:bg-brand-primary/90">
-                                Continuar al pago
+                            <Button
+                                className="w-full bg-brand-primary hover:bg-brand-primary/90 text-brand-primary-foreground"
+                                size="lg"
+                                onClick={() => router.push('/checkout')}
+                            >
+                                Proceder al pago
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
-                            <AlertDialogEliminarCarrito funcionEliminar={limpiarCarrito} />
+                            <div className="flex flex-col gap-2 w-full">
+                                <Button
+                                    variant="outline"
+                                    className="w-full text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive dark:text-red-400 dark:border-red-400/30 dark:hover:bg-red-900/20 dark:hover:text-red-300"
+                                    onClick={() => {
+                                        if (confirm('¿Estás seguro de que deseas vaciar el carrito?')) {
+                                            limpiarCarrito();
+                                        }
+                                    }}
+                                    aria-label="Vaciar carrito"
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Vaciar carrito
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="w-full hover:bg-primary/10 dark:hover:bg-primary/20"
+                                    asChild
+                                >
+                                    <Link href="/menu">
+                                        <ArrowLeft className="mr-2 h-4 w-4" />
+                                        Continuar comprando
+                                    </Link>
+                                </Button>
+                            </div>
                         </CardFooter>
                     </Card>
 
-                    <Button variant="link" asChild className="w-full">
-                        <Link href="/menu" className="flex items-center">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Seguir comprando
-                        </Link>
-                    </Button>
+
                 </div>
             </div>
         </div>

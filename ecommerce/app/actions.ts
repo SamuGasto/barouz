@@ -12,7 +12,7 @@ export const signUpAction = async ({
 }: {
   email: string;
   password: string;
-}) => {
+}): Promise<{ id_user: string; success: boolean }> => {
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
@@ -29,7 +29,9 @@ export const signUpAction = async ({
     return encodedRedirect("error", "/register", error.message);
   }
 
-  if (data.user) return data.user.id;
+  if (data.user) return { id_user: data.user.id, success: true };
+
+  return { id_user: "", success: false };
 };
 
 export async function signInAction({
@@ -38,7 +40,7 @@ export async function signInAction({
 }: {
   email: string;
   password: string;
-}) {
+}): Promise<{ success: boolean }> {
   // Log 3: Inicio de Server Action de login
   console.log("SERVER ACTION: Iniciando signInAction para email:", email);
   const supabase = await createClient();
@@ -65,11 +67,10 @@ export async function signInAction({
   console.log(
     "SERVER ACTION: Inicio de sesión exitoso. Revalidando y redirigiendo."
   );
-  revalidatePath("/", "layout");
-  redirect("/mis-pedidos");
+  return { success: true };
 }
 
-export async function signOutAction() {
+export async function signOutAction(): Promise<{ success: boolean }> {
   // Log 6: Inicio de Server Action de logout
   console.log("SERVER ACTION: Iniciando signOutAction.");
   const supabase = await createClient();
@@ -89,8 +90,7 @@ export async function signOutAction() {
   console.log(
     "SERVER ACTION: Cierre de sesión exitoso. Revalidando y redirigiendo."
   );
-  revalidatePath("/", "layout");
-  redirect("/login");
+  return { success: true };
 }
 
 export const signInWithOtp = async ({ email }: { email: string }) => {

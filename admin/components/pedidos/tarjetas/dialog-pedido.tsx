@@ -52,6 +52,22 @@ const CategoriaProductoEnum = z.enum([
   "Otros",
 ]);
 
+function parseTimestamp(timestamp: string): { fecha: { year: string, month: string, day: string }, time: { hour: string, minute: string, second: string } } {
+  const date = timestamp.split(" ")[0];
+  const time = timestamp.split(" ")[1];
+
+
+
+  return { fecha: { year: date.split("-")[0], month: date.split("-")[1], day: date.split("-")[2] }, time: { hour: time.split(":")[0], minute: time.split(":")[1], second: time.split(":")[2] } };
+}
+
+function parseToTimestamp(fecha: { year: string, month: string, day: string }, time: { hour: string, minute: string, second: string }) {
+  const fechaString = `${fecha.year}-${fecha.month}-${fecha.day}`;
+  const timeString = `${time.hour}:${time.minute}:${time.second}+04:00`;
+
+  return `${fechaString} ${timeString}`;
+}
+
 // Esquema para un solo detalle (producto en el pedido)
 const DetalleSchema = z.object({
   pedido_id: z.string().nullable(), // Puede ser nulo si es un nuevo producto
@@ -89,6 +105,18 @@ export const PedidoFinalScheme = z.object({
     "Cancelado",
   ]),
   razon_cancelacion: z.string().nullable().optional(),
+  fecha_hora: z.object({
+    fecha: z.object({
+      year: z.string(),
+      month: z.string(),
+      day: z.string(),
+    }),
+    time: z.object({
+      hour: z.string(),
+      minute: z.string(),
+      second: z.string(),
+    }),
+  }).optional(),
   detalles: z
     .array(DetalleSchema)
     .min(1, "El pedido debe tener al menos un producto."),
@@ -116,6 +144,7 @@ const getInitialValues = (pedido_final_arg?: TodosLosPedidos["pedido_final"]): z
     direccion: pedido_final_arg?.informacion.direccion || "",
     estado: pedido_final_arg?.informacion.estado || "Recibido",
     razon_cancelacion: pedido_final_arg?.informacion.razon_cancelacion || "",
+    fecha_hora: parseTimestamp(pedido_final_arg?.informacion.fecha_hora || ""),
     total_final: pedido_final_arg?.informacion.total_final || 0,
     detalles:
       pedido_final_arg?.pedidos
@@ -212,6 +241,7 @@ export function DialogPedido({ pedido_final_arg, usuarios, className, children, 
       razon_cancelacion: pedido_final.razon_cancelacion || null,
       tipo_envio: pedido_final.tipo_envio,
       direccion: pedido_final.tipo_envio === "Delivery" ? pedido_final.direccion : "",
+      fecha_hora: pedido_final.fecha_hora,
       estado: pedido_final.estado,
     };
 

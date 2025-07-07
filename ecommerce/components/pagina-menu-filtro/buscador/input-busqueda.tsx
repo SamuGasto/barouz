@@ -11,7 +11,7 @@ function InputBusqueda() {
     <div className="relative flex w-full">
       <Input
         type="text"
-        placeholder="🔍︎ Buscar waffles, helados, churros, etc..."
+        placeholder="🔍︎ Buscar por nombre o descripción..."
         value={busqueda}
         onChange={(e) => {
           setBusqueda(e.target.value);

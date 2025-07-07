@@ -11,13 +11,19 @@ import { signOutAction } from '@/app/actions'
 
 function UserData() {
     const router = useRouter()
-    const { user, loading } = useAuth()
+    const { user, loading, updateUser } = useAuth()
 
     const handleLogout = async () => {
         try {
-            await signOutAction()
+            const { success } = await signOutAction()
+            if (success) {
+                // Actualizar el estado de autenticación
+                await updateUser()
+                toast.success('Sesión cerrada correctamente')
+                router.push('/login')
+            }
         } catch (error) {
-            console.error(error)
+            console.error('Error al cerrar sesión:', error)
             toast.error('Error al cerrar sesión')
         }
     }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/providers/auth-provider";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,6 +27,7 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const { updateUser } = useAuth();
     const router2 = useRouter() as AppRouterInstance; // Castea el tipo para acceder a .isRedirectError
 
 
@@ -43,13 +45,19 @@ export default function Login() {
         console.log("LOGIN CLIENT: Enviando valores de formulario:", values);
 
         try {
-            await signInAction(values);
+            const result = await signInAction(values);
 
-            // Si llegamos aquí, la Server Action no lanzó un error (aunque podría haber redirigido)
-            // Si la Server Action redirige, este toast no se mostrará.
+            if (!result.success) {
+                toast.error("Error al iniciar sesión");
+                return;
+            }
+
+            // Actualizar el estado de autenticación
+            await updateUser();
+
             console.log("LOGIN CLIENT: Inicio de sesión exitoso. Redireccionando...");
             toast.success("¡Inicio de sesión exitoso!");
-            // router.back(); // La Server Action ya maneja la redirección
+            router.back(); // La Server Action ya maneja la redirección
         } catch (error: any) {
             // Log 2: Error capturado del Server Action
             console.error("LOGIN CLIENT ERROR: Error al intentar iniciar sesión:", error.message, error);

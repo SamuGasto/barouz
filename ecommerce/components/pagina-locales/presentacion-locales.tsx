@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 function PresentacionLocales() {
   const { data: locales, isLoading } = useLocales();
   return (
-    <div className="flex w-full flex-col items-center justify-center gap-6 p-10 md:flex-row">
+    <div className="flex w-full flex-col items-start justify-center gap-6 p-10 md:flex-row">
       {isLoading ? (
         <Loader2 className="h-12 w-12 animate-spin" />
       ) : (

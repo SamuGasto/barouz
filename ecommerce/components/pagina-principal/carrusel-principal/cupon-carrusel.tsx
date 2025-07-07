@@ -5,6 +5,8 @@ import { Clock, ImageOffIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CuponRow } from "@/types/resumen-tipos";
+import { useCarritoStore } from "@/components/providers/carrito-provider";
+import { redirect } from "next/navigation";
 
 interface PropType {
   cupon: CuponRow;
@@ -12,15 +14,17 @@ interface PropType {
 
 function CuponCarrusel(props: PropType) {
   const { cupon } = props;
+  const aplicarCupon = useCarritoStore((state) => state.aplicarCupon);
+
   return (
-    <Card className="h-fit w-full px-2 py-2">
-      <div className="relative">
+    <Card className="h-fit px-2 py-2">
+      <div className="relative h-[460px] w-full">
         {cupon.imagen_url !== "" ? (
           <Image
-            className="h-[460px] w-full rounded-lg object-cover"
+            className="rounded-lg object-cover"
             quality={100}
-            width={460}
-            height={460}
+            fill
+            sizes="100vw"
             src={cupon.imagen_url}
             alt={cupon.nombre}
           />
@@ -43,7 +47,13 @@ function CuponCarrusel(props: PropType) {
               <span className="font-bold">{cupon.fecha_fin}</span>
             </p>
           </div>
-          <Button className="bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary/90 mt-2 w-fit">
+          <Button
+            onClick={() => {
+              aplicarCupon(cupon);
+              redirect("/menu");
+            }}
+            className="bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary/90 mt-2 w-fit"
+          >
             Ordenar Ahora
           </Button>
         </div>

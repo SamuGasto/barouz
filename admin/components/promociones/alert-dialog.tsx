@@ -1,7 +1,6 @@
 import React from 'react'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { CuponRow } from '@/types/tipos_supabase_resumidos';
-import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 
 function AlertDialogDeleteCupon({ cupon, handleRemove }: { cupon: CuponRow, handleRemove: (cupon: CuponRow) => void }) {

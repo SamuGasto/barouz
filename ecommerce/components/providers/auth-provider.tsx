@@ -6,6 +6,7 @@ import {
     useContext,
     useEffect,
     useState,
+    useCallback,
     type ReactNode,
 } from 'react';
 import { User } from '@supabase/supabase-js';
@@ -19,6 +20,7 @@ type UserExtend = User & {
 interface AuthProviderProps {
     user: UserExtend | null;
     loading: boolean;
+    updateUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthProviderProps | undefined>(undefined);
@@ -28,38 +30,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true);
     const supabase = createClient();
 
+    const fetchUserData = useCallback(async (sessionUser: User | null) => {
+        console.log("AUTH PROVIDER: Actualizando datos del usuario...");
+
+        if (sessionUser) {
+            const { data: userDB, error: errorInUserDB } = await supabase
+                .from('usuario')
+                .select('nombre')
+                .eq('id', sessionUser.id)
+                .single();
+
+            if (errorInUserDB) {
+                console.error('AUTH PROVIDER ERROR: Error al obtener nombre del usuario de la DB:', errorInUserDB.message);
+                toast.error('Error al cargar los datos del usuario.');
+                setUser(sessionUser as UserExtend);
+            } else {
+                console.log("AUTH PROVIDER: Nombre del usuario de la DB obtenido:", userDB?.nombre);
+                setUser({ ...sessionUser, nombre: userDB?.nombre });
+            }
+        } else {
+            setUser(null);
+        }
+        setLoading(false);
+    }, [supabase]);
+
+    const updateUser = useCallback(async () => {
+        setLoading(true);
+        const { data: { session } } = await supabase.auth.getSession();
+        await fetchUserData(session?.user || null);
+    }, [fetchUserData, supabase]);
+
     useEffect(() => {
         // Log 9: AuthProvider montado
         console.log("AUTH PROVIDER: Componente montado. Iniciando verificación de sesión.");
-
-        const fetchUserData = async (sessionUser: User | null) => {
-            // Log 10: Datos de usuario de la sesión de Supabase
-            console.log("AUTH PROVIDER: Sesión de Supabase recibida:", sessionUser ? sessionUser.id : "No hay sesión");
-
-            if (sessionUser) {
-                const { data: userDB, error: errorInUserDB } = await supabase
-                    .from('usuario')
-                    .select('nombre')
-                    .eq('id', sessionUser.id)
-                    .single();
-
-                if (errorInUserDB) {
-                    // Log 11: Error al obtener nombre de la DB
-                    console.error('AUTH PROVIDER ERROR: Error al obtener nombre del usuario de la DB:', errorInUserDB.message);
-                    toast.error('Error al cargar los datos del usuario.');
-                    setUser(sessionUser as UserExtend); // Aún así, establece el usuario básico
-                } else {
-                    // Log 12: Nombre del usuario de la DB obtenido
-                    console.log("AUTH PROVIDER: Nombre del usuario de la DB obtenido:", userDB?.nombre);
-                    setUser({ ...sessionUser, nombre: userDB?.nombre });
-                }
-            } else {
-                setUser(null);
-            }
-            setLoading(false); // La carga inicial o después del cambio ha terminado
-            // Log 13: Carga del AuthProvider finalizada
-            console.log("AUTH PROVIDER: loading es ahora false. Estado final del usuario:", user ? user.id : "null");
-        };
 
         // 1. Obtener la sesión inicial
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -86,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [supabase]);
 
     return (
-        <AuthContext.Provider value={{ user, loading }}>
+        <AuthContext.Provider value={{ user, loading, updateUser }}>
             {children}
         </AuthContext.Provider>
     );
