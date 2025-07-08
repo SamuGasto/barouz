@@ -11,11 +11,11 @@ function MenuFiltrado() {
   const { data: productos, isLoading } = useProductos()
 
   const filtrado = productos?.filter((producto) => {
-    if (filtrosCategoria.some((item) => item === producto.categoria)) return true;
+    if (filtrosCategoria.some((item) => item === producto.categoria) || filtrosCategoria.length == 0) return true;
     return false;
   })
     .filter((producto) => {
-      if (filtrosTexto == "") return true;
+      if (filtrosTexto == "" || filtrosTexto == undefined || filtrosTexto == null) return true;
       return (
         producto.nombre
           .toLowerCase()

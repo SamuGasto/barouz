@@ -9,6 +9,7 @@ import { LogOut, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { signOutAction } from '@/app/actions'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import UserData from './user-data'
 
 const links = [
     { href: "/protected/pedidos", label: "Pedidos" },
@@ -64,13 +65,7 @@ function NavbarProtected() {
         <nav className="flex w-full h-16 border flex-row items-center justify-between p-3 px-5">
             <SideMenu open={open} onOpenChange={setOpen} />
             <NormalMenu />
-            <div id="actions" className='flex flex-row items-center gap-2'>
-                <Button variant="ghost" onClick={() => signOutAction()}>
-                    <LogOut />
-                    <p>Salir</p>
-                </Button>
-                <ThemeSwitcher />
-            </div>
+            <UserData />
         </nav>
     )
 }
