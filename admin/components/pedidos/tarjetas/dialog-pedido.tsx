@@ -24,6 +24,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -52,20 +53,60 @@ const CategoriaProductoEnum = z.enum([
   "Otros",
 ]);
 
-function parseTimestamp(timestamp: string): { fecha: { year: string, month: string, day: string }, time: { hour: string, minute: string, second: string } } {
-  const date = timestamp.split(" ")[0];
-  const time = timestamp.split(" ")[1];
+function parseTimestamp(timestamp: string | undefined): { fecha: { year: string, month: string, day: string }, time: { hour: string, minute: string, second: string } } {
+  if (!timestamp || timestamp === "") {
+    // Si no hay timestamp, devolver la fecha y hora actuales
+    const now = new Date();
+    return {
+      fecha: {
+        year: now.getFullYear().toString(),
+        month: (now.getMonth() + 1).toString().padStart(2, '0'),
+        day: now.getDate().toString().padStart(2, '0')
+      },
+      time: {
+        hour: now.getHours().toString().padStart(2, '0'),
+        minute: now.getMinutes().toString().padStart(2, '0'),
+        second: '00'
+      }
+    };
+  }
 
+  try {
+    // Manejar tanto el formato ISO como el formato de entrada del input datetime-local
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) {
+      throw new Error('Fecha inválida');
+    }
 
-
-  return { fecha: { year: date.split("-")[0], month: date.split("-")[1], day: date.split("-")[2] }, time: { hour: time.split(":")[0], minute: time.split(":")[1], second: time.split(":")[2] } };
-}
-
-function parseToTimestamp(fecha: { year: string, month: string, day: string }, time: { hour: string, minute: string, second: string }) {
-  const fechaString = `${fecha.year}-${fecha.month}-${fecha.day}`;
-  const timeString = `${time.hour}:${time.minute}:${time.second}+04:00`;
-
-  return `${fechaString} ${timeString}`;
+    return {
+      fecha: {
+        year: date.getFullYear().toString(),
+        month: (date.getMonth() + 1).toString().padStart(2, '0'),
+        day: date.getDate().toString().padStart(2, '0')
+      },
+      time: {
+        hour: date.getHours().toString().padStart(2, '0'),
+        minute: date.getMinutes().toString().padStart(2, '0'),
+        second: '00'
+      }
+    };
+  } catch (error) {
+    console.error('Error al parsear fecha:', error);
+    // Devolver fecha y hora actuales en caso de error
+    const now = new Date();
+    return {
+      fecha: {
+        year: now.getFullYear().toString(),
+        month: (now.getMonth() + 1).toString().padStart(2, '0'),
+        day: now.getDate().toString().padStart(2, '0')
+      },
+      time: {
+        hour: now.getHours().toString().padStart(2, '0'),
+        minute: now.getMinutes().toString().padStart(2, '0'),
+        second: '00'
+      }
+    };
+  }
 }
 
 // Esquema para un solo detalle (producto en el pedido)
@@ -116,11 +157,13 @@ export const PedidoFinalScheme = z.object({
       minute: z.string(),
       second: z.string(),
     }),
-  }).optional(),
+  }),
   detalles: z
     .array(DetalleSchema)
     .min(1, "El pedido debe tener al menos un producto."),
   total_final: z.number(),
+  metodo_pago: z.enum(["Transferencia", "Efectivo"]),
+  cupon_id: z.string().nullable().optional(),
 });
 
 // Esquema completo del diálogo, incluyendo el usuario seleccionado
@@ -144,8 +187,10 @@ const getInitialValues = (pedido_final_arg?: TodosLosPedidos["pedido_final"]): z
     direccion: pedido_final_arg?.informacion.direccion || "",
     estado: pedido_final_arg?.informacion.estado || "Recibido",
     razon_cancelacion: pedido_final_arg?.informacion.razon_cancelacion || "",
-    fecha_hora: parseTimestamp(pedido_final_arg?.informacion.fecha_hora || ""),
+    fecha_hora: parseTimestamp(pedido_final_arg?.informacion.fecha_hora),
     total_final: pedido_final_arg?.informacion.total_final || 0,
+    metodo_pago: pedido_final_arg?.informacion.metodo_pago || "Efectivo",
+    cupon_id: null,
     detalles:
       pedido_final_arg?.pedidos
         ?.filter((detalle) => detalle.producto)
@@ -193,6 +238,7 @@ export function DialogPedido({ pedido_final_arg, usuarios, className, children, 
     pedido_final_arg?.informacion.tipo_envio === "Delivery"
   );
 
+
   const gestionarPedidoMutation = useGestionarPedidoFinal();
   const form = useForm<z.infer<typeof DialogFormScheme>>({
     resolver: zodResolver(DialogFormScheme),
@@ -238,7 +284,7 @@ export function DialogPedido({ pedido_final_arg, usuarios, className, children, 
     const finalPayload: z.infer<typeof PedidoFinalScheme> = {
       ...pedido_final,
       detalles: detalles,
-      razon_cancelacion: pedido_final.razon_cancelacion || null,
+      razon_cancelacion: pedido_final.razon_cancelacion || "",
       tipo_envio: pedido_final.tipo_envio,
       direccion: pedido_final.tipo_envio === "Delivery" ? pedido_final.direccion : "",
       fecha_hora: pedido_final.fecha_hora,
@@ -449,11 +495,60 @@ export function DialogPedido({ pedido_final_arg, usuarios, className, children, 
               />
               <FormField
                 control={form.control}
+                name="pedido_final.fecha_hora"
+                render={({ field }) => {
+                  // Crear un valor compatible con datetime-local (YYYY-MM-DDTHH:MM)
+                  const datetimeValue = `${field.value.fecha.year}-${field.value.fecha.month.padStart(2, '0')}-${field.value.fecha.day.padStart(2, '0')}T${field.value.time.hour.padStart(2, '0')}:${field.value.time.minute.padStart(2, '0')}`;
+
+                  return (
+                    <FormItem className="flex flex-row w-full my-4 items-center col-span-3">
+                      <FormLabel className="w-1/3">Fecha y hora</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="fecha_hora"
+                          type="datetime-local"
+                          onChange={(e) => {
+                            const fechaHora = e.target.value;
+                            if (!fechaHora) return;
+
+                            const [datePart, timePart] = fechaHora.split('T');
+                            if (!datePart || !timePart) return;
+
+                            const [year, month, day] = datePart.split('-');
+                            const [hour, minute] = timePart.split(':');
+
+                            field.onChange({
+                              fecha: {
+                                year,
+                                month: month.padStart(2, '0'),
+                                day: day.padStart(2, '0')
+                              },
+                              time: {
+                                hour: hour.padStart(2, '0'),
+                                minute: minute.padStart(2, '0'),
+                                second: '00'
+                              }
+                            });
+                          }}
+                          value={datetimeValue}
+                          min={`${new Date().getFullYear()}-01-01T00:00`}
+                          max={`${new Date().getFullYear() + 1}-12-31T23:59`}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+              <FormField
+                control={form.control}
                 name="pedido_final.detalles"
                 render={({ field }) => (
                   <GestorPedidos detalles={field.value} onChange={field.onChange} />
                 )}
               />
+
+
             </ScrollArea>
             <DialogFooter>
               <div className="flex w-full justify-between items-center">

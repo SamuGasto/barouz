@@ -32,6 +32,7 @@ function DetallesPedido({ detallesPedido, setDetallesPedido }: Props) {
         estado: "Recibido",
         fecha_hora: "",
         id: "",
+        metodo_pago: "Transferencia",
         razon_cancelacion: "",
         tipo_envio: "Retiro en tienda",
         total_final: 0,
