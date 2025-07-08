@@ -13,8 +13,16 @@ export function EliminarExtraDialog({ open, onOpenChange, extraId }: {
     const { mutateAsync: eliminar, isPending: eliminarLoading } = useEliminarExtra()
 
     const handleDelete = async () => {
-        await eliminar(extraId)
-        toast.success("Extra eliminado")
+        toast.promise(eliminar(extraId), {
+            loading: "Eliminando...",
+            success: () => {
+                return "Extra eliminado";
+            },
+            error: (error) => {
+                console.error("Error al eliminar extra:", error)
+                return `${error}`;
+            },
+        })
         onOpenChange(false)
     }
 

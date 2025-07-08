@@ -16,10 +16,10 @@ async function TodosProductos() {
     <>
       <section
         id="todos"
-        className="mt-5 flex w-full flex-col items-center gap-6"
+        className="mt-5 flex w-full flex-col items-center gap-6 bg-brand-background-3 py-4"
       >
-        <div className="items-left justify-left flex flex-col gap-2 bg-brand-background-3">
-          <h2 className="text-4xl font-thin">Todas las promociones</h2>
+        <div className="items-center justify-center flex flex-col gap-2 ">
+          <h2 className="text-4xl text-center font-thin">Todas las promociones</h2>
         </div>
         <div className="flex w-full flex-wrap justify-center gap-1 px-2 py-12 md:gap-4 md:px-4 lg:px-6">
           {todasLasPromociones.map((item) => (

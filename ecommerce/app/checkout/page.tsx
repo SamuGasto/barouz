@@ -104,9 +104,11 @@ export default function CheckoutPage() {
         <div className="mx-auto max-w-4xl">
           <h1 className="text-2xl font-bold tracking-tight mb-8">Finalizar compra</h1>
 
-          <div className="mb-8">
-            <CheckoutStep />
-          </div>
+          {currentStep !== 'Confirmación' && (
+            <div className="mb-8">
+              <CheckoutStep />
+            </div>
+          )}
 
           <div className="mt-8">
             {currentStep === 'Envío' && (

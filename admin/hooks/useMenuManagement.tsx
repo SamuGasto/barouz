@@ -49,8 +49,8 @@ export function useUpdateProduct() {
     const queryClient = useQueryClient();
 
     return useMutation<
-        ProductRow, 
-        Error, 
+        ProductRow,
+        Error,
         { id: string; updates: Partial<ProductUpdate> }
     >({
         mutationFn: ({ id, updates }) => menuService.actualizarProducto(id, updates),
@@ -71,6 +71,12 @@ export function useDeleteProduct() {
 
     return useMutation<void, Error, string>({
         mutationFn: async (productId: string) => {
+            const productInPedido = await menuService.checkIfProductVinculatedToPedido(productId)
+
+            if (productInPedido.length > 0) {
+                throw new Error("El producto no puede ser eliminado porque está vinculado a un pedido");
+            }
+
             const productsInCache = queryClient.getQueryData<ProductRow[]>(['products'])
             const productToDelete = productsInCache?.find(product => product.id === productId)
 

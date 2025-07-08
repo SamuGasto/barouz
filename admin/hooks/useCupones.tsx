@@ -62,7 +62,13 @@ export function useEliminarCupon() {
     const queryClient = useQueryClient();
 
     return useMutation<boolean, Error, string>({
-        mutationFn: cuponesService.eliminarCupon,
+        mutationFn: async (id: string) => {
+            const cuponVinculatedToPedidoFinal = await cuponesService.checkIfCuponVinculatedToPedidoFinal(id);
+            if (cuponVinculatedToPedidoFinal.length > 0) {
+                throw new Error("El cupon no se puede eliminar porque esta siendo utilizado en un pedido final");
+            }
+            return cuponesService.eliminarCupon(id);
+        },
         onSuccess: (response: boolean) => {
             queryClient.invalidateQueries({ queryKey: ["cupones"] })
         },

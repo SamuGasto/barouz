@@ -71,6 +71,30 @@ class CuponesService {
     return data;
   }
 
+  public async checkIfCuponVinculatedToPedidoFinal(cupon_id: string) {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("cupon_pedido_final")
+        .select("*")
+        .eq("cupon_id", cupon_id);
+
+      if (error) {
+        throw new Error(
+          `Error al obtener cupones del pedido final: ${error.message}`
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error(
+        "Error inesperado en checkIfCuponVinculatedToPedidoFinal:",
+        error
+      );
+      throw new Error("No se pudieron obtener los cupones del pedido final");
+    }
+  }
+
   public async eliminarCupon(id: string): Promise<boolean> {
     const supabase = createClient();
     const { error } = await supabase.from("cupon").delete().eq("id", id);

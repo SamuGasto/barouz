@@ -50,7 +50,10 @@ export default function PromocionesPage() {
         success: () => {
           return "Cupón eliminado";
         },
-        error: "Error al eliminar",
+        error: (error) => {
+          console.error("Error al eliminar cupon:", error)
+          return `${error}`;
+        },
       }
     );
   }

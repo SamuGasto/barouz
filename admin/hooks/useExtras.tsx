@@ -73,7 +73,13 @@ export function useEliminarExtra() {
     const queryClient = useQueryClient()
 
     return useMutation<void, Error, string>({
-        mutationFn: (id) => extraService.eliminarExtra(id),
+        mutationFn: async (id) => {
+            const extraVinculatedToPedido = await extraService.checkIfExtraVinculatedToPedido(id);
+            if (extraVinculatedToPedido.length > 0) {
+                throw new Error("El extra no se puede eliminar porque esta siendo utilizado en un pedido");
+            }
+            return extraService.eliminarExtra(id);
+        },
         onSuccess: (_, id) => {
             // Actualizar caché
             queryClient.setQueryData<ExtraRow[]>(["extras"], (old) =>

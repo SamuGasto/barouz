@@ -39,9 +39,10 @@ export default function MenuPage() {
     { id: "waffles", name: "Waffles", icon: <CakeSlice className="h-4 w-4" /> },
     { id: "helados", name: "Helados Artesanales", icon: <IceCream className="h-4 w-4" /> },
     { id: "churros", name: "Churros", icon: <Candy className="h-4 w-4" /> },
-    { id: "bebestibles", name: "Bebestibles", icon: <Coffee className="h-4 w-4" /> },
+    { id: "bebestibles", name: "Bebidas", icon: <Coffee className="h-4 w-4" /> },
     { id: "cookies", name: "Waffle Cookies", icon: <Cookie className="h-4 w-4" /> },
     { id: "postres", name: "Postres", icon: <Snowflake className="h-4 w-4" /> },
+    { id: "otros", name: "Otros", icon: <PackagePlus className="h-4 w-4" /> },
   ]
 
   return (

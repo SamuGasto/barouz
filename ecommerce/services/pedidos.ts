@@ -78,7 +78,7 @@ class PedidosService {
             )
           `
       )
-      .order("fecha_hora", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Error al obtener todos los pedidos:", error);

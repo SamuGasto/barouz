@@ -96,6 +96,30 @@ class MenuService {
     }
   }
 
+  public async checkIfProductVinculatedToPedido(product_id: string) {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("pedido")
+        .select("*")
+        .eq("producto_id", product_id);
+
+      if (error) {
+        throw new Error(
+          `Error al obtener productos del pedido: ${error.message}`
+        );
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error(
+        "Error inesperado en obtenerTodosLosProductosPorPedido:",
+        error
+      );
+      throw new Error("No se pudieron obtener los productos del pedido");
+    }
+  }
+
   public async crearProducto(
     producto: Omit<ProductoInsert, "id" | "created_at" | "updated_at">
   ): Promise<ProductoRow> {

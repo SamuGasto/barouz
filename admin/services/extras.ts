@@ -88,6 +88,30 @@ class ExtraService {
     return data.map((item) => item.categoria || "");
   }
 
+  public async checkIfExtraVinculatedToPedido(extra_id: string) {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("pedido_extra")
+        .select("*")
+        .eq("extra_id", extra_id);
+
+      if (error) {
+        throw new Error(
+          `Error al obtener extras del pedido final: ${error.message}`
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error(
+        "Error inesperado en checkIfExtraVinculatedToPedidoFinal:",
+        error
+      );
+      throw new Error("No se pudieron obtener los extras del pedido final");
+    }
+  }
+
   public async crearExtra(extra: ExtraInsert): Promise<ExtraRow> {
     const supabase = createClient();
     const { data, error } = await supabase
