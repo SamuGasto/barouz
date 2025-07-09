@@ -1,15 +1,15 @@
-import { Database } from "@/types/supabase";
-import { supabase } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
+import {
+  PedidoRow,
+  PedidoInsert,
+  PedidoUpdate,
+  ProductoRow,
+} from "@/types/tipos_supabase_resumidos";
 
-type PedidoRow = Database["public"]["Tables"]["pedido_final"]["Row"];
-type PedidoInsert = Database["public"]["Tables"]["pedido_final"]["Insert"];
-type PedidoUpdate = Database["public"]["Tables"]["pedido_final"]["Update"];
-
-class PedidoService {
-  public async getAllPedidos(): Promise<
-    Database["public"]["Tables"]["pedido_final"]["Row"][]
-  > {
-    const { data, error } = await supabase.from("pedido_final").select("*");
+class PedidosService {
+  public async obtenerTodosPedidos(): Promise<PedidoRow[]> {
+    const supabase = createClient();
+    const { data, error } = await supabase.from("pedido").select("*");
 
     if (error) {
       console.error("Error al obtener datos de la base de pedidos:", error);
@@ -19,36 +19,26 @@ class PedidoService {
     return data;
   }
 
-  public async crearPedido(pedido: PedidoInsert): Promise<PedidoRow> {
-    const { data, error } = await supabase
-      .from("pedido_final")
-      .insert([pedido])
-      .select("*")
-      .single();
-
-    if (error) {
-      console.error("Error al crear pedido:", error);
-      throw error;
-    }
-
-    return data;
-  }
-
-  public async obtenerDetalleProductos(pedido_final_id: string) {
+  public async obtenerPedidoPorId(id: string): Promise<PedidoRow> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("pedido")
       .select("*")
-      .eq("pedido_final_id", pedido_final_id);
+      .eq("id", id)
+      .single();
 
     if (error) {
-      console.error("Error al obtener datos de la base de productos:", error);
+      console.error("Error al obtener datos de la base de pedidos:", error);
       throw error;
     }
 
     return data;
   }
 
-  public async obtenerTodosLosProductosPorPedido(pedido_id: string) {
+  public async obtenerTodosLosProductosPorPedido(
+    pedido_id: string
+  ): Promise<ProductoRow[]> {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("producto")
       .select("*")
@@ -62,9 +52,46 @@ class PedidoService {
     return data;
   }
 
-  public async eliminarPedido(pedido_id: string) {
+  public async crearPedido(pedido: PedidoInsert): Promise<PedidoRow> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("pedido")
+      .insert(pedido)
+      .select("*")
+      .single();
+
+    if (error) {
+      console.error("Error al crear pedido:", error);
+      throw error;
+    }
+
+    return data;
+  }
+
+  public async modificarPedido(
+    pedido_id: string,
+    pedido: PedidoUpdate
+  ): Promise<PedidoRow> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("pedido")
+      .update(pedido)
+      .eq("id", pedido_id)
+      .select("*")
+      .single();
+
+    if (error) {
+      console.error("Error al modificar datos de la base de pedidos:", error);
+      throw error;
+    }
+
+    return data;
+  }
+
+  public async eliminarPedido(pedido_id: string): Promise<boolean> {
+    const supabase = createClient();
     const { error } = await supabase
-      .from("pedido_final")
+      .from("pedido")
       .delete()
       .eq("id", pedido_id);
 
@@ -77,4 +104,6 @@ class PedidoService {
   }
 }
 
-export const pedidoService = new PedidoService();
+const pedidosService = new PedidosService();
+
+export default pedidosService;

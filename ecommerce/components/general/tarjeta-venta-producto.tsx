@@ -1,12 +1,12 @@
 import React from "react";
 import { Card } from "../ui/card";
 import Image from "next/image";
-import { Producto } from "@/data/tipos";
 import { Button } from "../ui/button";
-import { Trash } from "lucide-react";
+import { ImageOffIcon, Trash } from "lucide-react";
+import { ProductoRow } from "@/types/resumen-tipos";
 
 interface PropType {
-  producto: Producto;
+  producto: ProductoRow;
   cantidad: number;
   modificarCantidad: (cantidad: number) => void;
   eliminar: () => void;
@@ -17,11 +17,19 @@ function TarjetaVentaProducto(props: PropType) {
   return (
     <Card className="flex w-fit flex-row items-center justify-center p-1">
       <div id="imagen" className="flex aspect-square max-w-[128px]">
-        <Image
-          className="rounded-md object-cover"
-          src={producto.imagen}
-          alt={producto.nombre}
-        />
+        {producto.imagen !== "" ? (
+          <Image
+            className="rounded-md object-cover"
+            width={128}
+            height={128}
+            src={producto.imagen}
+            alt={producto.nombre}
+          />
+        ) : (
+          <div className="flex h-[128px] w-[128px] border border-dashed rounded-md items-center justify-center">
+            <ImageOffIcon className="h-12 w-12" />
+          </div>
+        )}
       </div>
       <div className="items-left justify-left flex min-w-[200px] flex-col gap-2">
         <div id="descripcion">
@@ -31,16 +39,24 @@ function TarjetaVentaProducto(props: PropType) {
         <div id="precio" className="flex flex-row items-center gap-2">
           <Card className="flex h-fit w-fit flex-row items-center gap-2 py-0">
             <Button
+              type="button"
               className="h-8 w-8"
-              onClick={() => modificarCantidad(-1)}
+              onClick={(e) => {
+                e.preventDefault();
+                modificarCantidad(-1);
+              }}
               variant={"ghost"}
             >
               -
             </Button>
             <p>{cantidad}</p>
             <Button
+              type="button"
               className="h-8 w-8"
-              onClick={() => modificarCantidad(1)}
+              onClick={(e) => {
+                e.preventDefault();
+                modificarCantidad(1);
+              }}
               variant={"ghost"}
             >
               +
@@ -65,9 +81,13 @@ function TarjetaVentaProducto(props: PropType) {
           <p className="text-right text-sm font-thin">Precio unitario</p>
         </div>
         <Button
+          type="button"
           className="flex h-fit w-fit flex-row items-center gap-2 self-center"
           variant="destructive"
-          onClick={() => eliminar()}
+          onClick={(e) => {
+            e.preventDefault();
+            eliminar();
+          }}
         >
           <Trash size={16} />
           Eliminar

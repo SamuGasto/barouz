@@ -1,9 +1,9 @@
 import React from "react";
 import TarjetaLocal from "./tarjeta-local";
-import { Local } from "@/data/tipos";
+import { LocalRow } from "@/types/resumen-tipos";
 
 interface PropType {
-  locales: Local[];
+  locales: LocalRow[];
 }
 
 function Locales(props: PropType) {

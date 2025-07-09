@@ -2,11 +2,11 @@
 import React from "react";
 import { APIProvider, Map } from "@vis.gl/react-google-maps";
 import { Card } from "@/components/ui/card";
-import { Local } from "@/data/tipos";
+import { LocalRow } from "@/types/resumen-tipos";
 import initMap from "@/utils/mapa/init-map";
 
 interface PropType {
-  locales: Local[];
+  locales: LocalRow[];
 }
 
 

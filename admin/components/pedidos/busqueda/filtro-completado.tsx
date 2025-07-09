@@ -2,17 +2,17 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import React from 'react'
 
 interface Props {
-    activeTab: string
-    onTabChange: (value: string) => void
+    activeTab: 'Activos' | 'Completados' | 'Todos'
+    onTabChange: (value: 'Activos' | 'Completados' | 'Todos') => void
 }
 
 function FiltroCompletado({ activeTab, onTabChange }: Props) {
     return (
-        <div><Tabs defaultValue='activos' value={activeTab} onValueChange={onTabChange}>
+        <div><Tabs defaultValue='Todos' value={activeTab} onValueChange={(value) => onTabChange(value as 'Activos' | 'Completados' | 'Todos')}>
             <TabsList>
-                <TabsTrigger value="activos">Activos</TabsTrigger>
-                <TabsTrigger value="completados">Completados</TabsTrigger>
-                <TabsTrigger value="todos">Todos</TabsTrigger>
+                <TabsTrigger value="Todos">Todos</TabsTrigger>
+                <TabsTrigger value="Activos">Activos</TabsTrigger>
+                <TabsTrigger value="Completados">Completados</TabsTrigger>
             </TabsList>
         </Tabs></div>
     )

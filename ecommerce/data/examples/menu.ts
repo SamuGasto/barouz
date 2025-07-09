@@ -35,7 +35,7 @@ const menu: Menu[] = [
     productos: todos_churros,
   },
   {
-    nombre: "Waffles Cookies",
+    nombre: "Waffle Cookies",
     imagen: waffleCookies,
     productos: todos_cookies,
   },

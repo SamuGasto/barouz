@@ -4,10 +4,9 @@ import Banner from "@/components/pagina-menu/banner";
 
 export default async function Home() {
   return (
-    <main className="mb-6 flex w-full flex-col items-center gap-6">
+    <div className="mb-6 flex w-full flex-col items-center gap-6">
       <Banner />
-      <Populares />
       <Menu />
-    </main>
+    </div>
   );
 }

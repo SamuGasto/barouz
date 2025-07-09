@@ -35,7 +35,7 @@ export function MenuProductCard({ item, onEdit, onDelete }: MenuProductCardProps
                     toast.error("Error al eliminar producto ya que esta siendo utilizado en un pedido")
                 }
                 else {
-                    toast.error("Error al eliminar producto, intentalo de nuevo más tarde")
+                    toast.error("Error al eliminar producto: " + error.message)
                 }
             })
         }

@@ -39,14 +39,15 @@ export default function MenuPage() {
     { id: "waffles", name: "Waffles", icon: <CakeSlice className="h-4 w-4" /> },
     { id: "helados", name: "Helados Artesanales", icon: <IceCream className="h-4 w-4" /> },
     { id: "churros", name: "Churros", icon: <Candy className="h-4 w-4" /> },
-    { id: "bebestibles", name: "Bebestibles", icon: <Coffee className="h-4 w-4" /> },
+    { id: "bebestibles", name: "Bebidas", icon: <Coffee className="h-4 w-4" /> },
     { id: "cookies", name: "Waffle Cookies", icon: <Cookie className="h-4 w-4" /> },
     { id: "postres", name: "Postres", icon: <Snowflake className="h-4 w-4" /> },
+    { id: "otros", name: "Otros", icon: <PackagePlus className="h-4 w-4" /> },
   ]
 
   return (
     <div className="flex min-h-screen flex-col gap-3 px-2 sm:px-4 lg:px-8">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
         <h2 className="text-3xl font-bold tracking-tight">Gestión de Menú</h2>
         <Button
           onClick={() => { setActualProduct(undefined); setShowDialog(true) }}
@@ -70,8 +71,8 @@ export default function MenuPage() {
         </div>
       </div>
 
-      <Tabs value={activeCategoryId} onValueChange={setActiveCategoryId} className="space-y-4 w-full">
-        <TabsList className="flex flex-nowrap overflow-x-auto scrollbar-thin scrollbar-thumb-muted rounded-md">
+      <Tabs value={activeCategoryId} onValueChange={setActiveCategoryId} className="flex flex-col gap-4 w-full">
+        <TabsList className="flex h-fit flex-wrap gap-2 scrollbar-thin scrollbar-thumb-muted rounded-md">
 
           {categories.map((category) => (
             <TabsTrigger

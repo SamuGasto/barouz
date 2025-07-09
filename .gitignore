@@ -185,3 +185,8 @@ next-env.d.ts
 
 # DATA-FAKE
 .DATA-FAKE
+
+# Windsurf
+.windsurf
+CONTRIBUTING.md
+.vscode

@@ -1,6 +1,4 @@
 import React from "react";
-import CarruselDeProductos from "../../general/carrusel-de-productos";
-import productos from "@/data/examples/productos-promociones";
 
 function Populares() {
   return (
@@ -9,7 +7,7 @@ function Populares() {
         <h2 className="text-4xl font-thin">Populares</h2>
       </div>
       <div className="w-full rounded-xl p-4 md:ml-10 md:w-11/12 md:p-0 dark:shadow-none">
-        <CarruselDeProductos productos={productos} />
+        {/* <CarruselDeProductos productos={productos} /> */}
       </div>
     </div>
   );

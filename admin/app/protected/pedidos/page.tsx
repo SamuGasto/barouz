@@ -2,19 +2,20 @@
 import React from 'react'
 import Busqueda from '@/components/pedidos/busqueda/busqueda'
 import { ListaTarjetas } from '@/components/pedidos/tarjetas/lista-tarjetas';
-
 import useUsuarios from '@/hooks/useUsuarios';
-import { useProducts } from '@/hooks/useMenuManagement';
-import usePedidos from '@/hooks/usePedidos';
+import usePedidosFinal from '@/hooks/usePedidosFinales';
+import { Loader2 } from 'lucide-react';
+import { Database } from '@/types/supabase';
 
 function Pedidos() {
-  const { data: pedidos, isLoading: pedidosLoading } = usePedidos();
-  const { usuarioService, loading: usuariosLoading } = useUsuarios();
-  const { data: products, isLoading: productsLoading } = useProducts();
-
   const [searchTerm, setSearchTerm] = React.useState("");
-  const [activeTab, setActiveTab] = React.useState("activos");
-  const [activeSubTab, setActiveSubTab] = React.useState("all");
+  const [activeTab, setActiveTab] = React.useState<'Activos' | 'Completados' | 'Todos'>("Todos");
+  const [activeSubTab, setActiveSubTab] = React.useState<'Todos' | Database['public']['Enums']['EstadoPedidos']>("Todos");
+  const { data: todosUsuarios, isPending: todosUsuariosPending } = useUsuarios()
+  const { data: pedidosFinales, isLoading: pedidosLoading } = usePedidosFinal();
+
+  const isGeneralLoading = pedidosLoading || todosUsuariosPending
+
 
   return (
     <div className="flex w-full justify-center items-center flex-col gap-10">
@@ -22,22 +23,17 @@ function Pedidos() {
         activeTab={activeTab}
         activeSubTab={activeSubTab}
         onSearchChange={setSearchTerm}
-        onTabChange={setActiveTab}
-        onSubTabChange={setActiveSubTab}
-        todosUsuarios={usuarioService.usuarios}
-        todosLosProductos={products || []}
+        onTabChange={(value) => setActiveTab(value as 'Activos' | 'Completados' | 'Todos')}
+        onSubTabChange={(value) => setActiveSubTab(value as 'Todos' | Database['public']['Enums']['EstadoPedidos'])}
+        usuarios={todosUsuarios || []}
       />
-      <ListaTarjetas searchTerm={searchTerm}
-        activeSubTab={activeSubTab}
-        pedidos={pedidos || []}
-        type="all"
-        onEdit={() => { }}
-        onUpdateStatus={() => { }}
-        onCancel={() => { }}
-        onReactivate={() => { }}
-        menu={products || []}
-        todosUsuarios={usuarioService.usuarios}
-      />
+      {isGeneralLoading ? <Loader2 className="animate-spin" /> : <div className='flex w-full justify-center items-center'>
+        <ListaTarjetas searchTerm={searchTerm}
+          pedidosFinales={pedidosFinales || []}
+          activeSubTab={activeSubTab}
+          type={activeTab}
+          usuarios={todosUsuarios || []}
+        /></div>}
     </div>
   )
 }

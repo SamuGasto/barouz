@@ -8,6 +8,7 @@ import { storageService } from '@/services/storage';
 type ProductRow = Database["public"]["Tables"]["producto"]["Row"];
 type ProductInsert = Database["public"]["Tables"]["producto"]["Insert"];
 type ProductUpdate = Database["public"]["Tables"]["producto"]["Update"];
+type PedidoRow = Database["public"]["Tables"]["pedido"]["Row"];
 
 export function useProducts() {
     return useQuery<ProductRow[]>({
@@ -47,16 +48,20 @@ export function useCreateProduct() {
 export function useUpdateProduct() {
     const queryClient = useQueryClient();
 
-    return useMutation<ProductRow, Error, ProductUpdate>({
-        mutationFn: menuService.actualizarProducto,
+    return useMutation<
+        ProductRow,
+        Error,
+        { id: string; updates: Partial<ProductUpdate> }
+    >({
+        mutationFn: ({ id, updates }) => menuService.actualizarProducto(id, updates),
         onSuccess: (updatedProduct: ProductRow) => {
             queryClient.setQueryData<ProductRow[]>(['products'], (old) => {
-                return old ? old.map(product => product.id === updatedProduct.id ? updatedProduct : product) : [updatedProduct]
-            })
-            queryClient.invalidateQueries({ queryKey: ['products'] })
+                return old ? old.map(product => product.id === updatedProduct.id ? updatedProduct : product) : [updatedProduct];
+            });
+            queryClient.invalidateQueries({ queryKey: ['products'] });
         },
         onError: (error) => {
-            console.error("Error al actualizar producto: ", error)
+            console.error("Error al actualizar producto: ", error);
         }
     })
 }
@@ -66,13 +71,19 @@ export function useDeleteProduct() {
 
     return useMutation<void, Error, string>({
         mutationFn: async (productId: string) => {
+            const productInPedido = await menuService.checkIfProductVinculatedToPedido(productId)
+
+            if (productInPedido.length > 0) {
+                throw new Error("El producto no puede ser eliminado porque está vinculado a un pedido");
+            }
+
             const productsInCache = queryClient.getQueryData<ProductRow[]>(['products'])
             const productToDelete = productsInCache?.find(product => product.id === productId)
 
             // Si el producto tiene una imagen, intenta eliminarla del storage primero
             if (productToDelete && productToDelete.imagen && productToDelete.imagen !== "") {
                 try {
-                    await storageService.deleteProductImage(productToDelete.imagen);
+                    await storageService.deleteImage("productos", productToDelete.imagen);
                 } catch (storageError) {
                     console.error("No se pudo eliminar la imagen del storage, pero se intentará eliminar el producto de la DB.", storageError);
                     // Opcional: podrías decidir lanzar el error aquí si quieres que la eliminación
@@ -99,18 +110,18 @@ export function useDeleteProduct() {
     })
 }
 
+export function usePedidosByPedidoId(pedido_id: string | undefined) {
+    return useQuery<PedidoRow[]>({
+        queryKey: ["productsByPedido", pedido_id],
+        queryFn: () => menuService.obtenerPedidosPorPedidoFinal(pedido_id!),
+        enabled: !!pedido_id,
+    })
+}
+
 export function useProductsByPedidoId(pedido_id: string | undefined) {
     return useQuery<ProductRow[]>({
         queryKey: ["productsByPedido", pedido_id],
         queryFn: () => menuService.obtenerTodosLosProductosPorPedido(pedido_id!),
         enabled: !!pedido_id,
-    })
-}
-
-export function usePedidoDetails(pedido_final_id: string | undefined) {
-    return useQuery<ProductRow[]>({
-        queryKey: ["pedidoDetails", pedido_final_id],
-        queryFn: () => menuService.obtenerDetalleProductos(pedido_final_id!),
-        enabled: !!pedido_final_id,
     })
 }

@@ -1,18 +1,22 @@
 import React from 'react'
-import UsuarioService from '@/services/usuarios';
+import { usuarioService } from '@/services/usuarios';
+import { useQuery } from '@tanstack/react-query';
 
 function useUsuarios() {
-    const [usuarioService, setUsuarioService] = React.useState(new UsuarioService())
-    const [loading, setLoading] = React.useState(true)
+    return useQuery({
+        queryKey: ["usuarios"],
+        queryFn: () => usuarioService.obtenerTodosLosUsuarios(),
+        staleTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: true,
+    })
+}
 
-    React.useEffect(() => {
-        const getData = async () => {
-            await usuarioService.obtenerTodosLosUsuarios().then(() => setLoading(false))
-        }
-        getData()
-    }, [])
-
-    return { usuarioService, loading }
+export function useUsuarioByID(id: string) {
+    return useQuery({
+        queryKey: ["usuario", id],
+        queryFn: () => usuarioService.obtenerUsuarioPorID(id),
+        staleTime: 5 * 60 * 1000,
+    })
 }
 
 export default useUsuarios

@@ -4,7 +4,6 @@ import type React from "react"
 
 import { useState, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { Upload, X, ImageIcon, AlertCircle } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
@@ -19,7 +18,6 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({ value, nameProduct, onChange, onRemove, disabled, className }: ImageUploadProps) {
-    const [isDragOver, setIsDragOver] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [isProcessingImage, setIsProcessingImage] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -30,9 +28,6 @@ export function ImageUpload({ value, nameProduct, onChange, onRemove, disabled, 
         (e: React.DragEvent) => {
             e.preventDefault()
             e.stopPropagation()
-            if (!isBusy) {
-                setIsDragOver(true)
-            }
         },
         [isBusy],
     )
@@ -40,9 +35,6 @@ export function ImageUpload({ value, nameProduct, onChange, onRemove, disabled, 
     const handleDragLeave = useCallback((e: React.DragEvent) => {
         e.preventDefault()
         e.stopPropagation()
-        if (!isBusy) {
-            setIsDragOver(false)
-        }
     }, [isBusy])
 
     const validateFile = (file: File): string | null => {
@@ -148,7 +140,6 @@ export function ImageUpload({ value, nameProduct, onChange, onRemove, disabled, 
         async (e: React.DragEvent) => {
             e.preventDefault()
             e.stopPropagation()
-            setIsDragOver(false)
 
             if (isBusy) return
 

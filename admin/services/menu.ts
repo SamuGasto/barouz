@@ -1,113 +1,191 @@
+import { createClient } from "@/utils/supabase/client";
 import { Database } from "@/types/supabase";
-import supabase from "@/utils/supabase/client";
+import {
+  ProductoInsert,
+  ProductoRow,
+  ProductoUpdate,
+} from "@/types/tipos_supabase_resumidos";
 
 class MenuService {
-  public async getAllProducts(): Promise<
-    Database["public"]["Tables"]["producto"]["Row"][]
-  > {
-    const { data, error } = await supabase.from("producto").select("*");
+  public async getAllProducts(): Promise<ProductoRow[]> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("producto")
+        .select("*")
+        .order("categoria", { ascending: true });
 
-    if (error) {
-      console.error("Error al obtener datos de la base de productos:", error);
-      throw error;
+      if (error) {
+        console.error("Error al obtener productos:", error);
+        throw new Error(`Error al obtener productos: ${error.message}`);
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error("Error inesperado en getAllProducts:", error);
+      throw new Error("No se pudieron obtener los productos");
     }
-
-    return data;
   }
 
-  public async getProductById(
-    id: string
-  ): Promise<Database["public"]["Tables"]["producto"]["Row"]> {
-    const { data, error } = await supabase
-      .from("producto")
-      .select("*")
-      .eq("id", id)
-      .single();
+  public async getProductById(id: string): Promise<ProductoRow> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("producto")
+        .select("*")
+        .eq("id", id)
+        .single();
 
-    if (error) {
-      console.error("Error al obtener datos de la base de productos:", error);
-      throw error;
+      if (error) {
+        throw new Error(`Error al obtener el producto: ${error.message}`);
+      }
+
+      if (!data) {
+        throw new Error("Producto no encontrado");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error inesperado en getProductById:", error);
+      throw new Error("No se pudo obtener el producto");
     }
-
-    return data;
   }
 
-  public async obtenerTodosLosProductosPorPedido(pedido_id: string) {
-    const { data, error } = await supabase
-      .from("producto")
-      .select("*")
-      .eq("pedido_id", pedido_id);
+  public async obtenerTodosLosProductosPorPedido(
+    pedido_id: string
+  ): Promise<ProductoRow[]> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("producto")
+        .select("*")
+        .eq("pedido_id", pedido_id);
 
-    if (error) {
-      console.error("Error al obtener datos de la base de productos:", error);
-      throw error;
+      if (error) {
+        throw new Error(
+          `Error al obtener productos del pedido: ${error.message}`
+        );
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error(
+        "Error inesperado en obtenerTodosLosProductosPorPedido:",
+        error
+      );
+      throw new Error("No se pudieron obtener los productos del pedido");
     }
-
-    return data;
   }
 
-  public async obtenerDetalleProductos(id_pedido_final: string) {
-    const { data, error } = await supabase
-      .from("pedido")
-      .select("*")
-      .eq("pedido_final_id", id_pedido_final);
+  public async obtenerPedidosPorPedidoFinal(id_pedido_final: string) {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("pedido")
+        .select("*")
+        .eq("pedido_final_id", id_pedido_final);
 
-    if (error) {
-      console.error("Error al obtener datos de la base de productos:", error);
-      throw error;
+      if (error) {
+        throw new Error(`Error al obtener pedidos: ${error.message}`);
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error("Error inesperado en obtenerPedidosPorPedidoFinal:", error);
+      throw new Error("No se pudieron obtener los pedidos");
     }
+  }
 
-    return data;
+  public async checkIfProductVinculatedToPedido(product_id: string) {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("pedido")
+        .select("*")
+        .eq("producto_id", product_id);
+
+      if (error) {
+        throw new Error(
+          `Error al obtener productos del pedido: ${error.message}`
+        );
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error(
+        "Error inesperado en obtenerTodosLosProductosPorPedido:",
+        error
+      );
+      throw new Error("No se pudieron obtener los productos del pedido");
+    }
   }
 
   public async crearProducto(
-    producto: Database["public"]["Tables"]["producto"]["Insert"]
-  ): Promise<Database["public"]["Tables"]["producto"]["Row"]> {
-    const { data, error } = await supabase
-      .from("producto")
-      .insert([producto])
-      .select("*")
-      .single();
+    producto: Omit<ProductoInsert, "id" | "created_at" | "updated_at">
+  ): Promise<ProductoRow> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("producto")
+        .insert([producto])
+        .select()
+        .single();
 
-    if (error) {
-      console.error("Error al crear producto:", error);
-      throw error;
+      if (error) {
+        throw new Error(`Error al crear producto: ${error.message}`);
+      }
+
+      if (!data) {
+        throw new Error("No se pudo crear el producto");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error inesperado en crearProducto:", error);
+      throw new Error("No se pudo crear el producto");
     }
-
-    return data;
   }
 
   public async actualizarProducto(
-    producto: Database["public"]["Tables"]["producto"]["Update"]
-  ): Promise<Database["public"]["Tables"]["producto"]["Row"]> {
-    if (!producto.id) {
-      throw new Error("El ID del producto es requerido");
+    id: string,
+    updates: Partial<ProductoUpdate>
+  ): Promise<ProductoRow> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("producto")
+        .update(updates)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) {
+        throw new Error(`Error al actualizar producto: ${error.message}`);
+      }
+
+      if (!data) {
+        throw new Error("No se pudo actualizar el producto");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error inesperado en actualizarProducto:", error);
+      throw new Error("No se pudo actualizar el producto");
     }
-
-    const { data, error } = await supabase
-      .from("producto")
-      .update(producto)
-      .eq("id", producto.id)
-      .select("*")
-      .single();
-
-    if (error) {
-      console.error("Error al actualizar producto:", error);
-      throw error;
-    }
-
-    return data;
   }
 
-  public async eliminarProducto(id: string): Promise<boolean> {
-    const { error } = await supabase.from("producto").delete().eq("id", id);
+  public async eliminarProducto(id: string): Promise<void> {
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.from("producto").delete().eq("id", id);
 
-    if (error) {
-      console.error("Error al eliminar producto:", error);
-      throw error;
+      if (error) {
+        throw new Error(`Error al eliminar producto: ${error.message}`);
+      }
+    } catch (error) {
+      console.error("Error inesperado en eliminarProducto:", error);
+      throw new Error("No se pudo eliminar el producto");
     }
-
-    return true;
   }
 }
 
